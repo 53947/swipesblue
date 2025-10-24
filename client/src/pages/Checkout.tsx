@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
 import CheckoutProgress from "@/components/CheckoutProgress";
 import PaymentForm from "@/components/PaymentForm";
 import OrderSummary from "@/components/OrderSummary";
@@ -7,9 +9,16 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Check } from "lucide-react";
+import type { CartItem as CartItemType, Product } from "@shared/schema";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Checkout() {
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [orderNumber, setOrderNumber] = useState("");
   const [shippingInfo, setShippingInfo] = useState({
     email: "",
     fullName: "",
@@ -18,21 +27,147 @@ export default function Checkout() {
     state: "",
     zip: "",
   });
+  const [paymentData, setPaymentData] = useState<any>(null);
 
-  const subtotal = 849.96;
+  const { data: items, isLoading: isLoadingCart } = useQuery<(CartItemType & { product: Product })[]>({
+    queryKey: ["/api/cart"],
+  });
+
+  const subtotal = items?.reduce((sum, item) =>
+    sum + parseFloat(item.product.price) * (item.quantity || 0), 0
+  ) || 0;
+
   const tax = subtotal * 0.09;
   const shipping = 15.00;
+  const total = subtotal + tax + shipping;
 
   const handleShippingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Shipping info submitted:', shippingInfo);
+    
+    if (!items || items.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Please add items to your cart before checking out",
+        variant: "destructive",
+      });
+      setLocation("/products");
+      return;
+    }
+
+    if (!shippingInfo.email || !shippingInfo.fullName || !shippingInfo.address || 
+        !shippingInfo.city || !shippingInfo.state || !shippingInfo.zip) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all shipping information fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setCurrentStep(2);
   };
 
-  const handlePaymentSubmit = (data: any) => {
-    console.log('Payment submitted:', data);
-    setCurrentStep(3);
+  const handlePaymentSubmit = async (data: any) => {
+    if (!items || items.length === 0) {
+      toast({
+        title: "Cart is empty",
+        description: "Cannot process payment without items in cart",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsProcessing(true);
+    setPaymentData(data);
+
+    try {
+      const orderNumber = `ORD-${Date.now()}`;
+      
+      const orderData = {
+        orderNumber,
+        customerEmail: shippingInfo.email,
+        customerName: shippingInfo.fullName,
+        shippingAddress: shippingInfo.address,
+        shippingCity: shippingInfo.city,
+        shippingState: shippingInfo.state,
+        shippingZip: shippingInfo.zip,
+        subtotal: subtotal.toFixed(2),
+        tax: tax.toFixed(2),
+        shipping: shipping.toFixed(2),
+        discount: "0.00",
+        total: total.toFixed(2),
+        status: "pending",
+        paymentStatus: "pending",
+        items: items.map(item => ({
+          productId: item.productId,
+          productName: item.product.name,
+          productPrice: item.product.price,
+          quantity: item.quantity,
+          subtotal: (parseFloat(item.product.price) * (item.quantity || 0)).toFixed(2),
+        })),
+        payment: {
+          cardNumber: data.cardNumber,
+          cardName: data.cardName,
+          expiry: data.expiry,
+          cvv: data.cvv,
+        },
+      };
+
+      const response = await apiRequest("POST", "/api/orders", orderData);
+      const result = await response.json();
+
+      await queryClient.invalidateQueries({ queryKey: ["/api/cart"] });
+      await queryClient.invalidateQueries({ queryKey: ["/api/orders"] });
+
+      setOrderNumber(result.orderNumber);
+      setCurrentStep(3);
+      
+      toast({
+        title: "Order placed successfully",
+        description: `Your order #${result.orderNumber} has been confirmed`,
+      });
+    } catch (error: any) {
+      console.error("Order error:", error);
+      toast({
+        title: "Payment failed",
+        description: error.message || "There was an error processing your payment. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsProcessing(false);
+    }
   };
+
+  if (isLoadingCart) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <span className="text-4xl font-bold" style={{ color: "#00FF40" }}>/</span>
+            <h1 className="text-4xl font-bold" style={{ color: "#09080e" }}>checkout</h1>
+          </div>
+          <p className="text-muted-foreground">Complete your secure purchase</p>
+        </div>
+        <div className="animate-pulse space-y-4">
+          <div className="h-12 bg-muted rounded" />
+          <div className="h-96 bg-muted rounded" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!items || items.length === 0) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="text-center py-16">
+          <p className="text-xl text-muted-foreground mb-4">Your cart is empty</p>
+          <Button onClick={() => setLocation("/products")} data-testid="button-continue-shopping">
+            Browse Products
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -63,6 +198,7 @@ export default function Checkout() {
                       placeholder="john@example.com"
                       value={shippingInfo.email}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, email: e.target.value })}
+                      required
                       data-testid="input-email"
                     />
                   </div>
@@ -74,6 +210,7 @@ export default function Checkout() {
                       placeholder="John Doe"
                       value={shippingInfo.fullName}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, fullName: e.target.value })}
+                      required
                       data-testid="input-fullname"
                     />
                   </div>
@@ -85,6 +222,7 @@ export default function Checkout() {
                       placeholder="123 Main St"
                       value={shippingInfo.address}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, address: e.target.value })}
+                      required
                       data-testid="input-address"
                     />
                   </div>
@@ -97,6 +235,7 @@ export default function Checkout() {
                         placeholder="New York"
                         value={shippingInfo.city}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, city: e.target.value })}
+                        required
                         data-testid="input-city"
                       />
                     </div>
@@ -108,6 +247,7 @@ export default function Checkout() {
                         placeholder="NY"
                         value={shippingInfo.state}
                         onChange={(e) => setShippingInfo({ ...shippingInfo, state: e.target.value })}
+                        required
                         data-testid="input-state"
                       />
                     </div>
@@ -120,6 +260,7 @@ export default function Checkout() {
                       placeholder="10001"
                       value={shippingInfo.zip}
                       onChange={(e) => setShippingInfo({ ...shippingInfo, zip: e.target.value })}
+                      required
                       data-testid="input-zip"
                     />
                   </div>
@@ -139,18 +280,16 @@ export default function Checkout() {
 
           {currentStep === 2 && (
             <div className="space-y-4">
-              <PaymentForm onSubmit={handlePaymentSubmit} />
+              <PaymentForm onSubmit={handlePaymentSubmit} isProcessing={isProcessing} />
               <div className="flex gap-4">
-                <Button variant="outline" onClick={() => setCurrentStep(1)} className="flex-1" data-testid="button-back">
-                  Back
-                </Button>
-                <Button
-                  className="flex-1"
-                  style={{ backgroundColor: "#0000FF", color: "white" }}
-                  onClick={() => handlePaymentSubmit({})}
-                  data-testid="button-place-order"
+                <Button 
+                  variant="outline" 
+                  onClick={() => setCurrentStep(1)} 
+                  className="flex-1" 
+                  disabled={isProcessing}
+                  data-testid="button-back"
                 >
-                  Place Order
+                  Back
                 </Button>
               </div>
             </div>
@@ -168,11 +307,20 @@ export default function Checkout() {
                 </p>
                 <div className="bg-muted rounded-lg p-4 mb-6 inline-block">
                   <p className="text-sm text-muted-foreground mb-1">Order Number</p>
-                  <p className="font-mono font-bold" data-testid="text-order-number">ORD-2025-001234</p>
+                  <p className="font-mono font-bold" data-testid="text-order-number">{orderNumber}</p>
                 </div>
-                <Button onClick={() => console.log('View order details')} data-testid="button-view-order">
-                  View Order Details
-                </Button>
+                <div className="flex gap-4 justify-center">
+                  <Button onClick={() => setLocation("/products")} data-testid="button-continue-shopping">
+                    Continue Shopping
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setLocation("/orders")}
+                    data-testid="button-view-orders"
+                  >
+                    View My Orders
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           )}

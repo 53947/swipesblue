@@ -12,6 +12,8 @@ interface NavItem {
 const navItems: NavItem[] = [
   { path: "/", label: "Dashboard" },
   { path: "/transactions", label: "Transactions" },
+  { path: "/products", label: "Products" },
+  { path: "/orders", label: "Orders" },
   { path: "/shoppingcart", label: "shoppingcart" },
   { path: "/checkout", label: "checkout" },
   { path: "/brand-studio", label: "Brand Studio" },
