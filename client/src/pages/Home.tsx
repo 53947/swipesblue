@@ -105,7 +105,8 @@ export default function Home() {
       <section className="py-20 bg-muted/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
+              <Zap className="h-8 w-8" style={{ color: "#0000FF" }} />
               <span style={{ color: "#0000FF" }}>Try It Live</span>
             </h2>
             <p className="text-muted-foreground text-lg">
@@ -226,7 +227,8 @@ export default function Home() {
       <section className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
+              <Package className="h-8 w-8" style={{ color: "#FF0040" }} />
               <span style={{ color: "#FF0040" }}>Build Your Stack</span>
             </h2>
             <p className="text-muted-foreground text-lg">
@@ -242,8 +244,8 @@ export default function Home() {
                   <Badge variant="secondary">App</Badge>
                 </div>
                 <CardTitle className="text-2xl">
-                  <span style={{ color: "#00FF40" }}>/</span>
-                  <span>shoppingcart</span>
+                  <span style={{ color: "#09080e" }}>/</span>
+                  <span style={{ color: "#00FF40" }}>shoppingcart</span>
                 </CardTitle>
                 <CardDescription className="text-base">
                   Powerful cart management for any website or platform
@@ -291,8 +293,8 @@ export default function Home() {
                   <Badge variant="secondary">App</Badge>
                 </div>
                 <CardTitle className="text-2xl">
-                  <span style={{ color: "#00FF40" }}>/</span>
-                  <span>checkout</span>
+                  <span style={{ color: "#09080e" }}>/</span>
+                  <span style={{ color: "#00FF40" }}>checkout</span>
                 </CardTitle>
                 <CardDescription className="text-base">
                   Optimized checkout experience with one-click payments
@@ -340,8 +342,8 @@ export default function Home() {
                   <Badge variant="secondary">Premium</Badge>
                 </div>
                 <CardTitle className="text-2xl">
-                  <span style={{ color: "#00FF40" }}>/</span>
-                  <span>brand-studio</span>
+                  <span style={{ color: "#09080e" }}>/</span>
+                  <span style={{ color: "#00FF40" }}>brand-studio</span>
                 </CardTitle>
                 <CardDescription className="text-base">
                   White-label gateway with full brand customization
