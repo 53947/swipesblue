@@ -215,8 +215,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const sessionId = getSessionId(req);
       
+      const orderItemInputSchema = insertOrderItemSchema.omit({ orderId: true });
+      
       const orderSchema = insertOrderSchema.extend({
-        items: z.array(insertOrderItemSchema),
+        items: z.array(orderItemInputSchema),
         payment: z.object({
           cardNumber: z.string(),
           cardName: z.string(),

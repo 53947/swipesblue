@@ -53,7 +53,7 @@ export interface IStorage {
   getOrderByNumber(orderNumber: string): Promise<Order | undefined>;
   getOrdersBySession(sessionId: string): Promise<Order[]>;
   getOrderItems(orderId: string): Promise<OrderItem[]>;
-  createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order>;
+  createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<Order>;
   updateOrderStatus(id: string, status: string): Promise<Order | undefined>;
   updateOrderPaymentStatus(id: string, paymentStatus: string): Promise<Order | undefined>;
   getAllOrders(): Promise<Order[]>;
@@ -221,11 +221,16 @@ export class DbStorage implements IStorage {
     return await db.select().from(orderItems).where(eq(orderItems.orderId, orderId));
   }
 
-  async createOrder(order: InsertOrder, items: InsertOrderItem[]): Promise<Order> {
+  async createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<Order> {
     const result = await db.insert(orders).values(order).returning();
     const createdOrder = result[0];
 
-    await db.insert(orderItems).values(items);
+    const itemsWithOrderId = items.map(item => ({
+      ...item,
+      orderId: createdOrder.id,
+    }));
+
+    await db.insert(orderItems).values(itemsWithOrderId);
 
     return createdOrder;
   }
