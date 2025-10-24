@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CreditCard, ShoppingCart as CartIcon, Check, Package, Palette, ArrowRight, Zap, Shield, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -17,19 +17,38 @@ export default function Home() {
     amount: "99.99"
   });
 
+  useEffect(() => {
+    if (transactionState === "success" || transactionState === "error") {
+      console.log("Success/Error state detected, setting timeout to reset");
+      const timer = setTimeout(() => {
+        console.log("Resetting to idle");
+        setTransactionState("idle");
+      }, 4000);
+      
+      return () => {
+        console.log("Cleaning up timer");
+        clearTimeout(timer);
+      };
+    }
+  }, [transactionState]);
+
   const handleDemoTransaction = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log("Demo transaction started", formData);
     setTransactionState("processing");
     
     await new Promise(resolve => setTimeout(resolve, 2000));
     
-    if (formData.cardNumber.startsWith("4242")) {
+    const isSuccess = formData.cardNumber.replace(/\s/g, '').startsWith("4242");
+    console.log("Card number check:", formData.cardNumber, "-> isSuccess:", isSuccess);
+    
+    if (isSuccess) {
+      console.log("Setting success state");
       setTransactionState("success");
     } else {
+      console.log("Setting error state");
       setTransactionState("error");
     }
-    
-    setTimeout(() => setTransactionState("idle"), 4000);
   };
 
   return (
@@ -171,21 +190,26 @@ export default function Home() {
               </CardContent>
               {(transactionState === "success" || transactionState === "error") && (
                 <CardFooter>
-                  <div className={`w-full p-4 rounded-md ${
-                    transactionState === "success" ? "bg-[#00FF40]/10" : "bg-[#FF0040]/10"
-                  }`}>
+                  <div 
+                    className={`w-full p-4 rounded-md ${
+                      transactionState === "success" ? "bg-[#00FF40]/10" : "bg-[#FF0040]/10"
+                    }`}
+                    role="status"
+                    aria-live="polite"
+                    data-testid={transactionState === "success" ? "message-success" : "message-error"}
+                  >
                     <div className="flex items-center gap-2">
                       {transactionState === "success" ? (
                         <>
-                          <Check className="h-5 w-5" style={{ color: "#00FF40" }} />
-                          <span style={{ color: "#00FF40" }} className="font-medium">
+                          <Check className="h-5 w-5" style={{ color: "#00FF40" }} data-testid="icon-success" />
+                          <span style={{ color: "#00FF40" }} className="font-medium" data-testid="text-success">
                             Transaction approved • ${formData.amount}
                           </span>
                         </>
                       ) : (
                         <>
-                          <span className="text-xl" style={{ color: "#FF0040" }}>×</span>
-                          <span style={{ color: "#FF0040" }} className="font-medium">
+                          <span className="text-xl" style={{ color: "#FF0040" }} data-testid="icon-error">×</span>
+                          <span style={{ color: "#FF0040" }} className="font-medium" data-testid="text-error">
                             Transaction declined • Insufficient funds
                           </span>
                         </>
