@@ -21,6 +21,12 @@ declare module 'express-session' {
   }
 }
 
+if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'production') {
+  throw new Error('SESSION_SECRET environment variable must be set in production');
+}
+
+app.set('trust proxy', 1);
+
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
@@ -35,9 +41,9 @@ app.use(
       tableName: 'session',
       createTableIfMissing: true,
     }),
-    secret: process.env.SESSION_SECRET || 'dev-secret-change-in-production',
+    secret: process.env.SESSION_SECRET || 'dev-secret-must-change-in-production',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
     cookie: {
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
       httpOnly: true,
@@ -63,7 +69,17 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
+        const sanitized = { ...capturedJsonResponse };
+        if (sanitized.payment) {
+          delete sanitized.payment;
+        }
+        if (sanitized.cardNumber) {
+          delete sanitized.cardNumber;
+        }
+        if (sanitized.cvv) {
+          delete sanitized.cvv;
+        }
+        logLine += ` :: ${JSON.stringify(sanitized)}`;
       }
 
       if (logLine.length > 80) {

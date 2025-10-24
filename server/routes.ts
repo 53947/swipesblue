@@ -14,15 +14,18 @@ import { z } from "zod";
 import { createPaymentGateway } from "./payment-gateways/nmi";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session helper to get or create session ID
+  // Session helper to get session ID from express-session
   function getSessionId(req: any): string {
     if (!req.session) {
-      req.session = {};
+      throw new Error("Session not initialized");
     }
-    if (!req.session.id) {
-      req.session.id = `session_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    // Use the session ID provided by express-session
+    // When saveUninitialized is false, we need to ensure the session exists
+    // by setting a property on it
+    if (!req.session.initialized) {
+      req.session.initialized = true;
     }
-    return req.session.id;
+    return req.sessionID;
   }
 
   // Products endpoints

@@ -222,17 +222,19 @@ export class DbStorage implements IStorage {
   }
 
   async createOrder(order: InsertOrder, items: Omit<InsertOrderItem, 'orderId'>[]): Promise<Order> {
-    const result = await db.insert(orders).values(order).returning();
-    const createdOrder = result[0];
+    return await db.transaction(async (tx) => {
+      const result = await tx.insert(orders).values(order).returning();
+      const createdOrder = result[0];
 
-    const itemsWithOrderId = items.map(item => ({
-      ...item,
-      orderId: createdOrder.id,
-    }));
+      const itemsWithOrderId = items.map(item => ({
+        ...item,
+        orderId: createdOrder.id,
+      }));
 
-    await db.insert(orderItems).values(itemsWithOrderId);
+      await tx.insert(orderItems).values(itemsWithOrderId);
 
-    return createdOrder;
+      return createdOrder;
+    });
   }
 
   async updateOrderStatus(id: string, status: string): Promise<Order | undefined> {
