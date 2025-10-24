@@ -1,16 +1,16 @@
-# Swipes Blue Payment Gateway - Design Guidelines
+# SwipesBlue.com Payment Gateway - Design Guidelines
 
 ## Core Design Principles
-**Stripe-inspired financial interface** with Swipes Blue's fluorescent palette. Prioritizes trust, efficiency, and accessibility with strategic color use on clean white backgrounds.
+**Stripe-inspired financial interface** with SwipesBlue.com's fluorescent palette. Prioritizes trust, efficiency, and accessibility with strategic color use on clean white backgrounds.
 
 ---
 
 ## Color System
 
 **Brand Palette:**
-- **Fluorescent Blue** `#0000FF` - Primary actions, headers, buttons
-- **Fluorescent Red** `#FF0040` - Alerts, destructive actions
-- **Fluorescent Green** `#00FF40` - Success states, navigation slashes (/)
+- **Flour Red** `#FF0040` - PRIMARY: Headers, titles, primary actions, main highlights
+- **Fluorescent Blue** `#0000FF` - SECONDARY: Secondary actions, accents  
+- **Fluorescent Green** `#00FF40` - SUCCESS: Success states, navigation slashes (/)
 - **White** `#FFFFFF` - Backgrounds, cards
 - **Black** `#09080e` - Body text, navigation labels
 
@@ -28,7 +28,7 @@
 ## Typography
 
 **Fonts:**
-- **Display**: Archivo Semi Expanded Bold (brand "Swipes") + Archivo Bold (suffix ".com")
+- **Display**: Archivo Semi Expanded Bold (brand "SWIPES" in red) + Archivo Bold ("BLUE" in blue + ".COM" in green)
 - **Interface**: Inter/SF Pro (Google Fonts CDN)
 
 **Scale:**
@@ -69,7 +69,7 @@
 - Sticky on scroll
 
 **Sidebar (Dashboard):**
-- Active: 4px Fluorescent Blue left border + light tint
+- Active: 4px Flour Red left border + light tint
 - Collapsible mobile
 
 ### Cards
@@ -81,32 +81,32 @@
 ### Forms & Inputs
 **Text Inputs:**
 - 48px height, 6px radius, 1px `#E5E5E5` border
-- Focus: 2px Fluorescent Blue border
+- Focus: 2px Flour Red border
 - Error: 2px Fluorescent Red border + message
 - Success: Fluorescent Green checkmark
 
 **Buttons:**
 - Height: 48px, Radius: 6px, Padding: `px-8 py-3`
-- **Primary**: Blue bg, white text
-- **Secondary**: White bg, Blue border/text
+- **Primary**: Red bg (#FF0040), white text
+- **Secondary**: White bg, Red border/text
 - **Destructive**: Red bg, white text
 - Hover: 10% opacity reduction | Disabled: 50% opacity
 
 ### Shopping Cart
 **Item Row:**
 - 80px square product image (left)
-- Quantity controls: Fluorescent Blue +/- buttons
+- Quantity controls: Flour Red +/- buttons
 - Remove: Fluorescent Red X icon
 - Line total: Bold, right-aligned
 
 **Summary Panel:**
 - Sticky, white card with border
-- Total in Bold Fluorescent Blue
-- CTA: "Proceed to Checkout" (Blue primary button)
+- Total in Bold Flour Red
+- CTA: "Proceed to Checkout" (Red primary button)
 
 ### Checkout
 **Layout:**
-- 3-step progress: Info → Payment → Confirmation (Blue active, Green complete)
+- 3-step progress: Info → Payment → Confirmation (Red active, Green complete)
 - Left (60%): Forms | Right (40%): Sticky order summary
 - NMI tokenized payment frame with lock icon
 - Security badges: PCI, SSL
@@ -136,7 +136,7 @@
 **Asset Grid:**
 - Categories: Wordmarks, Brandmarks, Avatars, Icons, Favicons
 - Upload dropzone with preview
-- Active: Fluorescent Blue border
+- Active: Flour Red border
 - Edit/Replace/Delete controls per asset
 
 ### Feedback
@@ -145,7 +145,7 @@
 - White card with colored left border (Green/Red/Blue)
 
 **Loading:**
-- Fluorescent Blue spinner
+- Flour Red spinner
 - Gray pulsing skeletons
 
 **Empty States:**
@@ -180,7 +180,7 @@ Category sidebar → Asset grid → Upload FAB (Blue) → Edit modal with previe
 
 **Icons:**
 - Heroicons CDN: 20px inline, 24px standalone
-- Fluorescent Blue (active), `#666666` (inactive)
+- Flour Red (active), `#666666` (inactive)
 
 ---
 
@@ -200,7 +200,7 @@ Category sidebar → Asset grid → Upload FAB (Blue) → Edit modal with previe
 ## Accessibility (WCAG AA)
 
 - **Contrast**: 4.5:1 minimum for text
-- **Focus**: 2px Fluorescent Blue outline on all interactive elements
+- **Focus**: 2px Flour Red outline on all interactive elements
 - **Keyboard**: Full navigation support with visible states
 - **ARIA**: Proper labels on all inputs/interactions
 - **Validation**: Visual + text error messages
@@ -220,7 +220,7 @@ Category sidebar → Asset grid → Upload FAB (Blue) → Edit modal with previe
 
 **Primary CTA Pattern:**
 ```html
-<button class="bg-[#0000FF] text-white h-12 px-8 rounded-md font-medium hover:opacity-90">
+<button class="bg-[#FF0040] text-white h-12 px-8 rounded-md font-medium hover:opacity-90">
   Proceed to Checkout
 </button>
 ```

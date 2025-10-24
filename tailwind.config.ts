@@ -87,6 +87,7 @@ export default {
         serif: ["var(--font-serif)"],
         mono: ["var(--font-mono)"],
         archivo: ["Archivo", "sans-serif"],
+        "archivo-semi-expanded": ["Archivo Semi Expanded", "Archivo", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

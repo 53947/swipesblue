@@ -3,11 +3,14 @@ export default function Logo({ variant = "default", className = "" }: { variant?
   
   return (
     <div className={`flex items-center gap-0 ${className}`}>
+      <span className={`font-archivo-semi-expanded font-bold ${textSize} ml-[1px] mr-[1px]`} style={{ color: "#FF0040" }}>
+        SWIPES
+      </span>
       <span className={`font-archivo font-bold ${textSize}`} style={{ color: "#0000FF" }}>
-        Swipes
+        BLUE
       </span>
       <span className={`font-archivo font-bold ${textSize}`} style={{ color: "#00FF40" }}>
-        .com
+        .COM
       </span>
     </div>
   );
