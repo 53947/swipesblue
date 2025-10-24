@@ -253,7 +253,7 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-3xl font-bold" style={{ color: "#FF0040" }}>
-                  $49<span className="text-lg text-muted-foreground">/mo</span>
+                  $59<span className="text-lg text-muted-foreground">/mo</span>
                 </div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
@@ -302,7 +302,7 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-3xl font-bold" style={{ color: "#FF0040" }}>
-                  $79<span className="text-lg text-muted-foreground">/mo</span>
+                  $129<span className="text-lg text-muted-foreground">/mo</span>
                 </div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
@@ -351,7 +351,7 @@ export default function Home() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-3xl font-bold" style={{ color: "#FF0040" }}>
-                  $199<span className="text-lg text-muted-foreground">/mo</span>
+                  $249<span className="text-lg text-muted-foreground">/mo</span>
                 </div>
                 <ul className="space-y-2 text-sm">
                   <li className="flex items-start gap-2">
@@ -399,10 +399,10 @@ export default function Home() {
               <div className="text-center space-y-4">
                 <div>
                   <div className="text-5xl font-bold" style={{ color: "#FF0040" }}>
-                    $199<span className="text-2xl text-muted-foreground">/mo</span>
+                    $329<span className="text-2xl text-muted-foreground">/mo</span>
                   </div>
                   <p className="text-muted-foreground mt-2">
-                    Save $128/month compared to individual subscriptions
+                    Save $108/month (25% discount) compared to individual subscriptions
                   </p>
                 </div>
                 
