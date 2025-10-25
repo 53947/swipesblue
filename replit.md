@@ -22,11 +22,11 @@ Payment Gateway
 - Green is for success states
 
 ### Brand Colors
-- **Flour Red** `#FF0040` - PRIMARY: Headers, titles, primary actions, main highlights
-- **Fluorescent Blue** `#0000FF` - SECONDARY: Secondary actions, accents
-- **Fluorescent Green** `#00FF40` - SUCCESS: Success states, navigation slashes (/)
+- **Flourescent Blue** #0000FF- PRIMARY: Headers, titles, primary actions, main highlights
+- **Fluorescent Red** `#FF0040` - SECONDARY: Secondary actions, accents
+- **Fluorescent Green** `#00FF40` - SUCCESS: Success states, follows the hex black 09080e with names of apps (/), i.e. /checkout
 - **White** `#FFFFFF` - Backgrounds, cards
-- **Black** `#09080e` - Body text, navigation labels
+- **Black** `#09080e` - Body text, navigation labels, navigation slashes (/) of proprietary apps
 
 ## Project Overview
 Payment gateway application for swipesblue.com with Stripe-inspired financial interface using the fluorescent color palette.
