@@ -1,13 +1,18 @@
-# SwipesBlue.com - Project Documentation
+# swipesblue.com - Project Documentation
 
 ## Company Branding (CRITICAL - DO NOT CHANGE)
 
-### Company Name: SwipesBlue.com
+### Company Name: Swipes Blue
+
+# Swipes Blue - Triad Blue Ecosystem
+## Overview
+Payment Gateway
+**📘 CROSS-PLATFORM STANDARDS:** See `TRIAD_BLUE_STANDARDS.md` for comprehensive development standards that MUST be followed across all three platforms (navigation, typography, colors, technical architecture, features to copy vs rebuild).
 
 **Logo Components:**
-- **"SWIPES"** - Flour Red (#FF0040), Archivo Semi Expanded Bold, 24pt
-- **"BLUE"** - Fluorescent Blue (#0000FF), Archivo Bold, 24pt  
-- **".COM"** - Green Fluorescent (#00FF40), Archivo Bold, 24pt
+- **"swipes"** - Flourescent Red (#FF0040), Archivo Semi Expanded Bold, 24pt, Shadow Black, 50% Opacity, 5pt Blur, 5-10pt Distance
+- **"blue"** - Fluorescent Blue (#0000FF), Archivo Bold, 24pt, Shadow Black, 50% Opacity, 5pt Blur, 5-10pt Distance  
+- **".com"** - Green Fluorescent (#00FF40), Archivo Bold, 24pt, Shadow Black, 50% Opacity, 5pt Blur, 5-10pt Distance
 
 ### Color Hierarchy
 **PRIMARY ACCENT COLOR: RED (#FF0040)**
@@ -24,7 +29,7 @@
 - **Black** `#09080e` - Body text, navigation labels
 
 ## Project Overview
-Payment gateway application for SwipesBlue.com with Stripe-inspired financial interface using the fluorescent color palette.
+Payment gateway application for swipesblue.com with Stripe-inspired financial interface using the fluorescent color palette.
 
 ## Recent Changes
 - 2025-10-24: Corrected company branding - SwipesBlue.com with proper color scheme (RED as primary)
