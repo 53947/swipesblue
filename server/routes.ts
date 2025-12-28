@@ -16,6 +16,7 @@ import { createPaymentGateway } from "./payment-gateways/nmi";
 import { createNMIPartnerService, type MerchantBoardingRequest } from "./services/nmi-partner";
 import { createMerchantPaymentService, type MerchantPaymentRequest } from "./services/merchant-payment";
 import { requireApiKey, requirePermission, generateApiKey, generateApiSecret, type AuthenticatedRequest } from "./middleware/api-auth";
+import { webhookService, WebhookEventType } from "./services/webhook";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session helper to get session ID from express-session
@@ -490,6 +491,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
       });
 
+      // Trigger merchant.created webhook
+      await webhookService.sendWebhookEvent(
+        WebhookEventType.MERCHANT_CREATED,
+        validatedData.platform,
+        {
+          merchantId: merchant.id,
+          platformClientId: validatedData.platformClientId,
+          nmiMerchantId: merchant.nmiMerchantId,
+          businessName: validatedData.businessName,
+          businessEmail: validatedData.businessEmail,
+          status: merchant.status,
+          applicationId: boardingResponse.applicationId,
+        }
+      );
+
       res.status(201).json({
         merchantId: merchant.id,
         nmiMerchantId: merchant.nmiMerchantId,
@@ -577,6 +593,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Failed to update NMI merchant status:", nmiError);
           // Continue anyway - we updated our database
         }
+      }
+
+      // Trigger appropriate webhook based on status
+      if (status === "active") {
+        await webhookService.sendWebhookEvent(
+          WebhookEventType.MERCHANT_APPROVED,
+          merchant.platform,
+          {
+            merchantId: merchant.id,
+            platformClientId: merchant.platformClientId,
+            nmiMerchantId: merchant.nmiMerchantId,
+            businessName: merchant.businessName,
+            businessEmail: merchant.businessEmail,
+            status: merchant.status,
+          }
+        );
+      } else if (status === "suspended") {
+        await webhookService.sendWebhookEvent(
+          WebhookEventType.MERCHANT_SUSPENDED,
+          merchant.platform,
+          {
+            merchantId: merchant.id,
+            platformClientId: merchant.platformClientId,
+            nmiMerchantId: merchant.nmiMerchantId,
+            businessName: merchant.businessName,
+            businessEmail: merchant.businessEmail,
+            status: merchant.status,
+          }
+        );
       }
 
       res.json(merchant);
@@ -697,7 +742,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       if (!paymentResult.success) {
         // Log failed transaction
-        await storage.createPartnerPaymentTransaction({
+        const failedTransaction = await storage.createPartnerPaymentTransaction({
           merchantId: merchant.id,
           platform: platform,
           platformOrderId: validatedData.platformOrderId || null,
@@ -714,6 +759,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
           refundedAmount: "0",
           refundedAt: null,
         });
+
+        // Trigger payment.failed webhook
+        await webhookService.sendWebhookEvent(
+          WebhookEventType.PAYMENT_FAILED,
+          platform,
+          {
+            transactionId: failedTransaction.id,
+            merchantId: merchant.id,
+            platformOrderId: validatedData.platformOrderId || null,
+            amount: validatedData.amount,
+            currency: validatedData.currency,
+            customerEmail: validatedData.customerEmail,
+            errorMessage: paymentResult.errorMessage,
+            metadata: validatedData.metadata,
+          }
+        );
 
         return res.status(400).json({
           success: false,
@@ -747,6 +808,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         refundedAmount: "0",
         refundedAt: null,
       });
+
+      // Trigger payment.success webhook
+      await webhookService.sendWebhookEvent(
+        WebhookEventType.PAYMENT_SUCCESS,
+        platform,
+        {
+          transactionId: transaction.id,
+          merchantId: merchant.id,
+          platformOrderId: validatedData.platformOrderId || null,
+          gatewayTransactionId: paymentResult.transactionId,
+          authCode: paymentResult.authCode,
+          amount: validatedData.amount,
+          currency: validatedData.currency,
+          cardBrand: cardBrand,
+          cardLastFour: cardLastFour,
+          customerEmail: validatedData.customerEmail,
+          customerName: validatedData.customerName,
+          metadata: validatedData.metadata,
+        }
+      );
 
       res.status(201).json({
         success: true,
@@ -857,11 +938,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Update transaction with refund info
       const newRefundedAmount = refundedAmount + refundAmount;
+      const isFullyRefunded = newRefundedAmount >= transactionAmount;
       await storage.updatePartnerPaymentTransaction(transaction.id, {
         refundedAmount: newRefundedAmount.toString(),
         refundedAt: new Date(),
-        status: newRefundedAmount >= transactionAmount ? "refunded" : "success",
+        status: isFullyRefunded ? "refunded" : "success",
       });
+
+      // Trigger payment.refunded webhook
+      await webhookService.sendWebhookEvent(
+        WebhookEventType.PAYMENT_REFUNDED,
+        platform,
+        {
+          transactionId: transaction.id,
+          merchantId: merchant.id,
+          platformOrderId: transaction.platformOrderId || null,
+          gatewayTransactionId: refundResult.transactionId,
+          originalAmount: parseFloat(transaction.amount),
+          refundAmount: refundAmount,
+          totalRefunded: newRefundedAmount,
+          isFullyRefunded: isFullyRefunded,
+          reason: validatedData.reason,
+          customerEmail: transaction.customerEmail,
+          metadata: transaction.metadata,
+        }
+      );
 
       res.json({
         success: true,
@@ -1056,6 +1157,186 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error deactivating API key:", error);
       res.status(500).json({ message: "Failed to deactivate API key" });
+    }
+  });
+
+  // Webhook Management API (requires API key authentication)
+
+  // Register a new webhook endpoint
+  app.post("/api/v1/webhooks/register", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const webhookSchema = z.object({
+        url: z.string().url("Invalid webhook URL"),
+        events: z.array(z.nativeEnum(WebhookEventType)).min(1, "At least one event type required"),
+      });
+
+      const validatedData = webhookSchema.parse(req.body);
+
+      // Register webhook
+      const { endpoint, secret } = await webhookService.registerWebhook(
+        platform,
+        validatedData.url,
+        validatedData.events
+      );
+
+      // Return webhook details with secret (only shown once)
+      res.status(201).json({
+        id: endpoint.id,
+        platform: endpoint.platform,
+        url: endpoint.url,
+        events: endpoint.events,
+        secret: secret, // This is the only time the secret is returned
+        isActive: endpoint.isActive,
+        createdAt: endpoint.createdAt,
+        message: "Webhook registered successfully. Save the secret - it won't be shown again.",
+      });
+    } catch (error) {
+      console.error("Error registering webhook:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Invalid webhook registration",
+          message: "Validation failed",
+          errors: error.errors,
+        });
+      }
+      if (error instanceof Error && error.message.includes("Invalid")) {
+        return res.status(400).json({
+          error: "Invalid webhook data",
+          message: error.message,
+        });
+      }
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to register webhook",
+      });
+    }
+  });
+
+  // List webhooks for the authenticated platform
+  app.get("/api/v1/webhooks", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const endpoints = await storage.getWebhookEndpointsByPlatform(platform);
+
+      // Remove secrets from response
+      const sanitizedEndpoints = endpoints.map(endpoint => ({
+        id: endpoint.id,
+        platform: endpoint.platform,
+        url: endpoint.url,
+        events: endpoint.events,
+        isActive: endpoint.isActive,
+        createdAt: endpoint.createdAt,
+        updatedAt: endpoint.updatedAt,
+        // Don't return secret
+      }));
+
+      res.json(sanitizedEndpoints);
+    } catch (error) {
+      console.error("Error fetching webhooks:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to fetch webhooks",
+      });
+    }
+  });
+
+  // Delete a webhook endpoint
+  app.delete("/api/v1/webhooks/:id", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      // Get the webhook to verify it belongs to this platform
+      const endpoint = await storage.getWebhookEndpoint(req.params.id);
+
+      if (!endpoint) {
+        return res.status(404).json({
+          error: "Webhook not found",
+          message: "The specified webhook endpoint does not exist",
+        });
+      }
+
+      // Verify platform ownership (unless internal)
+      if (platform !== "internal" && endpoint.platform !== platform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot delete webhooks from other platforms",
+        });
+      }
+
+      // Delete the webhook (this will also cascade delete all deliveries)
+      const deleted = await storage.deleteWebhookEndpoint(req.params.id);
+
+      if (!deleted) {
+        return res.status(404).json({
+          error: "Webhook not found",
+          message: "Failed to delete webhook",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Webhook deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting webhook:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to delete webhook",
+      });
+    }
+  });
+
+  // Test a webhook endpoint
+  app.post("/api/v1/webhooks/:id/test", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      // Get the webhook to verify it belongs to this platform
+      const endpoint = await storage.getWebhookEndpoint(req.params.id);
+
+      if (!endpoint) {
+        return res.status(404).json({
+          error: "Webhook not found",
+          message: "The specified webhook endpoint does not exist",
+        });
+      }
+
+      // Verify platform ownership (unless internal)
+      if (platform !== "internal" && endpoint.platform !== platform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot test webhooks from other platforms",
+        });
+      }
+
+      // Send test webhook
+      const result = await webhookService.testWebhook(req.params.id);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          status: result.status,
+          message: result.message,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error testing webhook:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to test webhook",
+      });
     }
   });
 

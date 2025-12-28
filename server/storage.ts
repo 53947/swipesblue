@@ -20,6 +20,10 @@ import {
   type InsertApiKey,
   type PartnerPaymentTransaction,
   type InsertPartnerPaymentTransaction,
+  type WebhookEndpoint,
+  type InsertWebhookEndpoint,
+  type WebhookDelivery,
+  type InsertWebhookDelivery,
   users,
   products,
   cartItems,
@@ -30,8 +34,10 @@ import {
   merchants,
   apiKeys,
   partnerPaymentTransactions,
+  webhookEndpoints,
+  webhookDeliveries,
 } from "@shared/schema";
-import { eq, and, desc, like, or } from "drizzle-orm";
+import { eq, and, desc, like, or, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -110,6 +116,21 @@ export interface IStorage {
   getAllPartnerPaymentTransactions(): Promise<PartnerPaymentTransaction[]>;
   createPartnerPaymentTransaction(transaction: InsertPartnerPaymentTransaction): Promise<PartnerPaymentTransaction>;
   updatePartnerPaymentTransaction(id: string, transaction: Partial<InsertPartnerPaymentTransaction>): Promise<PartnerPaymentTransaction | undefined>;
+
+  // Webhook Endpoint operations
+  getWebhookEndpoint(id: string): Promise<WebhookEndpoint | undefined>;
+  getWebhookEndpointsByPlatform(platform: string): Promise<WebhookEndpoint[]>;
+  getAllWebhookEndpoints(): Promise<WebhookEndpoint[]>;
+  createWebhookEndpoint(endpoint: InsertWebhookEndpoint): Promise<WebhookEndpoint>;
+  updateWebhookEndpoint(id: string, endpoint: Partial<InsertWebhookEndpoint>): Promise<WebhookEndpoint | undefined>;
+  deleteWebhookEndpoint(id: string): Promise<boolean>;
+
+  // Webhook Delivery operations
+  getWebhookDelivery(id: string): Promise<WebhookDelivery | undefined>;
+  getWebhookDeliveriesByEndpoint(endpointId: string): Promise<WebhookDelivery[]>;
+  getPendingWebhookDeliveries(before: Date): Promise<WebhookDelivery[]>;
+  createWebhookDelivery(delivery: InsertWebhookDelivery): Promise<WebhookDelivery>;
+  updateWebhookDelivery(id: string, delivery: Partial<InsertWebhookDelivery>): Promise<WebhookDelivery | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -520,6 +541,84 @@ export class DbStorage implements IStorage {
       .update(partnerPaymentTransactions)
       .set({ ...transaction, updatedAt: new Date() })
       .where(eq(partnerPaymentTransactions.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Webhook Endpoint operations
+  async getWebhookEndpoint(id: string): Promise<WebhookEndpoint | undefined> {
+    const result = await db.select().from(webhookEndpoints).where(eq(webhookEndpoints.id, id));
+    return result[0];
+  }
+
+  async getWebhookEndpointsByPlatform(platform: string): Promise<WebhookEndpoint[]> {
+    return await db
+      .select()
+      .from(webhookEndpoints)
+      .where(eq(webhookEndpoints.platform, platform))
+      .orderBy(desc(webhookEndpoints.createdAt));
+  }
+
+  async getAllWebhookEndpoints(): Promise<WebhookEndpoint[]> {
+    return await db.select().from(webhookEndpoints).orderBy(desc(webhookEndpoints.createdAt));
+  }
+
+  async createWebhookEndpoint(endpoint: InsertWebhookEndpoint): Promise<WebhookEndpoint> {
+    const result = await db.insert(webhookEndpoints).values(endpoint).returning();
+    return result[0];
+  }
+
+  async updateWebhookEndpoint(id: string, endpoint: Partial<InsertWebhookEndpoint>): Promise<WebhookEndpoint | undefined> {
+    const result = await db
+      .update(webhookEndpoints)
+      .set({ ...endpoint, updatedAt: new Date() })
+      .where(eq(webhookEndpoints.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteWebhookEndpoint(id: string): Promise<boolean> {
+    const result = await db.delete(webhookEndpoints).where(eq(webhookEndpoints.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Webhook Delivery operations
+  async getWebhookDelivery(id: string): Promise<WebhookDelivery | undefined> {
+    const result = await db.select().from(webhookDeliveries).where(eq(webhookDeliveries.id, id));
+    return result[0];
+  }
+
+  async getWebhookDeliveriesByEndpoint(endpointId: string): Promise<WebhookDelivery[]> {
+    return await db
+      .select()
+      .from(webhookDeliveries)
+      .where(eq(webhookDeliveries.endpointId, endpointId))
+      .orderBy(desc(webhookDeliveries.createdAt));
+  }
+
+  async getPendingWebhookDeliveries(before: Date): Promise<WebhookDelivery[]> {
+    return await db
+      .select()
+      .from(webhookDeliveries)
+      .where(
+        and(
+          eq(webhookDeliveries.status, "pending"),
+          lte(webhookDeliveries.nextRetry, before)
+        )
+      )
+      .orderBy(webhookDeliveries.nextRetry);
+  }
+
+  async createWebhookDelivery(delivery: InsertWebhookDelivery): Promise<WebhookDelivery> {
+    const result = await db.insert(webhookDeliveries).values(delivery).returning();
+    return result[0];
+  }
+
+  async updateWebhookDelivery(id: string, delivery: Partial<InsertWebhookDelivery>): Promise<WebhookDelivery | undefined> {
+    const result = await db
+      .update(webhookDeliveries)
+      .set({ ...delivery, updatedAt: new Date() })
+      .where(eq(webhookDeliveries.id, id))
       .returning();
     return result[0];
   }

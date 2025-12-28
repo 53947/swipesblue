@@ -241,3 +241,49 @@ export const insertPartnerPaymentTransactionSchema = createInsertSchema(partnerP
 
 export type InsertPartnerPaymentTransaction = z.infer<typeof insertPartnerPaymentTransactionSchema>;
 export type PartnerPaymentTransaction = typeof partnerPaymentTransactions.$inferSelect;
+
+// Webhook Endpoints table - for storing webhook subscription configurations
+export const webhookEndpoints = pgTable("webhook_endpoints", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  platform: text("platform").notNull(), // 'businessblueprint' | 'hostsblue' | 'swipesblue'
+  url: text("url").notNull(), // Webhook endpoint URL
+  events: json("events").notNull(), // Array of subscribed event types
+  secret: text("secret").notNull(), // HMAC secret for signature verification
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertWebhookEndpointSchema = createInsertSchema(webhookEndpoints).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWebhookEndpoint = z.infer<typeof insertWebhookEndpointSchema>;
+export type WebhookEndpoint = typeof webhookEndpoints.$inferSelect;
+
+// Webhook Deliveries table - for tracking webhook delivery attempts and status
+export const webhookDeliveries = pgTable("webhook_deliveries", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  endpointId: varchar("endpoint_id").notNull().references(() => webhookEndpoints.id, { onDelete: "cascade" }),
+  event: text("event").notNull(), // Event type (e.g., 'payment.success')
+  payload: json("payload").notNull(), // The event payload sent to webhook
+  status: text("status").notNull().default("pending"), // 'pending' | 'success' | 'failed'
+  attempts: integer("attempts").notNull().default(0), // Number of delivery attempts
+  nextRetry: timestamp("next_retry"), // When to retry next (null if not retrying)
+  responseStatus: integer("response_status"), // HTTP status code from webhook endpoint
+  responseBody: text("response_body"), // Response from webhook endpoint
+  errorMessage: text("error_message"), // Error message if failed
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertWebhookDeliverySchema = createInsertSchema(webhookDeliveries).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertWebhookDelivery = z.infer<typeof insertWebhookDeliverySchema>;
+export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;

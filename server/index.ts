@@ -4,6 +4,7 @@ import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { webhookRetryWorker } from "./workers/webhook-retry-worker";
 
 const app = express();
 
@@ -124,5 +125,8 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+
+    // Start webhook retry worker
+    webhookRetryWorker.start();
   });
 })();
