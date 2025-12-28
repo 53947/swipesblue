@@ -1340,6 +1340,305 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // Admin API Endpoints
+  // ========================================
+  // These endpoints provide admin functionality for the SwipesBlue admin dashboard
+  // TODO: Add proper admin authentication
+
+  // Get dashboard metrics
+  app.get("/api/admin/metrics", async (_req, res) => {
+    try {
+      // Get all transactions
+      const allTransactions = await storage.getAllPartnerPaymentTransactions();
+
+      // Calculate total processed
+      const totalProcessed = allTransactions.reduce((sum, t) => {
+        return sum + parseFloat(t.amount);
+      }, 0);
+
+      // Calculate this month's revenue
+      const now = new Date();
+      const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+      const thisMonthTransactions = allTransactions.filter(t =>
+        new Date(t.createdAt) >= startOfMonth && t.status === "success"
+      );
+      const thisMonth = thisMonthTransactions.reduce((sum, t) => {
+        return sum + parseFloat(t.amount);
+      }, 0);
+
+      // Calculate success rate (last 30 days)
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const recentTransactions = allTransactions.filter(t =>
+        new Date(t.createdAt) >= thirtyDaysAgo
+      );
+      const successfulTransactions = recentTransactions.filter(t => t.status === "success");
+      const successRate = recentTransactions.length > 0
+        ? ((successfulTransactions.length / recentTransactions.length) * 100).toFixed(1)
+        : "0.0";
+
+      // Platform breakdown
+      const platformStats = allTransactions
+        .filter(t => t.status === "success")
+        .reduce((acc, t) => {
+          const platform = t.platform;
+          if (!acc[platform]) {
+            acc[platform] = 0;
+          }
+          acc[platform] += parseFloat(t.amount);
+          return acc;
+        }, {} as Record<string, number>);
+
+      const platformBreakdown = Object.entries(platformStats).map(([name, value], index) => ({
+        name: name.charAt(0).toUpperCase() + name.slice(1),
+        value: Math.round(value),
+        color: index === 0 ? "#3b82f6" : "#8b5cf6",
+      }));
+
+      // Get merchant stats
+      const allMerchants = await storage.getAllMerchants();
+      const merchantStats = {
+        active: allMerchants.filter(m => m.status === "active").length,
+        pending: allMerchants.filter(m => m.status === "pending").length,
+        suspended: allMerchants.filter(m => m.status === "suspended").length,
+      };
+
+      res.json({
+        totalProcessed: `$${totalProcessed.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        thisMonth: `$${thisMonth.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+        successRate: `${successRate}%`,
+        platformBreakdown,
+        merchantStats,
+      });
+    } catch (error) {
+      console.error("Error fetching admin metrics:", error);
+      res.status(500).json({ message: "Failed to fetch metrics" });
+    }
+  });
+
+  // Get recent transactions for dashboard
+  app.get("/api/admin/transactions/recent", async (_req, res) => {
+    try {
+      const allTransactions = await storage.getAllPartnerPaymentTransactions();
+
+      // Sort by date descending and take first 10
+      const recentTransactions = allTransactions
+        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+        .slice(0, 10);
+
+      res.json(recentTransactions);
+    } catch (error) {
+      console.error("Error fetching recent transactions:", error);
+      res.status(500).json({ message: "Failed to fetch recent transactions" });
+    }
+  });
+
+  // Get payment volume data (last 30 days)
+  app.get("/api/admin/volume", async (_req, res) => {
+    try {
+      const allTransactions = await storage.getAllPartnerPaymentTransactions();
+
+      // Get transactions from last 30 days
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const recentTransactions = allTransactions.filter(t =>
+        new Date(t.createdAt) >= thirtyDaysAgo && t.status === "success"
+      );
+
+      // Group by date
+      const volumeByDate = recentTransactions.reduce((acc, t) => {
+        const date = new Date(t.createdAt).toISOString().split('T')[0];
+        if (!acc[date]) {
+          acc[date] = 0;
+        }
+        acc[date] += parseFloat(t.amount);
+        return acc;
+      }, {} as Record<string, number>);
+
+      // Create array with all dates (fill missing dates with 0)
+      const volumeData = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+        const dateStr = date.toISOString().split('T')[0];
+        const displayDate = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+        volumeData.push({
+          date: displayDate,
+          amount: Math.round(volumeByDate[dateStr] || 0),
+        });
+      }
+
+      res.json(volumeData);
+    } catch (error) {
+      console.error("Error fetching volume data:", error);
+      res.status(500).json({ message: "Failed to fetch volume data" });
+    }
+  });
+
+  // Get all transactions (admin view - no platform filter)
+  app.get("/api/admin/transactions", async (_req, res) => {
+    try {
+      const allTransactions = await storage.getAllPartnerPaymentTransactions();
+
+      // Sort by date descending
+      const sortedTransactions = allTransactions.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      res.json(sortedTransactions);
+    } catch (error) {
+      console.error("Error fetching admin transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Get all webhooks (admin view - all platforms)
+  app.get("/api/admin/webhooks", async (_req, res) => {
+    try {
+      const allWebhooks = await storage.getAllWebhookEndpoints();
+      res.json(allWebhooks);
+    } catch (error) {
+      console.error("Error fetching admin webhooks:", error);
+      res.status(500).json({ message: "Failed to fetch webhooks" });
+    }
+  });
+
+  // Register webhook (admin)
+  app.post("/api/admin/webhooks/register", async (req, res) => {
+    try {
+      const registerSchema = z.object({
+        platform: z.string(),
+        url: z.string().url(),
+        events: z.array(z.string()).min(1),
+      });
+
+      const validatedData = registerSchema.parse(req.body);
+
+      // Register webhook
+      const { endpoint, secret } = await webhookService.registerWebhook(
+        validatedData.platform,
+        validatedData.url,
+        validatedData.events as any
+      );
+
+      res.status(201).json({
+        id: endpoint.id,
+        platform: endpoint.platform,
+        url: endpoint.url,
+        events: endpoint.events,
+        secret: secret,
+        isActive: endpoint.isActive,
+        createdAt: endpoint.createdAt,
+        message: "Webhook registered successfully. Save the secret - it won't be shown again.",
+      });
+    } catch (error) {
+      console.error("Error registering webhook:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Invalid webhook registration",
+          message: "Validation failed",
+          errors: error.errors,
+        });
+      }
+      if (error instanceof Error && error.message.includes("Invalid")) {
+        return res.status(400).json({
+          error: "Invalid webhook data",
+          message: error.message,
+        });
+      }
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to register webhook",
+      });
+    }
+  });
+
+  // Test webhook (admin)
+  app.post("/api/admin/webhooks/:id/test", async (req, res) => {
+    try {
+      const endpoint = await storage.getWebhookEndpoint(req.params.id);
+
+      if (!endpoint) {
+        return res.status(404).json({
+          error: "Webhook not found",
+          message: "The specified webhook endpoint does not exist",
+        });
+      }
+
+      // Send test webhook
+      const result = await webhookService.testWebhook(req.params.id);
+
+      if (result.success) {
+        res.json({
+          success: true,
+          status: result.status,
+          message: result.message,
+        });
+      } else {
+        res.status(400).json({
+          success: false,
+          message: result.message,
+        });
+      }
+    } catch (error) {
+      console.error("Error testing webhook:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to test webhook",
+      });
+    }
+  });
+
+  // Get webhook deliveries (admin)
+  app.get("/api/admin/webhooks/:id/deliveries", async (req, res) => {
+    try {
+      const deliveries = await storage.getWebhookDeliveriesByEndpoint(req.params.id);
+
+      // Sort by date descending
+      const sortedDeliveries = deliveries.sort(
+        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      );
+
+      res.json(sortedDeliveries);
+    } catch (error) {
+      console.error("Error fetching webhook deliveries:", error);
+      res.status(500).json({ message: "Failed to fetch deliveries" });
+    }
+  });
+
+  // Delete webhook (admin)
+  app.delete("/api/admin/webhooks/:id", async (req, res) => {
+    try {
+      const endpoint = await storage.getWebhookEndpoint(req.params.id);
+
+      if (!endpoint) {
+        return res.status(404).json({
+          error: "Webhook not found",
+          message: "The specified webhook endpoint does not exist",
+        });
+      }
+
+      const deleted = await storage.deleteWebhookEndpoint(req.params.id);
+
+      if (!deleted) {
+        return res.status(404).json({
+          error: "Webhook not found",
+          message: "Failed to delete webhook",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Webhook deleted successfully",
+      });
+    } catch (error) {
+      console.error("Error deleting webhook:", error);
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to delete webhook",
+      });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

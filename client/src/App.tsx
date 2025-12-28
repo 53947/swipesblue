@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/Header";
+import AdminLayout from "@/components/AdminLayout";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
 import Transactions from "@/pages/Transactions";
@@ -12,6 +13,11 @@ import ShoppingCart from "@/pages/ShoppingCart";
 import Checkout from "@/pages/Checkout";
 import Orders from "@/pages/Orders";
 import BrandStudio from "@/pages/BrandStudio";
+import AdminDashboard from "@/pages/admin/AdminDashboard";
+import Merchants from "@/pages/admin/Merchants";
+import AdminTransactions from "@/pages/admin/AdminTransactions";
+import ApiKeys from "@/pages/admin/ApiKeys";
+import Webhooks from "@/pages/admin/Webhooks";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +31,44 @@ function Router() {
       <Route path="/shoppingcart" component={ShoppingCart} />
       <Route path="/checkout" component={Checkout} />
       <Route path="/brand-studio" component={BrandStudio} />
+
+      {/* Admin Routes */}
+      <Route path="/admin">
+        {() => (
+          <AdminLayout>
+            <AdminDashboard />
+          </AdminLayout>
+        )}
+      </Route>
+      <Route path="/admin/merchants">
+        {() => (
+          <AdminLayout>
+            <Merchants />
+          </AdminLayout>
+        )}
+      </Route>
+      <Route path="/admin/transactions">
+        {() => (
+          <AdminLayout>
+            <AdminTransactions />
+          </AdminLayout>
+        )}
+      </Route>
+      <Route path="/admin/api-keys">
+        {() => (
+          <AdminLayout>
+            <ApiKeys />
+          </AdminLayout>
+        )}
+      </Route>
+      <Route path="/admin/webhooks">
+        {() => (
+          <AdminLayout>
+            <Webhooks />
+          </AdminLayout>
+        )}
+      </Route>
+
       <Route component={NotFound} />
     </Switch>
   );
