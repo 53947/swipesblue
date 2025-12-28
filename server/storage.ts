@@ -1,6 +1,6 @@
 import { db } from "./db";
-import { 
-  type User, 
+import {
+  type User,
   type InsertUser,
   type Product,
   type InsertProduct,
@@ -14,6 +14,12 @@ import {
   type InsertPaymentGateway,
   type PaymentTransaction,
   type InsertPaymentTransaction,
+  type Merchant,
+  type InsertMerchant,
+  type ApiKey,
+  type InsertApiKey,
+  type PartnerPaymentTransaction,
+  type InsertPartnerPaymentTransaction,
   users,
   products,
   cartItems,
@@ -21,6 +27,9 @@ import {
   orderItems,
   paymentGateways,
   paymentTransactions,
+  merchants,
+  apiKeys,
+  partnerPaymentTransactions,
 } from "@shared/schema";
 import { eq, and, desc, like, or } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -72,6 +81,35 @@ export interface IStorage {
   createPaymentTransaction(transaction: InsertPaymentTransaction): Promise<PaymentTransaction>;
   updatePaymentTransaction(id: string, transaction: Partial<InsertPaymentTransaction>): Promise<PaymentTransaction | undefined>;
   getAllTransactions(): Promise<PaymentTransaction[]>;
+
+  // Merchant operations
+  getMerchant(id: string): Promise<Merchant | undefined>;
+  getMerchantByPlatformClientId(platform: string, platformClientId: string): Promise<Merchant | undefined>;
+  getMerchantByNmiMerchantId(nmiMerchantId: string): Promise<Merchant | undefined>;
+  getMerchantsByPlatform(platform: string): Promise<Merchant[]>;
+  getAllMerchants(): Promise<Merchant[]>;
+  createMerchant(merchant: InsertMerchant): Promise<Merchant>;
+  updateMerchant(id: string, merchant: Partial<InsertMerchant>): Promise<Merchant | undefined>;
+  updateMerchantStatus(id: string, status: string): Promise<Merchant | undefined>;
+
+  // API Key operations
+  getApiKey(id: string): Promise<ApiKey | undefined>;
+  getApiKeyByKey(apiKey: string): Promise<ApiKey | undefined>;
+  getApiKeysByPlatform(platform: string): Promise<ApiKey[]>;
+  getAllApiKeys(): Promise<ApiKey[]>;
+  createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
+  updateApiKey(id: string, apiKey: Partial<InsertApiKey>): Promise<ApiKey | undefined>;
+  deactivateApiKey(id: string): Promise<ApiKey | undefined>;
+  updateApiKeyLastUsed(id: string): Promise<void>;
+
+  // Partner Payment Transaction operations
+  getPartnerPaymentTransaction(id: string): Promise<PartnerPaymentTransaction | undefined>;
+  getPartnerPaymentTransactionByGatewayId(gatewayTransactionId: string): Promise<PartnerPaymentTransaction | undefined>;
+  getPartnerPaymentTransactionsByMerchant(merchantId: string): Promise<PartnerPaymentTransaction[]>;
+  getPartnerPaymentTransactionsByPlatform(platform: string): Promise<PartnerPaymentTransaction[]>;
+  getAllPartnerPaymentTransactions(): Promise<PartnerPaymentTransaction[]>;
+  createPartnerPaymentTransaction(transaction: InsertPartnerPaymentTransaction): Promise<PartnerPaymentTransaction>;
+  updatePartnerPaymentTransaction(id: string, transaction: Partial<InsertPartnerPaymentTransaction>): Promise<PartnerPaymentTransaction | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -324,6 +362,166 @@ export class DbStorage implements IStorage {
 
   async getAllTransactions(): Promise<PaymentTransaction[]> {
     return await db.select().from(paymentTransactions).orderBy(desc(paymentTransactions.createdAt));
+  }
+
+  // Merchant operations
+  async getMerchant(id: string): Promise<Merchant | undefined> {
+    const result = await db.select().from(merchants).where(eq(merchants.id, id));
+    return result[0];
+  }
+
+  async getMerchantByPlatformClientId(platform: string, platformClientId: string): Promise<Merchant | undefined> {
+    const result = await db
+      .select()
+      .from(merchants)
+      .where(
+        and(
+          eq(merchants.platform, platform),
+          eq(merchants.platformClientId, platformClientId)
+        )
+      );
+    return result[0];
+  }
+
+  async getMerchantByNmiMerchantId(nmiMerchantId: string): Promise<Merchant | undefined> {
+    const result = await db.select().from(merchants).where(eq(merchants.nmiMerchantId, nmiMerchantId));
+    return result[0];
+  }
+
+  async getMerchantsByPlatform(platform: string): Promise<Merchant[]> {
+    return await db
+      .select()
+      .from(merchants)
+      .where(eq(merchants.platform, platform))
+      .orderBy(desc(merchants.createdAt));
+  }
+
+  async getAllMerchants(): Promise<Merchant[]> {
+    return await db.select().from(merchants).orderBy(desc(merchants.createdAt));
+  }
+
+  async createMerchant(merchant: InsertMerchant): Promise<Merchant> {
+    const result = await db.insert(merchants).values(merchant).returning();
+    return result[0];
+  }
+
+  async updateMerchant(id: string, merchant: Partial<InsertMerchant>): Promise<Merchant | undefined> {
+    const result = await db
+      .update(merchants)
+      .set({ ...merchant, updatedAt: new Date() })
+      .where(eq(merchants.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateMerchantStatus(id: string, status: string): Promise<Merchant | undefined> {
+    const result = await db
+      .update(merchants)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(merchants.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // API Key operations
+  async getApiKey(id: string): Promise<ApiKey | undefined> {
+    const result = await db.select().from(apiKeys).where(eq(apiKeys.id, id));
+    return result[0];
+  }
+
+  async getApiKeyByKey(apiKey: string): Promise<ApiKey | undefined> {
+    const result = await db.select().from(apiKeys).where(eq(apiKeys.apiKey, apiKey));
+    return result[0];
+  }
+
+  async getApiKeysByPlatform(platform: string): Promise<ApiKey[]> {
+    return await db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.platform, platform))
+      .orderBy(desc(apiKeys.createdAt));
+  }
+
+  async getAllApiKeys(): Promise<ApiKey[]> {
+    return await db.select().from(apiKeys).orderBy(desc(apiKeys.createdAt));
+  }
+
+  async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
+    const result = await db.insert(apiKeys).values(apiKey).returning();
+    return result[0];
+  }
+
+  async updateApiKey(id: string, apiKey: Partial<InsertApiKey>): Promise<ApiKey | undefined> {
+    const result = await db
+      .update(apiKeys)
+      .set({ ...apiKey, updatedAt: new Date() })
+      .where(eq(apiKeys.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deactivateApiKey(id: string): Promise<ApiKey | undefined> {
+    const result = await db
+      .update(apiKeys)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(eq(apiKeys.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async updateApiKeyLastUsed(id: string): Promise<void> {
+    await db
+      .update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, id));
+  }
+
+  // Partner Payment Transaction operations
+  async getPartnerPaymentTransaction(id: string): Promise<PartnerPaymentTransaction | undefined> {
+    const result = await db.select().from(partnerPaymentTransactions).where(eq(partnerPaymentTransactions.id, id));
+    return result[0];
+  }
+
+  async getPartnerPaymentTransactionByGatewayId(gatewayTransactionId: string): Promise<PartnerPaymentTransaction | undefined> {
+    const result = await db
+      .select()
+      .from(partnerPaymentTransactions)
+      .where(eq(partnerPaymentTransactions.gatewayTransactionId, gatewayTransactionId));
+    return result[0];
+  }
+
+  async getPartnerPaymentTransactionsByMerchant(merchantId: string): Promise<PartnerPaymentTransaction[]> {
+    return await db
+      .select()
+      .from(partnerPaymentTransactions)
+      .where(eq(partnerPaymentTransactions.merchantId, merchantId))
+      .orderBy(desc(partnerPaymentTransactions.createdAt));
+  }
+
+  async getPartnerPaymentTransactionsByPlatform(platform: string): Promise<PartnerPaymentTransaction[]> {
+    return await db
+      .select()
+      .from(partnerPaymentTransactions)
+      .where(eq(partnerPaymentTransactions.platform, platform))
+      .orderBy(desc(partnerPaymentTransactions.createdAt));
+  }
+
+  async getAllPartnerPaymentTransactions(): Promise<PartnerPaymentTransaction[]> {
+    return await db.select().from(partnerPaymentTransactions).orderBy(desc(partnerPaymentTransactions.createdAt));
+  }
+
+  async createPartnerPaymentTransaction(transaction: InsertPartnerPaymentTransaction): Promise<PartnerPaymentTransaction> {
+    const result = await db.insert(partnerPaymentTransactions).values(transaction).returning();
+    return result[0];
+  }
+
+  async updatePartnerPaymentTransaction(id: string, transaction: Partial<InsertPartnerPaymentTransaction>): Promise<PartnerPaymentTransaction | undefined> {
+    const result = await db
+      .update(partnerPaymentTransactions)
+      .set({ ...transaction, updatedAt: new Date() })
+      .where(eq(partnerPaymentTransactions.id, id))
+      .returning();
+    return result[0];
   }
 }
 

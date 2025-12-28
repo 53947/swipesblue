@@ -1,17 +1,21 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { 
-  insertProductSchema, 
-  insertCartItemSchema, 
+import {
+  insertProductSchema,
+  insertCartItemSchema,
   insertOrderSchema,
   insertOrderItemSchema,
   insertPaymentGatewaySchema,
   insertPaymentTransactionSchema,
+  insertMerchantSchema,
   type InsertOrderItem,
 } from "@shared/schema";
 import { z } from "zod";
 import { createPaymentGateway } from "./payment-gateways/nmi";
+import { createNMIPartnerService, type MerchantBoardingRequest } from "./services/nmi-partner";
+import { createMerchantPaymentService, type MerchantPaymentRequest } from "./services/merchant-payment";
+import { requireApiKey, requirePermission, generateApiKey, generateApiSecret, type AuthenticatedRequest } from "./middleware/api-auth";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session helper to get session ID from express-session
@@ -377,6 +381,681 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching transactions:", error);
       res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Merchant Management API endpoints (Partner API v1)
+
+  // Create a new merchant account via NMI Partner API
+  app.post("/api/v1/merchants/create", async (req, res) => {
+    try {
+      // Validate the merchant boarding request
+      const merchantBoardingSchema = z.object({
+        businessName: z.string().min(1, "Business name is required"),
+        businessEmail: z.string().email("Valid email is required"),
+        businessPhone: z.string().optional(),
+        businessAddress: z.string().optional(),
+        businessCity: z.string().optional(),
+        businessState: z.string().optional(),
+        businessZip: z.string().optional(),
+        businessCountry: z.string().default("US"),
+        platform: z.enum(["businessblueprint", "hostsblue", "swipesblue"]),
+        platformClientId: z.string().min(1, "Platform client ID is required"),
+        dba: z.string().optional(),
+        website: z.string().url().optional(),
+        taxId: z.string().optional(),
+        businessType: z.string().optional(),
+        merchantCategoryCode: z.string().optional(),
+        annualVolume: z.number().optional(),
+        averageTicket: z.number().optional(),
+        highTicket: z.number().optional(),
+      });
+
+      const validatedData = merchantBoardingSchema.parse(req.body);
+
+      // Check if merchant already exists for this platform client
+      const existingMerchant = await storage.getMerchantByPlatformClientId(
+        validatedData.platform,
+        validatedData.platformClientId
+      );
+
+      if (existingMerchant) {
+        return res.status(409).json({
+          message: "Merchant already exists for this platform client",
+          merchantId: existingMerchant.id,
+          status: existingMerchant.status,
+        });
+      }
+
+      // Initialize NMI Partner Service
+      const nmiPartnerService = createNMIPartnerService();
+
+      // Create sub-merchant via NMI Partner API
+      const boardingRequest: MerchantBoardingRequest = {
+        businessName: validatedData.businessName,
+        businessEmail: validatedData.businessEmail,
+        businessPhone: validatedData.businessPhone,
+        businessAddress: validatedData.businessAddress,
+        businessCity: validatedData.businessCity,
+        businessState: validatedData.businessState,
+        businessZip: validatedData.businessZip,
+        businessCountry: validatedData.businessCountry,
+        platform: validatedData.platform,
+        platformClientId: validatedData.platformClientId,
+        dba: validatedData.dba,
+        website: validatedData.website,
+        taxId: validatedData.taxId,
+        businessType: validatedData.businessType,
+        merchantCategoryCode: validatedData.merchantCategoryCode,
+        annualVolume: validatedData.annualVolume,
+        averageTicket: validatedData.averageTicket,
+        highTicket: validatedData.highTicket,
+      };
+
+      const boardingResponse = await nmiPartnerService.createSubMerchant(boardingRequest);
+
+      if (!boardingResponse.success) {
+        return res.status(400).json({
+          message: "Failed to create NMI sub-merchant",
+          error: boardingResponse.errorMessage,
+        });
+      }
+
+      // Store merchant in database
+      const partnerId = process.env.NMI_PARTNER_ID || "LaskowskiD3124";
+      const merchant = await storage.createMerchant({
+        platform: validatedData.platform,
+        platformClientId: validatedData.platformClientId,
+        nmiMerchantId: boardingResponse.merchantId || null,
+        partnerId: partnerId,
+        businessName: validatedData.businessName,
+        businessEmail: validatedData.businessEmail,
+        businessPhone: validatedData.businessPhone || null,
+        businessAddress: validatedData.businessAddress || null,
+        businessCity: validatedData.businessCity || null,
+        businessState: validatedData.businessState || null,
+        businessZip: validatedData.businessZip || null,
+        businessCountry: validatedData.businessCountry,
+        status: boardingResponse.status || "pending",
+        nmiApplicationStatus: boardingResponse.status || null,
+        nmiApplicationData: boardingResponse.rawResponse || null,
+        metadata: {
+          dba: validatedData.dba,
+          website: validatedData.website,
+          businessType: validatedData.businessType,
+          merchantCategoryCode: validatedData.merchantCategoryCode,
+          annualVolume: validatedData.annualVolume,
+          averageTicket: validatedData.averageTicket,
+          highTicket: validatedData.highTicket,
+        },
+      });
+
+      res.status(201).json({
+        merchantId: merchant.id,
+        nmiMerchantId: merchant.nmiMerchantId,
+        applicationId: boardingResponse.applicationId,
+        status: merchant.status,
+        message: boardingResponse.message || "Merchant application submitted successfully",
+      });
+    } catch (error) {
+      console.error("Error creating merchant:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Invalid merchant data",
+          errors: error.errors,
+        });
+      }
+      res.status(500).json({
+        message: "Failed to create merchant",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  });
+
+  // Get all merchants
+  app.get("/api/v1/merchants", async (_req, res) => {
+    try {
+      const merchants = await storage.getAllMerchants();
+      res.json(merchants);
+    } catch (error) {
+      console.error("Error fetching merchants:", error);
+      res.status(500).json({ message: "Failed to fetch merchants" });
+    }
+  });
+
+  // Get merchants by platform
+  app.get("/api/v1/merchants/platform/:platform", async (req, res) => {
+    try {
+      const { platform } = req.params;
+      const merchants = await storage.getMerchantsByPlatform(platform);
+      res.json(merchants);
+    } catch (error) {
+      console.error("Error fetching merchants by platform:", error);
+      res.status(500).json({ message: "Failed to fetch merchants" });
+    }
+  });
+
+  // Get specific merchant
+  app.get("/api/v1/merchants/:id", async (req, res) => {
+    try {
+      const merchant = await storage.getMerchant(req.params.id);
+      if (!merchant) {
+        return res.status(404).json({ message: "Merchant not found" });
+      }
+      res.json(merchant);
+    } catch (error) {
+      console.error("Error fetching merchant:", error);
+      res.status(500).json({ message: "Failed to fetch merchant" });
+    }
+  });
+
+  // Update merchant status
+  app.patch("/api/v1/merchants/:id/status", async (req, res) => {
+    try {
+      const statusSchema = z.object({
+        status: z.enum(["active", "suspended", "pending", "rejected"]),
+      });
+
+      const { status } = statusSchema.parse(req.body);
+      const merchant = await storage.updateMerchantStatus(req.params.id, status);
+
+      if (!merchant) {
+        return res.status(404).json({ message: "Merchant not found" });
+      }
+
+      // If activating or suspending, also update in NMI
+      if (status === "active" || status === "suspended") {
+        try {
+          const nmiPartnerService = createNMIPartnerService();
+          if (merchant.nmiMerchantId) {
+            await nmiPartnerService.updateMerchantStatus(
+              merchant.nmiMerchantId,
+              status
+            );
+          }
+        } catch (nmiError) {
+          console.error("Failed to update NMI merchant status:", nmiError);
+          // Continue anyway - we updated our database
+        }
+      }
+
+      res.json(merchant);
+    } catch (error) {
+      console.error("Error updating merchant status:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Invalid status",
+          errors: error.errors,
+        });
+      }
+      res.status(500).json({ message: "Failed to update merchant status" });
+    }
+  });
+
+  // Check merchant application status with NMI
+  app.get("/api/v1/merchants/:id/nmi-status", async (req, res) => {
+    try {
+      const merchant = await storage.getMerchant(req.params.id);
+      if (!merchant) {
+        return res.status(404).json({ message: "Merchant not found" });
+      }
+
+      if (!merchant.nmiMerchantId) {
+        return res.status(400).json({
+          message: "Merchant does not have an NMI merchant ID yet",
+        });
+      }
+
+      const nmiPartnerService = createNMIPartnerService();
+      const statusResponse = await nmiPartnerService.getMerchantStatus(
+        merchant.nmiMerchantId
+      );
+
+      // Update our database with the latest status
+      if (statusResponse.success && statusResponse.status) {
+        await storage.updateMerchant(merchant.id, {
+          nmiApplicationStatus: statusResponse.status,
+        });
+      }
+
+      res.json({
+        merchantId: merchant.id,
+        nmiMerchantId: merchant.nmiMerchantId,
+        status: statusResponse.status,
+        message: statusResponse.message,
+      });
+    } catch (error) {
+      console.error("Error checking NMI merchant status:", error);
+      res.status(500).json({ message: "Failed to check merchant status" });
+    }
+  });
+
+  // Partner Payment Processing API (requires API key authentication)
+
+  // Process a payment on behalf of a merchant
+  app.post("/api/v1/payments/process", requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      // Validate payment request
+      const paymentSchema = z.object({
+        merchantId: z.string().uuid("Invalid merchant ID"),
+        amount: z.number().positive("Amount must be positive"),
+        currency: z.string().default("USD"),
+        cardNumber: z.string().min(13, "Invalid card number"),
+        cardName: z.string().min(1, "Cardholder name required"),
+        expiry: z.string().regex(/^\d{4}$/, "Expiry must be MMYY format"),
+        cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3-4 digits"),
+        customerEmail: z.string().email("Valid email required"),
+        customerName: z.string().optional(),
+        billingAddress: z.object({
+          address: z.string(),
+          city: z.string(),
+          state: z.string(),
+          zip: z.string(),
+          country: z.string().optional(),
+        }).optional(),
+        platformOrderId: z.string().optional(),
+        metadata: z.record(z.any()).optional(),
+        description: z.string().optional(),
+        invoiceNumber: z.string().optional(),
+      });
+
+      const validatedData = paymentSchema.parse(req.body);
+
+      // Get merchant
+      const merchant = await storage.getMerchant(validatedData.merchantId);
+      if (!merchant) {
+        return res.status(404).json({
+          error: "Merchant not found",
+          message: "The specified merchant ID does not exist",
+        });
+      }
+
+      // Verify merchant belongs to the requesting platform (unless internal)
+      if (platform !== "internal" && merchant.platform !== platform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot process payments for merchants from other platforms",
+        });
+      }
+
+      // Validate card details
+      const paymentService = createMerchantPaymentService();
+      const validation = paymentService.validateCardDetails(validatedData as MerchantPaymentRequest);
+
+      if (!validation.valid) {
+        return res.status(400).json({
+          error: "Invalid payment details",
+          message: validation.errors.join(", "),
+        });
+      }
+
+      // Process the payment
+      const paymentResult = await paymentService.processPayment(merchant, validatedData as MerchantPaymentRequest);
+
+      if (!paymentResult.success) {
+        // Log failed transaction
+        await storage.createPartnerPaymentTransaction({
+          merchantId: merchant.id,
+          platform: platform,
+          platformOrderId: validatedData.platformOrderId || null,
+          gatewayTransactionId: null,
+          amount: validatedData.amount.toString(),
+          currency: validatedData.currency,
+          status: "failed",
+          customerEmail: validatedData.customerEmail,
+          customerName: validatedData.customerName || null,
+          billingAddress: validatedData.billingAddress || null,
+          errorMessage: paymentResult.errorMessage || null,
+          gatewayResponse: paymentResult.rawResponse || null,
+          metadata: validatedData.metadata || null,
+          refundedAmount: "0",
+          refundedAt: null,
+        });
+
+        return res.status(400).json({
+          success: false,
+          error: "Payment failed",
+          message: paymentResult.errorMessage || "Payment processing failed",
+        });
+      }
+
+      // Extract card details from response
+      const cardBrand = paymentResult.rawResponse?.cc_type || paymentResult.rawResponse?.card_type;
+      const cardLastFour = paymentResult.rawResponse?.cc_number?.slice(-4);
+
+      // Log successful transaction
+      const transaction = await storage.createPartnerPaymentTransaction({
+        merchantId: merchant.id,
+        platform: platform,
+        platformOrderId: validatedData.platformOrderId || null,
+        gatewayTransactionId: paymentResult.transactionId || null,
+        amount: validatedData.amount.toString(),
+        currency: validatedData.currency,
+        status: "success",
+        paymentMethod: "credit_card",
+        cardBrand: cardBrand || null,
+        cardLastFour: cardLastFour || null,
+        customerEmail: validatedData.customerEmail,
+        customerName: validatedData.customerName || null,
+        billingAddress: validatedData.billingAddress || null,
+        errorMessage: null,
+        gatewayResponse: paymentResult.rawResponse || null,
+        metadata: validatedData.metadata || null,
+        refundedAmount: "0",
+        refundedAt: null,
+      });
+
+      res.status(201).json({
+        success: true,
+        transactionId: transaction.id,
+        gatewayTransactionId: paymentResult.transactionId,
+        authCode: paymentResult.authCode,
+        amount: validatedData.amount,
+        currency: validatedData.currency,
+        status: "success",
+        cardBrand: cardBrand,
+        cardLastFour: cardLastFour,
+        message: paymentResult.message || "Payment processed successfully",
+        createdAt: transaction.createdAt,
+      });
+    } catch (error) {
+      console.error("Payment processing error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Invalid payment request",
+          message: "Validation failed",
+          errors: error.errors,
+        });
+      }
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to process payment",
+      });
+    }
+  });
+
+  // Process a refund
+  app.post("/api/v1/payments/refund", requireApiKey, requirePermission("process_refunds"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const refundSchema = z.object({
+        transactionId: z.string().uuid("Invalid transaction ID"),
+        amount: z.number().positive().optional(),
+        reason: z.string().optional(),
+      });
+
+      const validatedData = refundSchema.parse(req.body);
+
+      // Get the original transaction
+      const transaction = await storage.getPartnerPaymentTransaction(validatedData.transactionId);
+
+      if (!transaction) {
+        return res.status(404).json({
+          error: "Transaction not found",
+          message: "The specified transaction ID does not exist",
+        });
+      }
+
+      // Verify platform access
+      if (platform !== "internal" && transaction.platform !== platform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot refund transactions from other platforms",
+        });
+      }
+
+      // Check if already fully refunded
+      const refundedAmount = parseFloat(transaction.refundedAmount || "0");
+      const transactionAmount = parseFloat(transaction.amount);
+
+      if (refundedAmount >= transactionAmount) {
+        return res.status(400).json({
+          error: "Already refunded",
+          message: "This transaction has already been fully refunded",
+        });
+      }
+
+      // Get merchant
+      const merchant = await storage.getMerchant(transaction.merchantId);
+      if (!merchant) {
+        return res.status(404).json({
+          error: "Merchant not found",
+        });
+      }
+
+      // Calculate refund amount
+      const refundAmount = validatedData.amount || (transactionAmount - refundedAmount);
+
+      if (refundAmount + refundedAmount > transactionAmount) {
+        return res.status(400).json({
+          error: "Invalid refund amount",
+          message: "Refund amount exceeds available balance",
+        });
+      }
+
+      // Process refund
+      const paymentService = createMerchantPaymentService();
+      const refundResult = await paymentService.processRefund(
+        merchant,
+        transaction.gatewayTransactionId!,
+        refundAmount,
+        validatedData.reason
+      );
+
+      if (!refundResult.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Refund failed",
+          message: refundResult.errorMessage || "Refund processing failed",
+        });
+      }
+
+      // Update transaction with refund info
+      const newRefundedAmount = refundedAmount + refundAmount;
+      await storage.updatePartnerPaymentTransaction(transaction.id, {
+        refundedAmount: newRefundedAmount.toString(),
+        refundedAt: new Date(),
+        status: newRefundedAmount >= transactionAmount ? "refunded" : "success",
+      });
+
+      res.json({
+        success: true,
+        transactionId: transaction.id,
+        gatewayTransactionId: refundResult.transactionId,
+        refundAmount: refundAmount,
+        totalRefunded: newRefundedAmount,
+        message: refundResult.message || "Refund processed successfully",
+      });
+    } catch (error) {
+      console.error("Refund processing error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Invalid refund request",
+          errors: error.errors,
+        });
+      }
+      res.status(500).json({
+        error: "Internal server error",
+        message: "Failed to process refund",
+      });
+    }
+  });
+
+  // Get transactions for a merchant
+  app.get("/api/v1/payments/merchant/:merchantId", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+      const { merchantId } = req.params;
+
+      // Get merchant to verify platform access
+      const merchant = await storage.getMerchant(merchantId);
+      if (!merchant) {
+        return res.status(404).json({ message: "Merchant not found" });
+      }
+
+      if (platform !== "internal" && merchant.platform !== platform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot access transactions for merchants from other platforms",
+        });
+      }
+
+      const transactions = await storage.getPartnerPaymentTransactionsByMerchant(merchantId);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching merchant transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Get transactions for a platform
+  app.get("/api/v1/payments/platform/:platform", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const requestedPlatform = req.params.platform;
+
+      // Verify platform access
+      if (authReq.apiKey!.platform !== "internal" && authReq.apiKey!.platform !== requestedPlatform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot access transactions from other platforms",
+        });
+      }
+
+      const transactions = await storage.getPartnerPaymentTransactionsByPlatform(requestedPlatform);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Error fetching platform transactions:", error);
+      res.status(500).json({ message: "Failed to fetch transactions" });
+    }
+  });
+
+  // Get specific transaction details
+  app.get("/api/v1/payments/:transactionId", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+      const { transactionId } = req.params;
+
+      const transaction = await storage.getPartnerPaymentTransaction(transactionId);
+      if (!transaction) {
+        return res.status(404).json({ message: "Transaction not found" });
+      }
+
+      // Verify platform access
+      if (platform !== "internal" && transaction.platform !== platform) {
+        return res.status(403).json({
+          error: "Forbidden",
+          message: "Cannot access transactions from other platforms",
+        });
+      }
+
+      res.json(transaction);
+    } catch (error) {
+      console.error("Error fetching transaction:", error);
+      res.status(500).json({ message: "Failed to fetch transaction" });
+    }
+  });
+
+  // API Key Management Endpoints (internal use only)
+
+  // Create a new API key
+  app.post("/api/v1/api-keys/create", async (req, res) => {
+    try {
+      // TODO: Add admin authentication here
+      // For now, anyone can create API keys (remove this in production!)
+
+      const apiKeySchema = z.object({
+        platform: z.enum(["businessblueprint", "hostsblue", "swipesblue", "internal"]),
+        name: z.string().min(1, "Name is required"),
+        permissions: z.array(z.string()).default(["*"]),
+        metadata: z.record(z.any()).optional(),
+      });
+
+      const validatedData = apiKeySchema.parse(req.body);
+
+      // Generate API key and secret
+      const apiKey = generateApiKey();
+      const apiSecret = generateApiSecret();
+
+      // Create API key in database
+      const createdKey = await storage.createApiKey({
+        platform: validatedData.platform,
+        name: validatedData.name,
+        apiKey: apiKey,
+        apiSecret: apiSecret,
+        isActive: true,
+        permissions: validatedData.permissions,
+        metadata: validatedData.metadata || null,
+        lastUsedAt: null,
+      });
+
+      res.status(201).json({
+        id: createdKey.id,
+        platform: createdKey.platform,
+        name: createdKey.name,
+        apiKey: apiKey, // Return the key only once!
+        apiSecret: apiSecret,
+        permissions: createdKey.permissions,
+        isActive: createdKey.isActive,
+        createdAt: createdKey.createdAt,
+        message: "API key created successfully. Store these credentials securely - they won't be shown again.",
+      });
+    } catch (error) {
+      console.error("Error creating API key:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          error: "Invalid API key data",
+          errors: error.errors,
+        });
+      }
+      res.status(500).json({ message: "Failed to create API key" });
+    }
+  });
+
+  // List API keys (without exposing the actual keys)
+  app.get("/api/v1/api-keys", async (_req, res) => {
+    try {
+      // TODO: Add admin authentication here
+      const keys = await storage.getAllApiKeys();
+
+      // Remove sensitive data
+      const sanitizedKeys = keys.map(key => ({
+        id: key.id,
+        platform: key.platform,
+        name: key.name,
+        isActive: key.isActive,
+        permissions: key.permissions,
+        lastUsedAt: key.lastUsedAt,
+        createdAt: key.createdAt,
+        // Don't return apiKey or apiSecret
+      }));
+
+      res.json(sanitizedKeys);
+    } catch (error) {
+      console.error("Error fetching API keys:", error);
+      res.status(500).json({ message: "Failed to fetch API keys" });
+    }
+  });
+
+  // Deactivate an API key
+  app.delete("/api/v1/api-keys/:id", async (req, res) => {
+    try {
+      // TODO: Add admin authentication here
+      const deactivated = await storage.deactivateApiKey(req.params.id);
+      if (!deactivated) {
+        return res.status(404).json({ message: "API key not found" });
+      }
+      res.json({ message: "API key deactivated successfully" });
+    } catch (error) {
+      console.error("Error deactivating API key:", error);
+      res.status(500).json({ message: "Failed to deactivate API key" });
     }
   });
 

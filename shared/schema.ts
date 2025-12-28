@@ -128,7 +128,7 @@ export const insertPaymentGatewaySchema = createInsertSchema(paymentGateways).om
 export type InsertPaymentGateway = z.infer<typeof insertPaymentGatewaySchema>;
 export type PaymentGateway = typeof paymentGateways.$inferSelect;
 
-// Payment transactions table
+// Payment transactions table (internal orders)
 export const paymentTransactions = pgTable("payment_transactions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   orderId: varchar("order_id").notNull().references(() => orders.id),
@@ -139,6 +139,8 @@ export const paymentTransactions = pgTable("payment_transactions", {
   paymentMethod: text("payment_method"),
   errorMessage: text("error_message"),
   gatewayResponse: json("gateway_response"),
+  merchantId: varchar("merchant_id").references(() => merchants.id), // Link to merchant if applicable
+  platform: text("platform"), // Which platform initiated this transaction
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -149,3 +151,93 @@ export const insertPaymentTransactionSchema = createInsertSchema(paymentTransact
 
 export type InsertPaymentTransaction = z.infer<typeof insertPaymentTransactionSchema>;
 export type PaymentTransaction = typeof paymentTransactions.$inferSelect;
+
+// Merchants table - NMI sub-merchant accounts for partner platforms
+export const merchants = pgTable("merchants", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  platform: text("platform").notNull(), // 'businessblueprint' | 'hostsblue' | 'swipesblue'
+  platformClientId: text("platform_client_id").notNull(), // BB/HB client ID
+  nmiMerchantId: text("nmi_merchant_id"), // NMI sub-merchant ID (null until approved)
+  partnerId: text("partner_id").notNull(), // Our NMI Partner ID
+  businessName: text("business_name").notNull(),
+  businessEmail: text("business_email").notNull(),
+  businessPhone: text("business_phone"),
+  businessAddress: text("business_address"),
+  businessCity: text("business_city"),
+  businessState: text("business_state"),
+  businessZip: text("business_zip"),
+  businessCountry: text("business_country").notNull().default("US"),
+  status: text("status").notNull().default("pending"), // 'pending' | 'active' | 'suspended' | 'rejected'
+  nmiApplicationStatus: text("nmi_application_status"), // Status from NMI boarding process
+  nmiApplicationData: json("nmi_application_data"), // Full NMI boarding response
+  metadata: json("metadata"), // Additional platform-specific data
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMerchantSchema = createInsertSchema(merchants).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertMerchant = z.infer<typeof insertMerchantSchema>;
+export type Merchant = typeof merchants.$inferSelect;
+
+// API Keys table - for partner platform authentication
+export const apiKeys = pgTable("api_keys", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  platform: text("platform").notNull(), // 'businessblueprint' | 'hostsblue' | 'swipesblue' | 'internal'
+  name: text("name").notNull(), // Friendly name for the key
+  apiKey: text("api_key").notNull().unique(), // The actual API key (hashed in production)
+  apiSecret: text("api_secret"), // Optional secret for HMAC signing
+  isActive: boolean("is_active").notNull().default(true),
+  permissions: json("permissions"), // Array of permitted operations
+  metadata: json("metadata"), // Additional platform-specific data
+  lastUsedAt: timestamp("last_used_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertApiKeySchema = createInsertSchema(apiKeys).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertApiKey = z.infer<typeof insertApiKeySchema>;
+export type ApiKey = typeof apiKeys.$inferSelect;
+
+// Partner Payment Transactions table - for external partner payments
+export const partnerPaymentTransactions = pgTable("partner_payment_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull().references(() => merchants.id),
+  platform: text("platform").notNull(), // Which platform initiated this payment
+  platformOrderId: text("platform_order_id"), // Order ID from the partner platform (BB/HB)
+  gatewayTransactionId: text("gateway_transaction_id"), // NMI transaction ID
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("USD"),
+  status: text("status").notNull(), // 'success' | 'failed' | 'pending' | 'refunded'
+  paymentMethod: text("payment_method"), // 'credit_card' | 'debit_card' | etc.
+  cardBrand: text("card_brand"), // 'visa' | 'mastercard' | 'amex' | etc.
+  cardLastFour: text("card_last_four"), // Last 4 digits of card
+  customerEmail: text("customer_email"),
+  customerName: text("customer_name"),
+  billingAddress: json("billing_address"), // Billing address details
+  errorMessage: text("error_message"),
+  gatewayResponse: json("gateway_response"), // Full NMI response
+  metadata: json("metadata"), // Additional transaction data from partner
+  refundedAmount: decimal("refunded_amount", { precision: 10, scale: 2 }).default("0"),
+  refundedAt: timestamp("refunded_at"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertPartnerPaymentTransactionSchema = createInsertSchema(partnerPaymentTransactions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertPartnerPaymentTransaction = z.infer<typeof insertPartnerPaymentTransactionSchema>;
+export type PartnerPaymentTransaction = typeof partnerPaymentTransactions.$inferSelect;
