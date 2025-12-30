@@ -25,9 +25,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Search, Eye, CheckCircle, XCircle, Clock } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface Merchant {
@@ -50,7 +50,6 @@ export default function Merchants() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch merchants
   const { data: merchants, isLoading } = useQuery({
     queryKey: ["/api/v1/merchants"],
     queryFn: async () => {
@@ -60,7 +59,6 @@ export default function Merchants() {
     },
   });
 
-  // Update merchant status mutation
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status }: { id: string; status: string }) => {
       const response = await fetch(`/api/v1/merchants/${id}/status`, {
@@ -88,7 +86,6 @@ export default function Merchants() {
     },
   });
 
-  // Filter merchants
   const filteredMerchants = (merchants || []).filter((merchant: Merchant) => {
     const matchesSearch =
       !searchQuery ||
@@ -105,7 +102,7 @@ export default function Merchants() {
     return matchesSearch && matchesPlatform && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, merchantId?: string) => {
     const config: Record<string, { variant: any; icon: any }> = {
       active: { variant: "default", icon: CheckCircle },
       pending: { variant: "secondary", icon: Clock },
@@ -116,7 +113,7 @@ export default function Merchants() {
     const { variant, icon: Icon } = config[status] || config.pending;
 
     return (
-      <Badge variant={variant} className="flex items-center gap-1 w-fit">
+      <Badge variant={variant} className="flex items-center gap-1 w-fit" data-testid={merchantId ? `badge-status-${merchantId}` : undefined}>
         <Icon className="h-3 w-3" />
         {status}
       </Badge>
@@ -124,15 +121,13 @@ export default function Merchants() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
+    <div className="space-y-6" data-testid="merchants-page">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Merchants</h1>
-        <p className="text-gray-600 mt-1">Manage merchant accounts across all platforms</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">Merchants</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-1">Manage merchant accounts across all platforms</p>
       </div>
 
-      {/* Filters */}
-      <Card>
+      <Card data-testid="card-filters">
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="relative">
@@ -142,11 +137,12 @@ export default function Merchants() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                data-testid="input-search"
               />
             </div>
 
             <Select value={platformFilter} onValueChange={setPlatformFilter}>
-              <SelectTrigger>
+              <SelectTrigger data-testid="select-platform">
                 <SelectValue placeholder="All Platforms" />
               </SelectTrigger>
               <SelectContent>
@@ -158,7 +154,7 @@ export default function Merchants() {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger data-testid="select-status">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -173,8 +169,7 @@ export default function Merchants() {
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <Card>
+      <Card data-testid="card-merchants-table">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -201,7 +196,7 @@ export default function Merchants() {
                   ))
                 ) : filteredMerchants.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500" data-testid="text-no-merchants">
                       No merchants found
                     </TableCell>
                   </TableRow>
@@ -209,14 +204,15 @@ export default function Merchants() {
                   filteredMerchants.map((merchant: Merchant) => (
                     <TableRow
                       key={merchant.id}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={() => setSelectedMerchant(merchant)}
+                      data-testid={`row-merchant-${merchant.id}`}
                     >
-                      <TableCell className="font-medium">{merchant.businessName}</TableCell>
+                      <TableCell className="font-medium" data-testid={`text-name-${merchant.id}`}>{merchant.businessName}</TableCell>
                       <TableCell>
-                        <Badge variant="outline">{merchant.platform}</Badge>
+                        <Badge variant="outline" data-testid={`badge-platform-${merchant.id}`}>{merchant.platform}</Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
+                      <TableCell className="text-sm text-gray-600 dark:text-gray-300">
                         {merchant.businessEmail}
                       </TableCell>
                       <TableCell className="text-sm font-mono">
@@ -225,8 +221,8 @@ export default function Merchants() {
                       <TableCell className="text-sm font-mono">
                         {merchant.nmiMerchantId || "-"}
                       </TableCell>
-                      <TableCell>{getStatusBadge(merchant.status)}</TableCell>
-                      <TableCell className="text-sm text-gray-600">
+                      <TableCell>{getStatusBadge(merchant.status, merchant.id)}</TableCell>
+                      <TableCell className="text-sm text-gray-600 dark:text-gray-300">
                         {new Date(merchant.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
@@ -237,6 +233,7 @@ export default function Merchants() {
                             e.stopPropagation();
                             setSelectedMerchant(merchant);
                           }}
+                          data-testid={`button-view-${merchant.id}`}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -250,9 +247,8 @@ export default function Merchants() {
         </CardContent>
       </Card>
 
-      {/* Merchant Details Dialog */}
       <Dialog open={!!selectedMerchant} onOpenChange={() => setSelectedMerchant(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-merchant-details">
           <DialogHeader>
             <DialogTitle>Merchant Details</DialogTitle>
             <DialogDescription>
@@ -262,42 +258,40 @@ export default function Merchants() {
 
           {selectedMerchant && (
             <div className="space-y-6">
-              {/* Business Info */}
               <div>
                 <h3 className="font-semibold mb-3">Business Information</h3>
                 <dl className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <dt className="text-gray-500">Business Name</dt>
-                    <dd className="font-medium mt-1">{selectedMerchant.businessName}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Business Name</dt>
+                    <dd className="font-medium mt-1" data-testid="text-detail-name">{selectedMerchant.businessName}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Email</dt>
-                    <dd className="font-medium mt-1">{selectedMerchant.businessEmail}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Email</dt>
+                    <dd className="font-medium mt-1" data-testid="text-detail-email">{selectedMerchant.businessEmail}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Platform</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Platform</dt>
                     <dd className="mt-1">
-                      <Badge variant="outline">{selectedMerchant.platform}</Badge>
+                      <Badge variant="outline" data-testid="badge-detail-platform">{selectedMerchant.platform}</Badge>
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Client ID</dt>
-                    <dd className="font-mono text-xs mt-1">{selectedMerchant.platformClientId}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Client ID</dt>
+                    <dd className="font-mono text-xs mt-1" data-testid="text-detail-client-id">{selectedMerchant.platformClientId}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">NMI Merchant ID</dt>
-                    <dd className="font-mono text-xs mt-1">
+                    <dt className="text-gray-500 dark:text-gray-400">NMI Merchant ID</dt>
+                    <dd className="font-mono text-xs mt-1" data-testid="text-detail-nmi-id">
                       {selectedMerchant.nmiMerchantId || "Not assigned"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Status</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Status</dt>
                     <dd className="mt-1">{getStatusBadge(selectedMerchant.status)}</dd>
                   </div>
                 </dl>
               </div>
 
-              {/* Status Actions */}
               <div>
                 <h3 className="font-semibold mb-3">Status Management</h3>
                 <div className="flex gap-2">
@@ -311,6 +305,7 @@ export default function Merchants() {
                         })
                       }
                       disabled={updateStatusMutation.isPending}
+                      data-testid="button-approve"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Approve
@@ -327,6 +322,7 @@ export default function Merchants() {
                         })
                       }
                       disabled={updateStatusMutation.isPending}
+                      data-testid="button-suspend"
                     >
                       <XCircle className="h-4 w-4 mr-2" />
                       Suspend
@@ -342,6 +338,7 @@ export default function Merchants() {
                         })
                       }
                       disabled={updateStatusMutation.isPending}
+                      data-testid="button-reactivate"
                     >
                       <CheckCircle className="h-4 w-4 mr-2" />
                       Reactivate
@@ -350,18 +347,17 @@ export default function Merchants() {
                 </div>
               </div>
 
-              {/* Timestamps */}
               <div>
                 <h3 className="font-semibold mb-3">Timestamps</h3>
                 <dl className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <dt className="text-gray-500">Created</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Created</dt>
                     <dd className="font-medium mt-1">
                       {new Date(selectedMerchant.createdAt).toLocaleString()}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Last Updated</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Last Updated</dt>
                     <dd className="font-medium mt-1">
                       {new Date(selectedMerchant.updatedAt).toLocaleString()}
                     </dd>

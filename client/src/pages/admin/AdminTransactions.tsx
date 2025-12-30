@@ -62,7 +62,6 @@ export default function AdminTransactions() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Fetch transactions
   const { data: transactions, isLoading } = useQuery({
     queryKey: ["/api/admin/transactions"],
     queryFn: async () => {
@@ -72,7 +71,6 @@ export default function AdminTransactions() {
     },
   });
 
-  // Process refund mutation
   const refundMutation = useMutation({
     mutationFn: async ({ transactionId, amount, reason }: { transactionId: string; amount?: number; reason?: string }) => {
       const response = await fetch("/api/v1/payments/refund", {
@@ -106,7 +104,6 @@ export default function AdminTransactions() {
     },
   });
 
-  // Filter transactions
   const filteredTransactions = (transactions || []).filter((transaction: Transaction) => {
     const matchesSearch =
       !searchQuery ||
@@ -124,7 +121,7 @@ export default function AdminTransactions() {
     return matchesSearch && matchesPlatform && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: string, transactionId?: string) => {
     const config: Record<string, { variant: any; icon: any }> = {
       success: { variant: "default", icon: CheckCircle },
       failed: { variant: "destructive", icon: XCircle },
@@ -135,7 +132,7 @@ export default function AdminTransactions() {
     const { variant, icon: Icon } = config[status] || config.pending;
 
     return (
-      <Badge variant={variant} className="flex items-center gap-1 w-fit">
+      <Badge variant={variant} className="flex items-center gap-1 w-fit" data-testid={transactionId ? `badge-status-${transactionId}` : undefined}>
         {Icon && <Icon className="h-3 w-3" />}
         {status}
       </Badge>
@@ -181,21 +178,19 @@ export default function AdminTransactions() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6" data-testid="transactions-page">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Transactions</h1>
-          <p className="text-gray-600 mt-1">View and manage payment transactions</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">Transactions</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">View and manage payment transactions</p>
         </div>
-        <Button onClick={exportToCSV} disabled={filteredTransactions.length === 0}>
+        <Button onClick={exportToCSV} disabled={filteredTransactions.length === 0} data-testid="button-export">
           <Download className="h-4 w-4 mr-2" />
           Export CSV
         </Button>
       </div>
 
-      {/* Filters */}
-      <Card>
+      <Card data-testid="card-filters">
         <CardContent className="pt-6">
           <div className="grid gap-4 md:grid-cols-3">
             <div className="relative">
@@ -205,11 +200,12 @@ export default function AdminTransactions() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
+                data-testid="input-search"
               />
             </div>
 
             <Select value={platformFilter} onValueChange={setPlatformFilter}>
-              <SelectTrigger>
+              <SelectTrigger data-testid="select-platform">
                 <SelectValue placeholder="All Platforms" />
               </SelectTrigger>
               <SelectContent>
@@ -221,7 +217,7 @@ export default function AdminTransactions() {
             </Select>
 
             <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger>
+              <SelectTrigger data-testid="select-status">
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
@@ -236,8 +232,7 @@ export default function AdminTransactions() {
         </CardContent>
       </Card>
 
-      {/* Table */}
-      <Card>
+      <Card data-testid="card-transactions-table">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -264,7 +259,7 @@ export default function AdminTransactions() {
                   ))
                 ) : filteredTransactions.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={8} className="text-center py-8 text-gray-500" data-testid="text-no-transactions">
                       No transactions found
                     </TableCell>
                   </TableRow>
@@ -272,24 +267,25 @@ export default function AdminTransactions() {
                   filteredTransactions.map((transaction: Transaction) => (
                     <TableRow
                       key={transaction.id}
-                      className="cursor-pointer hover:bg-gray-50"
+                      className="cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800"
                       onClick={() => setSelectedTransaction(transaction)}
+                      data-testid={`row-transaction-${transaction.id}`}
                     >
-                      <TableCell className="text-sm text-gray-600">
+                      <TableCell className="text-sm text-gray-600 dark:text-gray-300">
                         {new Date(transaction.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
                         <div>
-                          <div className="font-medium text-sm">
+                          <div className="font-medium text-sm" data-testid={`text-customer-${transaction.id}`}>
                             {transaction.customerName || "Anonymous"}
                           </div>
-                          <div className="text-xs text-gray-500">{transaction.customerEmail}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{transaction.customerEmail}</div>
                         </div>
                       </TableCell>
                       <TableCell className="font-mono text-xs">
                         {transaction.platformOrderId || "-"}
                       </TableCell>
-                      <TableCell className="font-semibold">
+                      <TableCell className="font-semibold" data-testid={`text-amount-${transaction.id}`}>
                         ${parseFloat(transaction.amount).toFixed(2)}
                       </TableCell>
                       <TableCell>
@@ -302,7 +298,7 @@ export default function AdminTransactions() {
                           </span>
                         )}
                       </TableCell>
-                      <TableCell>{getStatusBadge(transaction.status)}</TableCell>
+                      <TableCell>{getStatusBadge(transaction.status, transaction.id)}</TableCell>
                       <TableCell>
                         <Button
                           variant="ghost"
@@ -311,6 +307,7 @@ export default function AdminTransactions() {
                             e.stopPropagation();
                             setSelectedTransaction(transaction);
                           }}
+                          data-testid={`button-view-${transaction.id}`}
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -324,9 +321,8 @@ export default function AdminTransactions() {
         </CardContent>
       </Card>
 
-      {/* Transaction Details Dialog */}
       <Dialog open={!!selectedTransaction && !refundDialogOpen} onOpenChange={() => setSelectedTransaction(null)}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" data-testid="dialog-transaction-details">
           <DialogHeader>
             <DialogTitle>Transaction Details</DialogTitle>
             <DialogDescription>
@@ -336,38 +332,37 @@ export default function AdminTransactions() {
 
           {selectedTransaction && (
             <div className="space-y-6">
-              {/* Transaction Info */}
               <div>
                 <h3 className="font-semibold mb-3">Transaction Information</h3>
                 <dl className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <dt className="text-gray-500">Transaction ID</dt>
-                    <dd className="font-mono text-xs mt-1">{selectedTransaction.id}</dd>
+                    <dt className="text-gray-500 dark:text-gray-400">Transaction ID</dt>
+                    <dd className="font-mono text-xs mt-1" data-testid="text-detail-id">{selectedTransaction.id}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Gateway Transaction ID</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Gateway Transaction ID</dt>
                     <dd className="font-mono text-xs mt-1">
                       {selectedTransaction.gatewayTransactionId || "N/A"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Platform Order ID</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Platform Order ID</dt>
                     <dd className="font-mono text-xs mt-1">
                       {selectedTransaction.platformOrderId || "N/A"}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Status</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Status</dt>
                     <dd className="mt-1">{getStatusBadge(selectedTransaction.status)}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Amount</dt>
-                    <dd className="font-semibold mt-1">
+                    <dt className="text-gray-500 dark:text-gray-400">Amount</dt>
+                    <dd className="font-semibold mt-1" data-testid="text-detail-amount">
                       ${parseFloat(selectedTransaction.amount).toFixed(2)} {selectedTransaction.currency}
                     </dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Refunded</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Refunded</dt>
                     <dd className="font-medium mt-1">
                       ${parseFloat(selectedTransaction.refundedAmount || "0").toFixed(2)}
                     </dd>
@@ -375,31 +370,29 @@ export default function AdminTransactions() {
                 </dl>
               </div>
 
-              {/* Customer Info */}
               <div>
                 <h3 className="font-semibold mb-3">Customer Information</h3>
                 <dl className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <dt className="text-gray-500">Name</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Name</dt>
                     <dd className="font-medium mt-1">{selectedTransaction.customerName || "N/A"}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Email</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Email</dt>
                     <dd className="font-medium mt-1">{selectedTransaction.customerEmail}</dd>
                   </div>
                 </dl>
               </div>
 
-              {/* Payment Method */}
               <div>
                 <h3 className="font-semibold mb-3">Payment Method</h3>
                 <dl className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <dt className="text-gray-500">Type</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Type</dt>
                     <dd className="font-medium mt-1 capitalize">{selectedTransaction.paymentMethod}</dd>
                   </div>
                   <div>
-                    <dt className="text-gray-500">Card</dt>
+                    <dt className="text-gray-500 dark:text-gray-400">Card</dt>
                     <dd className="font-medium mt-1 capitalize">
                       {selectedTransaction.cardBrand} ••••{selectedTransaction.cardLastFour}
                     </dd>
@@ -407,7 +400,6 @@ export default function AdminTransactions() {
                 </dl>
               </div>
 
-              {/* Actions */}
               {selectedTransaction.status === "success" && (
                 <div className="flex gap-2 pt-4 border-t">
                   <Button
@@ -415,6 +407,7 @@ export default function AdminTransactions() {
                       setRefundDialogOpen(true);
                       setRefundAmount(selectedTransaction.amount);
                     }}
+                    data-testid="button-refund"
                   >
                     <RotateCcw className="h-4 w-4 mr-2" />
                     Process Refund
@@ -426,9 +419,8 @@ export default function AdminTransactions() {
         </DialogContent>
       </Dialog>
 
-      {/* Refund Dialog */}
       <Dialog open={refundDialogOpen} onOpenChange={setRefundDialogOpen}>
-        <DialogContent>
+        <DialogContent data-testid="dialog-refund">
           <DialogHeader>
             <DialogTitle>Process Refund</DialogTitle>
             <DialogDescription>
@@ -447,8 +439,9 @@ export default function AdminTransactions() {
                 value={refundAmount}
                 onChange={(e) => setRefundAmount(e.target.value)}
                 className="mt-1"
+                data-testid="input-refund-amount"
               />
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                 Original amount: ${selectedTransaction ? parseFloat(selectedTransaction.amount).toFixed(2) : "0.00"}
               </p>
             </div>
@@ -461,15 +454,16 @@ export default function AdminTransactions() {
                 value={refundReason}
                 onChange={(e) => setRefundReason(e.target.value)}
                 className="mt-1"
+                data-testid="input-refund-reason"
               />
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setRefundDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setRefundDialogOpen(false)} data-testid="button-cancel-refund">
               Cancel
             </Button>
-            <Button onClick={handleRefund} disabled={refundMutation.isPending}>
+            <Button onClick={handleRefund} disabled={refundMutation.isPending} data-testid="button-submit-refund">
               {refundMutation.isPending ? "Processing..." : "Process Refund"}
             </Button>
           </DialogFooter>

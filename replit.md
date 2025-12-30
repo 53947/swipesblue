@@ -32,6 +32,7 @@ Payment Gateway
 Payment gateway application for swipesblue.com with Stripe-inspired financial interface using the fluorescent color palette.
 
 ## Recent Changes
+- 2025-12-30: Added comprehensive data-testid attributes across all admin UI pages for automated testing
 - 2025-10-24: Corrected company branding - SwipesBlue.com with proper color scheme (RED as primary)
 
 ## User Preferences

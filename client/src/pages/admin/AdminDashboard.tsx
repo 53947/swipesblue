@@ -11,8 +11,6 @@ import {
 import {
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -26,14 +24,14 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Stat Card Component
 function StatCard({
   title,
   value,
   subtitle,
   icon: Icon,
   trend,
-  loading
+  loading,
+  testId
 }: {
   title: string;
   value: string;
@@ -41,12 +39,13 @@ function StatCard({
   icon: any;
   trend?: { value: string; positive: boolean };
   loading?: boolean;
+  testId: string;
 }) {
   if (loading) {
     return (
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between pb-2">
-          <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+      <Card data-testid={`${testId}-loading`}>
+        <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+          <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">{title}</CardTitle>
           <Icon className="h-4 w-4 text-gray-400" />
         </CardHeader>
         <CardContent>
@@ -58,20 +57,21 @@ function StatCard({
   }
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
+    <Card data-testid={testId}>
+      <CardHeader className="flex flex-row items-center justify-between gap-2 pb-2">
+        <CardTitle className="text-sm font-medium text-gray-600 dark:text-gray-300">{title}</CardTitle>
         <Icon className="h-4 w-4 text-gray-400" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        <div className="text-2xl font-bold text-gray-900 dark:text-white" data-testid={`${testId}-value`}>{value}</div>
         <div className="flex items-center gap-2 mt-1">
-          <p className="text-xs text-gray-500">{subtitle}</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">{subtitle}</p>
           {trend && (
             <span
               className={`text-xs font-medium ${
                 trend.positive ? "text-green-600" : "text-red-600"
               }`}
+              data-testid={`${testId}-trend`}
             >
               {trend.value}
             </span>
@@ -83,7 +83,6 @@ function StatCard({
 }
 
 export default function AdminDashboard() {
-  // Fetch dashboard metrics
   const { data: metrics, isLoading: metricsLoading } = useQuery({
     queryKey: ["/api/admin/metrics"],
     queryFn: async () => {
@@ -93,9 +92,8 @@ export default function AdminDashboard() {
     },
   });
 
-  // Fetch recent transactions
   const { data: recentTransactions, isLoading: transactionsLoading } = useQuery({
-    queryKey: ["/api/v1/payments/platform/all", { limit: 10 }],
+    queryKey: ["/api/admin/transactions/recent"],
     queryFn: async () => {
       const response = await fetch("/api/admin/transactions/recent");
       if (!response.ok) throw new Error("Failed to fetch transactions");
@@ -103,7 +101,6 @@ export default function AdminDashboard() {
     },
   });
 
-  // Fetch payment volume chart data
   const { data: volumeData, isLoading: volumeLoading } = useQuery({
     queryKey: ["/api/admin/volume"],
     queryFn: async () => {
@@ -113,7 +110,6 @@ export default function AdminDashboard() {
     },
   });
 
-  // Mock data for demonstration (replace with actual API data)
   const platformBreakdown = metrics?.platformBreakdown || [
     { name: "BusinessBlueprint", value: 156000, color: "#3b82f6" },
     { name: "HostsBlue", value: 124000, color: "#8b5cf6" },
@@ -126,21 +122,20 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
+    <div className="space-y-8" data-testid="admin-dashboard">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-1">Overview of your payment gateway performance</p>
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">Dashboard</h1>
+        <p className="text-gray-600 dark:text-gray-300 mt-1">Overview of your payment gateway performance</p>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4" data-testid="stats-grid">
         <StatCard
           title="Total Processed"
           value={metrics?.totalProcessed || "$0"}
           subtitle="All time"
           icon={DollarSign}
           loading={metricsLoading}
+          testId="stat-total-processed"
         />
         <StatCard
           title="This Month"
@@ -149,6 +144,7 @@ export default function AdminDashboard() {
           icon={TrendingUp}
           trend={{ value: "+12.5%", positive: true }}
           loading={metricsLoading}
+          testId="stat-this-month"
         />
         <StatCard
           title="Success Rate"
@@ -157,6 +153,7 @@ export default function AdminDashboard() {
           icon={CheckCircle2}
           trend={{ value: "+2.1%", positive: true }}
           loading={metricsLoading}
+          testId="stat-success-rate"
         />
         <StatCard
           title="Active Merchants"
@@ -164,16 +161,15 @@ export default function AdminDashboard() {
           subtitle={`${merchantStats.pending} pending approval`}
           icon={Users}
           loading={metricsLoading}
+          testId="stat-active-merchants"
         />
       </div>
 
-      {/* Charts Row */}
       <div className="grid gap-4 md:grid-cols-2">
-        {/* Payment Volume Chart */}
-        <Card>
+        <Card data-testid="chart-payment-volume">
           <CardHeader>
             <CardTitle>Payment Volume</CardTitle>
-            <p className="text-sm text-gray-500">Last 30 days</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Last 30 days</p>
           </CardHeader>
           <CardContent>
             {volumeLoading ? (
@@ -210,11 +206,10 @@ export default function AdminDashboard() {
           </CardContent>
         </Card>
 
-        {/* Platform Breakdown */}
-        <Card>
+        <Card data-testid="chart-platform-breakdown">
           <CardHeader>
             <CardTitle>Platform Breakdown</CardTitle>
-            <p className="text-sm text-gray-500">Revenue by platform</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Revenue by platform</p>
           </CardHeader>
           <CardContent>
             {metricsLoading ? (
@@ -251,10 +246,8 @@ export default function AdminDashboard() {
         </Card>
       </div>
 
-      {/* Merchant Status & Recent Transactions */}
       <div className="grid gap-4 md:grid-cols-3">
-        {/* Merchant Status */}
-        <Card>
+        <Card data-testid="card-merchant-status">
           <CardHeader>
             <CardTitle>Merchant Status</CardTitle>
           </CardHeader>
@@ -264,30 +257,29 @@ export default function AdminDashboard() {
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span className="text-sm font-medium">Active</span>
               </div>
-              <span className="text-2xl font-bold">{merchantStats.active}</span>
+              <span className="text-2xl font-bold" data-testid="text-merchants-active">{merchantStats.active}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Clock className="h-4 w-4 text-yellow-600" />
                 <span className="text-sm font-medium">Pending</span>
               </div>
-              <span className="text-2xl font-bold">{merchantStats.pending}</span>
+              <span className="text-2xl font-bold" data-testid="text-merchants-pending">{merchantStats.pending}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <XCircle className="h-4 w-4 text-red-600" />
                 <span className="text-sm font-medium">Suspended</span>
               </div>
-              <span className="text-2xl font-bold">{merchantStats.suspended}</span>
+              <span className="text-2xl font-bold" data-testid="text-merchants-suspended">{merchantStats.suspended}</span>
             </div>
           </CardContent>
         </Card>
 
-        {/* Recent Transactions */}
-        <Card className="md:col-span-2">
+        <Card className="md:col-span-2" data-testid="card-recent-transactions">
           <CardHeader>
             <CardTitle>Recent Transactions</CardTitle>
-            <p className="text-sm text-gray-500">Last 10 transactions</p>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Last 10 transactions</p>
           </CardHeader>
           <CardContent>
             {transactionsLoading ? (
@@ -301,11 +293,12 @@ export default function AdminDashboard() {
                 {(recentTransactions || []).slice(0, 10).map((transaction: any) => (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-3 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+                    className="flex items-center justify-between p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+                    data-testid={`row-transaction-${transaction.id}`}
                   >
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-sm" data-testid={`text-customer-${transaction.id}`}>
                           {transaction.customerName || "Anonymous"}
                         </span>
                         <Badge
@@ -316,19 +309,20 @@ export default function AdminDashboard() {
                               ? "destructive"
                               : "secondary"
                           }
+                          data-testid={`badge-status-${transaction.id}`}
                         >
                           {transaction.status}
                         </Badge>
                       </div>
-                      <div className="text-xs text-gray-500 mt-1">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                         {transaction.platform} • {new Date(transaction.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold">
+                      <div className="font-semibold" data-testid={`text-amount-${transaction.id}`}>
                         ${parseFloat(transaction.amount).toFixed(2)}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-gray-500 dark:text-gray-400">
                         {transaction.cardBrand || "N/A"} •••• {transaction.cardLastFour || "****"}
                       </div>
                     </div>

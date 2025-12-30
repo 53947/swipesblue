@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -65,7 +65,6 @@ export default function Webhooks() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Form state
   const [platform, setPlatform] = useState("businessblueprint");
   const [url, setUrl] = useState("");
   const [selectedEvents, setSelectedEvents] = useState<string[]>([]);
@@ -79,7 +78,6 @@ export default function Webhooks() {
     { id: "merchant.suspended", label: "Merchant Suspended" },
   ];
 
-  // Fetch webhooks (requires API key - would need to add admin endpoint)
   const { data: webhooks, isLoading } = useQuery({
     queryKey: ["/api/admin/webhooks"],
     queryFn: async () => {
@@ -89,7 +87,6 @@ export default function Webhooks() {
     },
   });
 
-  // Fetch deliveries for selected webhook
   const { data: deliveries, isLoading: deliveriesLoading } = useQuery({
     queryKey: ["/api/admin/webhook-deliveries", selectedWebhook?.id],
     queryFn: async () => {
@@ -101,7 +98,6 @@ export default function Webhooks() {
     enabled: !!selectedWebhook && deliveriesDialogOpen,
   });
 
-  // Create webhook mutation
   const createMutation = useMutation({
     mutationFn: async (data: { platform: string; url: string; events: string[] }) => {
       const response = await fetch("/api/admin/webhooks/register", {
@@ -136,7 +132,6 @@ export default function Webhooks() {
     },
   });
 
-  // Test webhook mutation
   const testMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/admin/webhooks/${id}/test`, {
@@ -161,7 +156,6 @@ export default function Webhooks() {
     },
   });
 
-  // Delete webhook mutation
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/admin/webhooks/${id}`, {
@@ -235,7 +229,7 @@ export default function Webhooks() {
     });
   };
 
-  const getDeliveryStatusBadge = (status: string) => {
+  const getDeliveryStatusBadge = (status: string, deliveryId?: string) => {
     const config: Record<string, { variant: any; icon: any }> = {
       success: { variant: "default", icon: CheckCircle },
       failed: { variant: "destructive", icon: XCircle },
@@ -245,7 +239,7 @@ export default function Webhooks() {
     const { variant, icon: Icon } = config[status] || config.pending;
 
     return (
-      <Badge variant={variant} className="flex items-center gap-1 w-fit">
+      <Badge variant={variant} className="flex items-center gap-1 w-fit" data-testid={deliveryId ? `badge-status-${deliveryId}` : undefined}>
         <Icon className="h-3 w-3" />
         {status}
       </Badge>
@@ -253,21 +247,19 @@ export default function Webhooks() {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
+    <div className="space-y-6" data-testid="webhooks-page">
+      <div className="flex items-center justify-between gap-4 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Webhooks</h1>
-          <p className="text-gray-600 mt-1">Manage webhook endpoints for real-time event notifications</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white" data-testid="text-page-title">Webhooks</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-1">Manage webhook endpoints for real-time event notifications</p>
         </div>
-        <Button onClick={() => setCreateDialogOpen(true)}>
+        <Button onClick={() => setCreateDialogOpen(true)} data-testid="button-register-webhook">
           <Plus className="h-4 w-4 mr-2" />
           Register Webhook
         </Button>
       </div>
 
-      {/* Table */}
-      <Card>
+      <Card data-testid="card-webhooks-table">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <Table>
@@ -292,34 +284,34 @@ export default function Webhooks() {
                   ))
                 ) : (webhooks || []).length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={6} className="text-center py-8 text-gray-500" data-testid="text-no-webhooks">
                       No webhooks registered. Create one to get started.
                     </TableCell>
                   </TableRow>
                 ) : (
                   (webhooks || []).map((webhook: WebhookEndpoint) => (
-                    <TableRow key={webhook.id}>
+                    <TableRow key={webhook.id} data-testid={`row-webhook-${webhook.id}`}>
                       <TableCell>
-                        <Badge variant="outline">{webhook.platform}</Badge>
+                        <Badge variant="outline" data-testid={`badge-platform-${webhook.id}`}>{webhook.platform}</Badge>
                       </TableCell>
-                      <TableCell className="font-mono text-xs max-w-xs truncate">
+                      <TableCell className="font-mono text-xs max-w-xs truncate" data-testid={`text-url-${webhook.id}`}>
                         {webhook.url}
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-wrap gap-1">
                           {webhook.events.map((event: string) => (
-                            <Badge key={event} variant="secondary" className="text-xs">
+                            <Badge key={event} variant="secondary" className="text-xs" data-testid={`badge-event-${webhook.id}-${event.replace('.', '-')}`}>
                               {event}
                             </Badge>
                           ))}
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={webhook.isActive ? "default" : "secondary"}>
+                        <Badge variant={webhook.isActive ? "default" : "secondary"} data-testid={`badge-status-${webhook.id}`}>
                           {webhook.isActive ? "Active" : "Inactive"}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm text-gray-600">
+                      <TableCell className="text-sm text-gray-600 dark:text-gray-300">
                         {new Date(webhook.createdAt).toLocaleDateString()}
                       </TableCell>
                       <TableCell>
@@ -329,6 +321,7 @@ export default function Webhooks() {
                             size="sm"
                             onClick={() => testMutation.mutate(webhook.id)}
                             disabled={testMutation.isPending}
+                            data-testid={`button-test-${webhook.id}`}
                           >
                             <PlayCircle className="h-4 w-4" />
                           </Button>
@@ -339,6 +332,7 @@ export default function Webhooks() {
                               setSelectedWebhook(webhook);
                               setDeliveriesDialogOpen(true);
                             }}
+                            data-testid={`button-deliveries-${webhook.id}`}
                           >
                             <Eye className="h-4 w-4" />
                           </Button>
@@ -347,6 +341,7 @@ export default function Webhooks() {
                             size="sm"
                             onClick={() => deleteMutation.mutate(webhook.id)}
                             disabled={deleteMutation.isPending}
+                            data-testid={`button-delete-${webhook.id}`}
                           >
                             <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
@@ -361,9 +356,8 @@ export default function Webhooks() {
         </CardContent>
       </Card>
 
-      {/* Create Webhook Dialog */}
       <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
-        <DialogContent>
+        <DialogContent data-testid="dialog-register-webhook">
           <DialogHeader>
             <DialogTitle>Register Webhook</DialogTitle>
             <DialogDescription>
@@ -375,7 +369,7 @@ export default function Webhooks() {
             <div>
               <Label htmlFor="platform">Platform</Label>
               <Select value={platform} onValueChange={setPlatform}>
-                <SelectTrigger className="mt-1">
+                <SelectTrigger className="mt-1" data-testid="select-platform">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -395,6 +389,7 @@ export default function Webhooks() {
                 value={url}
                 onChange={(e) => setUrl(e.target.value)}
                 className="mt-1"
+                data-testid="input-webhook-url"
               />
             </div>
 
@@ -407,6 +402,7 @@ export default function Webhooks() {
                       id={event.id}
                       checked={selectedEvents.includes(event.id)}
                       onCheckedChange={() => toggleEvent(event.id)}
+                      data-testid={`checkbox-${event.id}`}
                     />
                     <Label htmlFor={event.id} className="cursor-pointer">
                       {event.label}
@@ -418,19 +414,18 @@ export default function Webhooks() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCreateDialogOpen(false)}>
+            <Button variant="outline" onClick={() => setCreateDialogOpen(false)} data-testid="button-cancel">
               Cancel
             </Button>
-            <Button onClick={handleCreate} disabled={createMutation.isPending}>
+            <Button onClick={handleCreate} disabled={createMutation.isPending} data-testid="button-submit">
               {createMutation.isPending ? "Registering..." : "Register Webhook"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* New Webhook Result Dialog */}
       <Dialog open={!!newWebhookResult} onOpenChange={() => setNewWebhookResult(null)}>
-        <DialogContent>
+        <DialogContent data-testid="dialog-webhook-created">
           <DialogHeader>
             <DialogTitle>Webhook Registered</DialogTitle>
             <DialogDescription>
@@ -440,10 +435,10 @@ export default function Webhooks() {
 
           {newWebhookResult && (
             <div className="space-y-4">
-              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
                 <div className="flex items-start gap-2">
                   <CheckCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
-                  <div className="text-sm text-yellow-800">
+                  <div className="text-sm text-yellow-800 dark:text-yellow-200">
                     <p className="font-medium">Important: Save this secret now</p>
                     <p className="mt-1">
                       Use this secret to verify webhook signatures. It will only be shown once.
@@ -455,20 +450,21 @@ export default function Webhooks() {
               <div>
                 <Label>Webhook Secret</Label>
                 <div className="flex items-center gap-2 mt-1">
-                  <code className="flex-1 text-xs font-mono bg-gray-100 p-2 rounded break-all">
+                  <code className="flex-1 text-xs font-mono bg-gray-100 dark:bg-gray-800 p-2 rounded break-all" data-testid="text-webhook-secret">
                     {newWebhookResult.secret}
                   </code>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => copyToClipboard(newWebhookResult.secret)}
+                    data-testid="button-copy-secret"
                   >
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
 
-              <div className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600 dark:text-gray-300">
                 <p className="font-medium mb-2">Webhook Details:</p>
                 <dl className="space-y-1">
                   <div className="flex justify-between">
@@ -483,7 +479,7 @@ export default function Webhooks() {
                     <dt className="mb-1">Events:</dt>
                     <dd className="flex flex-wrap gap-1">
                       {newWebhookResult.events.map((event: string) => (
-                        <Badge key={event} variant="secondary" className="text-xs">
+                        <Badge key={event} variant="secondary" className="text-xs" data-testid={`badge-new-event-${event.replace('.', '-')}`}>
                           {event}
                         </Badge>
                       ))}
@@ -495,14 +491,13 @@ export default function Webhooks() {
           )}
 
           <DialogFooter>
-            <Button onClick={() => setNewWebhookResult(null)}>Done</Button>
+            <Button onClick={() => setNewWebhookResult(null)} data-testid="button-done">Done</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* Deliveries Dialog */}
       <Dialog open={deliveriesDialogOpen} onOpenChange={setDeliveriesDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto" data-testid="dialog-deliveries">
           <DialogHeader>
             <DialogTitle>Webhook Deliveries</DialogTitle>
             <DialogDescription>
@@ -512,9 +507,9 @@ export default function Webhooks() {
 
           {selectedWebhook && (
             <div className="space-y-4">
-              <div className="bg-gray-50 p-3 rounded-lg text-sm">
+              <div className="bg-gray-50 dark:bg-gray-800 p-3 rounded-lg text-sm">
                 <div className="font-medium mb-1">{selectedWebhook.url}</div>
-                <div className="text-gray-600">{selectedWebhook.platform}</div>
+                <div className="text-gray-600 dark:text-gray-300">{selectedWebhook.platform}</div>
               </div>
 
               <div>
@@ -525,7 +520,7 @@ export default function Webhooks() {
                     ))}
                   </div>
                 ) : (deliveries || []).length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500" data-testid="text-no-deliveries">
                     No deliveries yet
                   </div>
                 ) : (
@@ -533,29 +528,30 @@ export default function Webhooks() {
                     {(deliveries || []).map((delivery: WebhookDelivery) => (
                       <div
                         key={delivery.id}
-                        className="border border-gray-200 rounded-lg p-3"
+                        className="border border-gray-200 dark:border-gray-700 rounded-lg p-3"
+                        data-testid={`row-delivery-${delivery.id}`}
                       >
                         <div className="flex items-center justify-between mb-2">
                           <div className="flex items-center gap-2">
-                            <Badge variant="outline">{delivery.event}</Badge>
-                            {getDeliveryStatusBadge(delivery.status)}
+                            <Badge variant="outline" data-testid={`badge-event-delivery-${delivery.id}`}>{delivery.event}</Badge>
+                            {getDeliveryStatusBadge(delivery.status, delivery.id)}
                           </div>
-                          <div className="text-xs text-gray-500">
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
                             {new Date(delivery.createdAt).toLocaleString()}
                           </div>
                         </div>
-                        <div className="text-sm text-gray-600 grid grid-cols-2 gap-2">
+                        <div className="text-sm text-gray-600 dark:text-gray-300 grid grid-cols-2 gap-2">
                           <div>
-                            Attempts: <span className="font-medium">{delivery.attempts}</span>
+                            Attempts: <span className="font-medium" data-testid={`text-attempts-${delivery.id}`}>{delivery.attempts}</span>
                           </div>
                           {delivery.responseStatus && (
                             <div>
-                              Status: <span className="font-medium">{delivery.responseStatus}</span>
+                              Status: <span className="font-medium" data-testid={`text-response-status-${delivery.id}`}>{delivery.responseStatus}</span>
                             </div>
                           )}
                         </div>
                         {delivery.errorMessage && (
-                          <div className="mt-2 text-xs text-red-600">
+                          <div className="mt-2 text-xs text-red-600 dark:text-red-400" data-testid={`text-error-${delivery.id}`}>
                             {delivery.errorMessage}
                           </div>
                         )}
