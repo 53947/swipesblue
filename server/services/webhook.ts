@@ -217,7 +217,6 @@ export class WebhookService {
           attempts,
           responseStatus: response.status,
           responseBody: responseText,
-          updatedAt: new Date(),
         });
         console.log(`Webhook delivered successfully to ${endpoint.url} (attempt ${attempts})`);
       } else {
@@ -252,7 +251,6 @@ export class WebhookService {
         responseStatus,
         errorMessage,
         nextRetry: null,
-        updatedAt: new Date(),
       });
       console.error(
         `Webhook delivery failed permanently after ${attempts} attempts: ${errorMessage}`
@@ -273,7 +271,6 @@ export class WebhookService {
       responseStatus,
       errorMessage,
       nextRetry,
-      updatedAt: new Date(),
     });
 
     console.log(
@@ -305,7 +302,6 @@ export class WebhookService {
             status: "failed",
             errorMessage: "Webhook endpoint is inactive or was deleted",
             nextRetry: null,
-            updatedAt: new Date(),
           });
           continue;
         }
