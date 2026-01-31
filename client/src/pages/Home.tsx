@@ -54,22 +54,68 @@ const demos = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section - Stripe-inspired with colorful gradient */}
+      {/* Hero Section with dynamic swoosh */}
       <section className="relative overflow-hidden bg-white min-h-[600px]">
-        {/* Colorful abstract gradient background - right side */}
-        <div className="absolute right-0 top-0 w-1/2 h-full overflow-hidden hidden lg:block">
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: `
-                radial-gradient(ellipse 80% 60% at 70% 20%, rgba(168, 85, 247, 0.4) 0%, transparent 50%),
-                radial-gradient(ellipse 60% 80% at 90% 60%, rgba(251, 146, 60, 0.5) 0%, transparent 50%),
-                radial-gradient(ellipse 70% 50% at 50% 80%, rgba(236, 72, 153, 0.4) 0%, transparent 50%),
-                radial-gradient(ellipse 50% 60% at 30% 40%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
-                linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(251, 191, 36, 0.3) 50%, rgba(236, 72, 153, 0.2) 100%)
-              `
-            }}
-          />
+        {/* Dynamic Swoosh - flowing diagonal wave using brand colors */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <svg 
+            className="absolute right-0 top-0 h-full w-3/4 lg:w-2/3"
+            viewBox="0 0 800 600" 
+            preserveAspectRatio="xMaxYMid slice"
+            fill="none"
+          >
+            <defs>
+              <linearGradient id="swoosh1" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#E00420" stopOpacity="0.9" />
+                <stop offset="30%" stopColor="#A855F7" stopOpacity="0.8" />
+                <stop offset="60%" stopColor="#0000FF" stopOpacity="0.85" />
+                <stop offset="100%" stopColor="#1844A6" stopOpacity="0.9" />
+              </linearGradient>
+              <linearGradient id="swoosh2" x1="0%" y1="100%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#1844A6" stopOpacity="0.7" />
+                <stop offset="40%" stopColor="#0000FF" stopOpacity="0.75" />
+                <stop offset="70%" stopColor="#064A6C" stopOpacity="0.8" />
+                <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.6" />
+              </linearGradient>
+              <linearGradient id="swoosh3" x1="100%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.8" />
+                <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.7" />
+                <stop offset="100%" stopColor="#E00420" stopOpacity="0.6" />
+              </linearGradient>
+              <linearGradient id="swoosh4" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stopColor="#A855F7" stopOpacity="0.5" />
+                <stop offset="50%" stopColor="#EC4899" stopOpacity="0.6" />
+                <stop offset="100%" stopColor="#E00420" stopOpacity="0.5" />
+              </linearGradient>
+            </defs>
+            
+            {/* Main red-purple-blue swoosh */}
+            <path 
+              d="M400,0 Q600,100 700,200 Q800,300 750,400 Q700,500 800,600 L800,600 L800,0 Z" 
+              fill="url(#swoosh1)"
+            />
+            
+            {/* Blue-teal swoosh */}
+            <path 
+              d="M500,0 Q650,150 720,280 Q790,400 700,520 Q650,580 800,600 L800,600 L800,0 Z" 
+              fill="url(#swoosh2)"
+              opacity="0.8"
+            />
+            
+            {/* Yellow-orange accent swoosh */}
+            <path 
+              d="M550,0 Q700,80 750,180 Q800,280 780,380 Q760,480 800,550 L800,0 Z" 
+              fill="url(#swoosh3)"
+              opacity="0.7"
+            />
+            
+            {/* Purple-pink flowing accent */}
+            <path 
+              d="M600,100 Q720,200 780,320 Q800,400 790,480 Q780,560 800,600 L800,100 Z" 
+              fill="url(#swoosh4)"
+              opacity="0.5"
+            />
+          </svg>
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
@@ -77,28 +123,30 @@ export default function Home() {
             {/* Left side - Content */}
             <div className="space-y-8 text-left">
               <p className="text-sm font-medium text-gray-500 tracking-wide">
-                Payments processed on SwipesBlue: <span className="text-swipes-blue">$2.4M+</span>
+                Payments processed on SwipesBlue: <span className="text-swipes-blue font-semibold">$2.4M+</span>
               </p>
               
               <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
-                Financial infrastructure to{" "}
-                <span className="bg-gradient-to-r from-swipes-red via-swipes-blue to-green-500 bg-clip-text text-transparent">
-                  grow your revenue
-                </span>
+                Built for businesses to grow
               </h1>
               
-              <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-relaxed">
-                Accept payments, offer financial services, and implement custom revenue models—from your first transaction to your billionth.
+              <p className="text-xl md:text-2xl font-medium text-swipes-red">
+                Less fees. More revenue.
+              </p>
+              
+              <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
+                Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
               </p>
 
               <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
                 <Link href="/shoppingcart">
                   <Button 
                     size="lg" 
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full shadow-md transition-all font-medium"
+                    className="bg-swipes-red hover:bg-swipes-red/90 text-white px-6 py-3 shadow-md transition-all font-medium"
+                    style={{ borderRadius: '7px' }}
                     data-testid="button-hero-get-started"
                   >
-                    Get started
+                    Get Started
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
@@ -106,28 +154,38 @@ export default function Home() {
                   <Button 
                     size="lg" 
                     variant="outline" 
-                    className="border-gray-300 text-indigo-600 hover:bg-gray-50 px-6 py-3 rounded-full font-medium"
+                    className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 font-medium"
+                    style={{ borderRadius: '7px' }}
                     data-testid="button-hero-documentation"
                   >
-                    Contact sales
+                    View Documentation
                   </Button>
                 </Link>
               </div>
             </div>
 
-            {/* Right side - Gradient visual (mobile fallback) */}
+            {/* Right side - Mobile swoosh fallback */}
             <div className="lg:hidden mt-12">
-              <div 
-                className="h-64 rounded-2xl"
-                style={{
-                  background: `
-                    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(168, 85, 247, 0.4) 0%, transparent 50%),
-                    radial-gradient(ellipse 60% 80% at 90% 60%, rgba(251, 146, 60, 0.5) 0%, transparent 50%),
-                    radial-gradient(ellipse 70% 50% at 50% 80%, rgba(236, 72, 153, 0.4) 0%, transparent 50%),
-                    linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(251, 191, 36, 0.3) 50%, rgba(236, 72, 153, 0.2) 100%)
-                  `
-                }}
-              />
+              <svg 
+                className="w-full h-48"
+                viewBox="0 0 400 200" 
+                preserveAspectRatio="xMidYMid slice"
+                fill="none"
+              >
+                <defs>
+                  <linearGradient id="swooshMobile" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#E00420" stopOpacity="0.9" />
+                    <stop offset="25%" stopColor="#FBBF24" stopOpacity="0.8" />
+                    <stop offset="50%" stopColor="#A855F7" stopOpacity="0.85" />
+                    <stop offset="75%" stopColor="#0000FF" stopOpacity="0.9" />
+                    <stop offset="100%" stopColor="#064A6C" stopOpacity="0.8" />
+                  </linearGradient>
+                </defs>
+                <path 
+                  d="M0,100 Q100,20 200,80 Q300,140 400,60 L400,200 L0,200 Z" 
+                  fill="url(#swooshMobile)"
+                />
+              </svg>
             </div>
           </div>
         </div>

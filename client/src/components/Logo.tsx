@@ -14,9 +14,9 @@ export default function Logo({
   showUrl = false
 }: LogoProps) {
   const logoSizes = {
-    small: "h-6 w-auto",
-    default: "h-8 w-auto",
-    large: "h-12 w-auto"
+    small: "h-8 w-auto",
+    default: "h-10 w-auto",
+    large: "h-14 w-auto"
   };
 
   const logoSize = logoSizes[variant];
