@@ -56,23 +56,18 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-swipes-blue-deep via-swipes-blue-deep to-swipes-teal">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(168,85,247,0.15),transparent_50%)]" />
+      <section className="relative overflow-hidden bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
           <div className="text-center space-y-8">
-            <div className="flex justify-center mb-8">
-              <Logo showIcon variant="large" />
-            </div>
-            
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white">
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">
               Built for businesses to grow
             </h1>
             
-            <p className="text-xl md:text-2xl font-medium text-swipes-purple">
+            <p className="text-xl md:text-2xl font-medium text-swipes-red">
               Less fees. More revenue.
             </p>
             
-            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
               Simple payment processing for small businesses and developers.
               Accept cards, manage transactions, and scale without complexity.
             </p>
@@ -81,7 +76,7 @@ export default function Home() {
               <Link href="/shoppingcart">
                 <Button 
                   size="lg" 
-                  className="bg-swipes-red hover:bg-swipes-red/90 text-white px-8 shadow-lg hover:shadow-cta-glow transition-all"
+                  className="bg-swipes-blue hover:bg-swipes-blue/90 text-white px-8 shadow-lg transition-all"
                   data-testid="button-hero-get-started"
                 >
                   Get Started
@@ -92,7 +87,7 @@ export default function Home() {
                 <Button 
                   size="lg" 
                   variant="outline" 
-                  className="border-white/30 text-white hover:bg-white/10 px-8"
+                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8"
                   data-testid="button-hero-documentation"
                 >
                   View Documentation
@@ -100,17 +95,17 @@ export default function Home() {
               </Link>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-300">
+            <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-500">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-green-400" />
+                <Shield className="h-4 w-4 text-green-600" />
                 <span>PCI Compliant</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-swipes-orange" />
+                <Zap className="h-4 w-4 text-swipes-blue" />
                 <span>Real-time Processing</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-swipes-purple" />
+                <Clock className="h-4 w-4 text-swipes-red" />
                 <span>24/7 Support</span>
               </div>
             </div>
