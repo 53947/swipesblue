@@ -35,65 +35,67 @@ export default function Header() {
       }`}
       data-testid="header"
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <div className="flex items-center gap-8">
-            <Link href="/" className="flex-shrink-0" data-testid="link-logo-home">
-              <Logo showIcon variant="default" />
-            </Link>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+        {/* Left: Logo */}
+        <Link href="/" className="flex items-center h-10" data-testid="link-logo-home">
+          <Logo showIcon variant="default" />
+        </Link>
 
-            <nav className="hidden md:flex items-center gap-6">
-              {navItems.map((item) => {
-                const isActive = location === item.path;
-                
-                return (
-                  <Link
-                    key={item.path}
-                    href={item.path}
-                    data-testid={`link-nav-${item.label.toLowerCase()}`}
-                  >
-                    <span className={`text-[15px] transition-colors hover:text-swipes-blue-deep ${
-                      isActive ? "text-swipes-blue-deep font-medium" : "text-swipes-gray"
-                    }`}>
-                      {item.label}
-                    </span>
-                  </Link>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="hidden md:flex items-center gap-4">
-            <Link href="/admin">
-              <span 
-                className="text-[15px] text-swipes-gray hover:text-swipes-blue-deep transition-colors"
-                data-testid="link-sign-in"
+        {/* Center: Navigation */}
+        <nav className="hidden md:flex items-center gap-6 h-10">
+          {navItems.map((item) => {
+            const isActive = location === item.path;
+            
+            return (
+              <Link
+                key={item.path}
+                href={item.path}
+                className="flex items-center h-10"
+                data-testid={`link-nav-${item.label.toLowerCase()}`}
               >
-                Sign in
-              </span>
-            </Link>
-            <Link href="/shoppingcart">
-              <Button 
-                className="bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
-                data-testid="button-get-started"
-              >
-                Get Started
-              </Button>
-            </Link>
-          </div>
+                <span className={`text-[15px] leading-10 transition-colors hover:text-swipes-blue-deep ${
+                  isActive ? "text-swipes-blue-deep font-medium" : "text-swipes-gray"
+                }`}>
+                  {item.label}
+                </span>
+              </Link>
+            );
+          })}
+        </nav>
 
-          <Button
-            size="icon"
-            variant="ghost"
-            className="md:hidden"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            data-testid="button-mobile-menu"
-          >
-            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-          </Button>
+        {/* Right: Sign in + Button */}
+        <div className="hidden md:flex items-center gap-4 h-10">
+          <Link href="/admin" className="flex items-center h-10">
+            <span 
+              className="text-[15px] leading-10 text-swipes-gray hover:text-swipes-blue-deep transition-colors"
+              data-testid="link-sign-in"
+            >
+              Sign in
+            </span>
+          </Link>
+          <Link href="/shoppingcart" className="flex items-center h-10">
+            <Button 
+              className="bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
+              data-testid="button-get-started"
+            >
+              Get Started
+            </Button>
+          </Link>
         </div>
 
-        {mobileMenuOpen && (
+        {/* Mobile menu button */}
+        <Button
+          size="icon"
+          variant="ghost"
+          className="md:hidden"
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          data-testid="button-mobile-menu"
+        >
+          {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+        </Button>
+      </div>
+
+      {mobileMenuOpen && (
           <div className="md:hidden py-4 border-t border-gray-100">
             <nav className="flex flex-col gap-4">
               {navItems.map((item) => {
@@ -127,7 +129,6 @@ export default function Header() {
             </nav>
           </div>
         )}
-      </div>
     </header>
   );
 }
