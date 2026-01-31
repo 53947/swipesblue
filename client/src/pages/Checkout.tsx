@@ -170,14 +170,20 @@ export default function Checkout() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-4xl font-bold" style={{ color: "#00FF40" }}>/</span>
-          <h1 className="text-4xl font-bold" style={{ color: "#09080e" }}>checkout</h1>
+    <div className="min-h-screen bg-white">
+      {/* Demo Banner */}
+      <div className="bg-swipes-blue-deep text-white py-3 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
+          <span className="bg-swipes-purple/20 text-swipes-purple px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
+          <span>This is a live demo of the SwipesBlue checkout experience</span>
         </div>
-        <p className="text-muted-foreground">Complete your secure purchase</p>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 text-swipes-black">Checkout</h1>
+          <p className="text-swipes-gray">Complete your secure purchase</p>
+        </div>
 
       <CheckoutProgress currentStep={currentStep} />
 
@@ -334,6 +340,7 @@ export default function Checkout() {
             showCta={false}
           />
         </div>
+      </div>
       </div>
     </div>
   );

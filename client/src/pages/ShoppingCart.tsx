@@ -51,14 +51,20 @@ export default function ShoppingCart() {
   ) || 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-4">
-          <span className="text-4xl font-bold" style={{ color: "#00FF40" }}>/</span>
-          <h1 className="text-4xl font-bold" style={{ color: "#09080e" }}>shoppingcart</h1>
+    <div className="min-h-screen bg-white">
+      {/* Demo Banner */}
+      <div className="bg-swipes-blue-deep text-white py-3 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
+          <span className="bg-swipes-purple/20 text-swipes-purple px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
+          <span>This is a live demo of the SwipesBlue shopping cart</span>
         </div>
-        <p className="text-muted-foreground">Review your items and proceed to checkout</p>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 text-swipes-black">Shopping Cart</h1>
+          <p className="text-swipes-gray">Review your items and proceed to checkout</p>
+        </div>
 
       {isLoading ? (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -112,6 +118,7 @@ export default function ShoppingCart() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

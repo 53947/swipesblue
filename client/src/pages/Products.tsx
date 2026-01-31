@@ -55,11 +55,20 @@ export default function Products() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2" style={{ color: "#0000FF" }}>Products</h1>
-        <p className="text-muted-foreground">Browse our e-commerce solutions and add-ons</p>
+    <div className="min-h-screen bg-white">
+      {/* Demo Banner */}
+      <div className="bg-swipes-blue-deep text-white py-3 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
+          <span className="bg-swipes-purple/20 text-swipes-purple px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
+          <span>This is a live demo of the SwipesBlue product catalog</span>
+        </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 text-swipes-black">Products</h1>
+          <p className="text-swipes-gray">Browse our e-commerce solutions and add-ons</p>
+        </div>
 
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -78,7 +87,7 @@ export default function Products() {
             variant={selectedCategory === null ? "default" : "outline"}
             onClick={() => setSelectedCategory(null)}
             data-testid="button-category-all"
-            style={selectedCategory === null ? { backgroundColor: "#0000FF", color: "white" } : {}}
+            className={selectedCategory === null ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" : "border-swipes-blue-deep text-swipes-blue-deep"}
           >
             All
           </Button>
@@ -88,7 +97,7 @@ export default function Products() {
               variant={selectedCategory === category ? "default" : "outline"}
               onClick={() => setSelectedCategory(category as string)}
               data-testid={`button-category-${category?.toLowerCase().replace(/\s/g, '-')}`}
-              style={selectedCategory === category ? { backgroundColor: "#0000FF", color: "white" } : {}}
+              className={selectedCategory === category ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" : "border-swipes-blue-deep text-swipes-blue-deep"}
             >
               {category}
             </Button>
@@ -132,7 +141,7 @@ export default function Products() {
               <CardContent className="flex-1">
                 <p className="text-sm text-muted-foreground mb-4">{product.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold" style={{ color: "#0000FF" }} data-testid={`price-${product.id}`}>
+                  <span className="text-2xl font-bold text-swipes-red" data-testid={`price-${product.id}`}>
                     ${parseFloat(product.price).toFixed(2)}
                   </span>
                   {product.stock !== undefined && product.stock > 0 && (
@@ -144,11 +153,10 @@ export default function Products() {
               </CardContent>
               <CardFooter>
                 <Button
-                  className="w-full"
+                  className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white"
                   onClick={() => handleAddToCart(product.id)}
                   disabled={product.stock === 0}
                   data-testid={`button-add-to-cart-${product.id}`}
-                  style={{ backgroundColor: "#0000FF", color: "white" }}
                 >
                   <ShoppingCartIcon className="h-4 w-4 mr-2" />
                   {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
@@ -163,6 +171,7 @@ export default function Products() {
           <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
         </div>
       )}
+      </div>
     </div>
   );
 }

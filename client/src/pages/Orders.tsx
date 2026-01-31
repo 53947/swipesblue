@@ -40,11 +40,20 @@ export default function Orders() {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2" style={{ color: "#0000FF" }}>My Orders</h1>
-        <p className="text-muted-foreground">View your order history and track shipments</p>
+    <div className="min-h-screen bg-white">
+      {/* Demo Banner */}
+      <div className="bg-swipes-blue-deep text-white py-3 px-4">
+        <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
+          <span className="bg-swipes-purple/20 text-swipes-purple px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
+          <span>This is a live demo of the SwipesBlue order management</span>
+        </div>
       </div>
+
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <h1 className="text-4xl font-bold mb-2 text-swipes-black">My Orders</h1>
+          <p className="text-swipes-gray">View your order history and track shipments</p>
+        </div>
 
       {isLoading ? (
         <div className="space-y-4">
@@ -135,6 +144,7 @@ export default function Orders() {
           ))}
         </div>
       )}
+      </div>
     </div>
   );
 }
