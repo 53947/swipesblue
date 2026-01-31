@@ -54,151 +54,26 @@ const demos = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section with stadium-style marching colored rods */}
+      {/* Hero Section with marching colored rods image */}
       <section className="relative overflow-hidden bg-white min-h-[600px]">
-        {/* Stadium-style Marching Rods - wraps around content area */}
+        {/* Marching Colored Rods - using actual image */}
         <div className="absolute inset-0 pointer-events-none">
-          {/* Main stadium curve - bottom arc of rods */}
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-[70%]"
+          <img 
+            src="/attached_assets/marching_colors_1769856782721.png"
+            alt=""
+            className="absolute right-0 bottom-0 w-full h-full object-cover object-left-bottom"
             style={{
-              background: 'linear-gradient(to top, transparent 0%, transparent 100%)'
+              objectPosition: 'left bottom'
             }}
-          >
-            <svg 
-              className="absolute bottom-0 left-0 w-full h-full"
-              viewBox="0 0 1400 500" 
-              preserveAspectRatio="xMidYMax slice"
-              fill="none"
-            >
-              <defs>
-                {/* Rod gradients for 3D cylindrical effect */}
-                <linearGradient id="rodBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#3366FF" />
-                  <stop offset="50%" stopColor="#0000FF" />
-                  <stop offset="100%" stopColor="#000099" />
-                </linearGradient>
-                <linearGradient id="rodTeal" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#0EA5E9" />
-                  <stop offset="50%" stopColor="#064A6C" />
-                  <stop offset="100%" stopColor="#042F44" />
-                </linearGradient>
-                <linearGradient id="rodPurple" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#D8B4FE" />
-                  <stop offset="50%" stopColor="#A855F7" />
-                  <stop offset="100%" stopColor="#6B21A8" />
-                </linearGradient>
-                <linearGradient id="rodPink" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#FBCFE8" />
-                  <stop offset="50%" stopColor="#EC4899" />
-                  <stop offset="100%" stopColor="#9D174D" />
-                </linearGradient>
-                <linearGradient id="rodRed" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#FCA5A5" />
-                  <stop offset="50%" stopColor="#E00420" />
-                  <stop offset="100%" stopColor="#7F1D1D" />
-                </linearGradient>
-                <linearGradient id="rodOrange" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#FDBA74" />
-                  <stop offset="50%" stopColor="#F97316" />
-                  <stop offset="100%" stopColor="#9A3412" />
-                </linearGradient>
-                <linearGradient id="rodYellow" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#FEF08A" />
-                  <stop offset="50%" stopColor="#FBBF24" />
-                  <stop offset="100%" stopColor="#B45309" />
-                </linearGradient>
-                <linearGradient id="rodDeepBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="#60A5FA" />
-                  <stop offset="50%" stopColor="#1844A6" />
-                  <stop offset="100%" stopColor="#1E3A5F" />
-                </linearGradient>
-              </defs>
-              
-              {/* Stadium curve - rods arranged in arc from bottom-left to bottom-right */}
-              {/* The arc curves up in the center where the content sits */}
-              
-              {/* Back row - smallest, furthest (blues/teals) */}
-              {[...Array(70)].map((_, i) => {
-                const t = i / 69;
-                const x = 50 + t * 1300;
-                const curveHeight = Math.sin(t * Math.PI) * 180;
-                const baseY = 500;
-                const height = 40 + curveHeight * 0.4 + (Math.random() * 15);
-                const y = baseY - height - curveHeight * 0.3;
-                const gradients = ['rodBlue', 'rodTeal', 'rodDeepBlue'];
-                const gradient = gradients[i % 3];
-                return <rect key={`b1-${i}`} x={x} y={y} width="3" height={height} rx="1.5" fill={`url(#${gradient})`} opacity={0.4 + t * 0.1} />;
-              })}
-              
-              {/* Middle-back row (purples) */}
-              {[...Array(80)].map((_, i) => {
-                const t = i / 79;
-                const x = 30 + t * 1340;
-                const curveHeight = Math.sin(t * Math.PI) * 160;
-                const baseY = 500;
-                const height = 60 + curveHeight * 0.5 + (Math.random() * 20);
-                const y = baseY - height - curveHeight * 0.2;
-                const gradients = ['rodPurple', 'rodPink', 'rodPurple'];
-                const gradient = gradients[i % 3];
-                return <rect key={`b2-${i}`} x={x} y={y} width="4" height={height} rx="2" fill={`url(#${gradient})`} opacity={0.5 + t * 0.15} />;
-              })}
-              
-              {/* Middle row (reds/pinks) */}
-              {[...Array(90)].map((_, i) => {
-                const t = i / 89;
-                const x = 15 + t * 1370;
-                const curveHeight = Math.sin(t * Math.PI) * 140;
-                const baseY = 500;
-                const height = 80 + curveHeight * 0.6 + (Math.random() * 25);
-                const y = baseY - height - curveHeight * 0.15;
-                const gradients = ['rodRed', 'rodPink', 'rodOrange'];
-                const gradient = gradients[i % 3];
-                return <rect key={`b3-${i}`} x={x} y={y} width="5" height={height} rx="2.5" fill={`url(#${gradient})`} opacity={0.6 + t * 0.2} />;
-              })}
-              
-              {/* Front-middle row (oranges/yellows) */}
-              {[...Array(100)].map((_, i) => {
-                const t = i / 99;
-                const x = 5 + t * 1390;
-                const curveHeight = Math.sin(t * Math.PI) * 120;
-                const baseY = 500;
-                const height = 100 + curveHeight * 0.7 + (Math.random() * 30);
-                const y = baseY - height - curveHeight * 0.1;
-                const gradients = ['rodOrange', 'rodYellow', 'rodRed'];
-                const gradient = gradients[i % 3];
-                return <rect key={`b4-${i}`} x={x} y={y} width="6" height={height} rx="3" fill={`url(#${gradient})`} opacity={0.7 + t * 0.2} />;
-              })}
-              
-              {/* Front row - tallest, closest (mixed vibrant) */}
-              {[...Array(110)].map((_, i) => {
-                const t = i / 109;
-                const x = t * 1400;
-                const curveHeight = Math.sin(t * Math.PI) * 100;
-                const baseY = 500;
-                const height = 130 + curveHeight * 0.8 + (Math.random() * 40);
-                const y = baseY - height;
-                const gradients = ['rodBlue', 'rodPurple', 'rodRed', 'rodOrange', 'rodYellow', 'rodTeal', 'rodPink', 'rodDeepBlue'];
-                const gradient = gradients[i % 8];
-                return <rect key={`b5-${i}`} x={x} y={y} width="7" height={height} rx="3.5" fill={`url(#${gradient})`} opacity={0.85} />;
-              })}
-              
-              {/* Sparkle effects */}
-              {[...Array(25)].map((_, i) => {
-                const x = 100 + (i * 50) + Math.random() * 30;
-                const y = 200 + Math.random() * 150;
-                return <circle key={`sp-${i}`} cx={x} cy={y} r={1.5 + Math.random() * 2} fill="white" opacity={0.5 + Math.random() * 0.5} />;
-              })}
-            </svg>
-          </div>
-          
-          {/* White gradient overlay to fade rods in center for content readability */}
+          />
+          {/* White gradient overlay for content readability */}
           <div 
             className="absolute inset-0"
             style={{
               background: `
-                radial-gradient(ellipse 60% 70% at 35% 40%, white 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 50%, transparent 70%),
-                linear-gradient(to bottom, white 0%, rgba(255,255,255,0.9) 20%, transparent 50%)
+                radial-gradient(ellipse 55% 65% at 30% 45%, white 0%, rgba(255,255,255,0.98) 25%, rgba(255,255,255,0.85) 45%, transparent 65%),
+                linear-gradient(to right, white 0%, rgba(255,255,255,0.9) 30%, transparent 60%),
+                linear-gradient(to bottom, white 0%, rgba(255,255,255,0.8) 15%, transparent 40%)
               `
             }}
           />
