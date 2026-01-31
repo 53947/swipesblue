@@ -38,11 +38,11 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex-shrink-0" data-testid="link-logo-home">
+            <Link href="/" className="flex-shrink-0 flex items-center" data-testid="link-logo-home">
               <Logo showIcon variant="default" />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-6">
+            <nav className="hidden md:flex items-center gap-6 h-10">
               {navItems.map((item) => {
                 const isActive = location === item.path;
                 
@@ -50,6 +50,7 @@ export default function Header() {
                   <Link
                     key={item.path}
                     href={item.path}
+                    className="flex items-center h-full"
                     data-testid={`link-nav-${item.label.toLowerCase()}`}
                   >
                     <span className={`text-[15px] transition-colors hover:text-swipes-blue-deep ${

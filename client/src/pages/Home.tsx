@@ -54,138 +54,159 @@ const demos = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section with marching colored rods */}
+      {/* Hero Section with stadium-style marching colored rods */}
       <section className="relative overflow-hidden bg-white min-h-[600px]">
-        {/* Marching Colored Rods - Stadium of colors visual */}
-        <div className="absolute right-0 top-0 w-3/5 h-full overflow-hidden pointer-events-none hidden lg:block">
-          <svg 
-            className="absolute inset-0 w-full h-full"
-            viewBox="0 0 600 500" 
-            preserveAspectRatio="xMaxYMid slice"
-            fill="none"
-          >
-            <defs>
-              {/* Gradient for perspective fade */}
-              <linearGradient id="fadeMask" x1="0%" y1="50%" x2="100%" y2="50%">
-                <stop offset="0%" stopColor="white" stopOpacity="0" />
-                <stop offset="30%" stopColor="white" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="white" stopOpacity="1" />
-              </linearGradient>
-              {/* Rod gradients for 3D effect */}
-              <linearGradient id="rodBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#0066FF" />
-                <stop offset="50%" stopColor="#0000FF" />
-                <stop offset="100%" stopColor="#000099" />
-              </linearGradient>
-              <linearGradient id="rodTeal" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#0891B2" />
-                <stop offset="50%" stopColor="#064A6C" />
-                <stop offset="100%" stopColor="#042F44" />
-              </linearGradient>
-              <linearGradient id="rodPurple" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#C084FC" />
-                <stop offset="50%" stopColor="#A855F7" />
-                <stop offset="100%" stopColor="#7C3AED" />
-              </linearGradient>
-              <linearGradient id="rodPink" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#F472B6" />
-                <stop offset="50%" stopColor="#EC4899" />
-                <stop offset="100%" stopColor="#BE185D" />
-              </linearGradient>
-              <linearGradient id="rodRed" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#FF4060" />
-                <stop offset="50%" stopColor="#E00420" />
-                <stop offset="100%" stopColor="#991B1B" />
-              </linearGradient>
-              <linearGradient id="rodOrange" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#FDBA74" />
-                <stop offset="50%" stopColor="#F97316" />
-                <stop offset="100%" stopColor="#C2410C" />
-              </linearGradient>
-              <linearGradient id="rodYellow" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#FDE047" />
-                <stop offset="50%" stopColor="#FBBF24" />
-                <stop offset="100%" stopColor="#D97706" />
-              </linearGradient>
-              <linearGradient id="rodDeepBlue" x1="0%" y1="0%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#3B82F6" />
-                <stop offset="50%" stopColor="#1844A6" />
-                <stop offset="100%" stopColor="#1E3A5F" />
-              </linearGradient>
-            </defs>
-            
-            {/* Generate marching rods in curved formation */}
-            {/* Row 1 - Front row (tallest, closest) - Blues and Teals */}
-            {[...Array(25)].map((_, i) => {
-              const x = 50 + i * 22;
-              const curve = Math.sin((i / 24) * Math.PI) * 40;
-              const height = 180 + Math.random() * 60;
-              const y = 320 - curve;
-              const gradient = i % 3 === 0 ? 'rodBlue' : i % 3 === 1 ? 'rodTeal' : 'rodDeepBlue';
-              return <rect key={`r1-${i}`} x={x} y={y - height} width="4" height={height} rx="2" fill={`url(#${gradient})`} opacity={0.95} />;
-            })}
-            
-            {/* Row 2 - Purples and Pinks */}
-            {[...Array(30)].map((_, i) => {
-              const x = 35 + i * 19;
-              const curve = Math.sin((i / 29) * Math.PI) * 50;
-              const height = 160 + Math.random() * 50;
-              const y = 280 - curve;
-              const gradient = i % 3 === 0 ? 'rodPurple' : i % 3 === 1 ? 'rodPink' : 'rodPurple';
-              return <rect key={`r2-${i}`} x={x} y={y - height} width="3.5" height={height} rx="1.75" fill={`url(#${gradient})`} opacity={0.9} />;
-            })}
-            
-            {/* Row 3 - Reds and Oranges */}
-            {[...Array(35)].map((_, i) => {
-              const x = 20 + i * 17;
-              const curve = Math.sin((i / 34) * Math.PI) * 60;
-              const height = 140 + Math.random() * 45;
-              const y = 240 - curve;
-              const gradient = i % 3 === 0 ? 'rodRed' : i % 3 === 1 ? 'rodOrange' : 'rodPink';
-              return <rect key={`r3-${i}`} x={x} y={y - height} width="3" height={height} rx="1.5" fill={`url(#${gradient})`} opacity={0.85} />;
-            })}
-            
-            {/* Row 4 - Yellows and Oranges (back, smaller) */}
-            {[...Array(40)].map((_, i) => {
-              const x = 10 + i * 15;
-              const curve = Math.sin((i / 39) * Math.PI) * 70;
-              const height = 120 + Math.random() * 40;
-              const y = 200 - curve;
-              const gradient = i % 3 === 0 ? 'rodYellow' : i % 3 === 1 ? 'rodOrange' : 'rodYellow';
-              return <rect key={`r4-${i}`} x={x} y={y - height} width="2.5" height={height} rx="1.25" fill={`url(#${gradient})`} opacity={0.75} />;
-            })}
-            
-            {/* Row 5 - Far back (tiny, fading) */}
-            {[...Array(50)].map((_, i) => {
-              const x = 5 + i * 12;
-              const curve = Math.sin((i / 49) * Math.PI) * 80;
-              const height = 80 + Math.random() * 30;
-              const y = 160 - curve;
-              const colors = ['rodBlue', 'rodPurple', 'rodTeal', 'rodDeepBlue'];
-              const gradient = colors[i % 4];
-              return <rect key={`r5-${i}`} x={x} y={y - height} width="2" height={height} rx="1" fill={`url(#${gradient})`} opacity={0.5} />;
-            })}
-            
-            {/* Sparkle/light effects */}
-            {[...Array(15)].map((_, i) => {
-              const x = 100 + Math.random() * 400;
-              const y = 80 + Math.random() * 200;
-              return <circle key={`sp-${i}`} cx={x} cy={y} r={1 + Math.random() * 2} fill="white" opacity={0.6 + Math.random() * 0.4} />;
-            })}
-          </svg>
-          
-          {/* White gradient fade on left edge */}
+        {/* Stadium-style Marching Rods - wraps around content area */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Main stadium curve - bottom arc of rods */}
           <div 
-            className="absolute inset-y-0 left-0 w-1/3"
+            className="absolute bottom-0 left-0 right-0 h-[70%]"
             style={{
-              background: 'linear-gradient(to right, white 0%, rgba(255,255,255,0.8) 40%, transparent 100%)'
+              background: 'linear-gradient(to top, transparent 0%, transparent 100%)'
+            }}
+          >
+            <svg 
+              className="absolute bottom-0 left-0 w-full h-full"
+              viewBox="0 0 1400 500" 
+              preserveAspectRatio="xMidYMax slice"
+              fill="none"
+            >
+              <defs>
+                {/* Rod gradients for 3D cylindrical effect */}
+                <linearGradient id="rodBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#3366FF" />
+                  <stop offset="50%" stopColor="#0000FF" />
+                  <stop offset="100%" stopColor="#000099" />
+                </linearGradient>
+                <linearGradient id="rodTeal" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#0EA5E9" />
+                  <stop offset="50%" stopColor="#064A6C" />
+                  <stop offset="100%" stopColor="#042F44" />
+                </linearGradient>
+                <linearGradient id="rodPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#D8B4FE" />
+                  <stop offset="50%" stopColor="#A855F7" />
+                  <stop offset="100%" stopColor="#6B21A8" />
+                </linearGradient>
+                <linearGradient id="rodPink" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#FBCFE8" />
+                  <stop offset="50%" stopColor="#EC4899" />
+                  <stop offset="100%" stopColor="#9D174D" />
+                </linearGradient>
+                <linearGradient id="rodRed" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#FCA5A5" />
+                  <stop offset="50%" stopColor="#E00420" />
+                  <stop offset="100%" stopColor="#7F1D1D" />
+                </linearGradient>
+                <linearGradient id="rodOrange" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#FDBA74" />
+                  <stop offset="50%" stopColor="#F97316" />
+                  <stop offset="100%" stopColor="#9A3412" />
+                </linearGradient>
+                <linearGradient id="rodYellow" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#FEF08A" />
+                  <stop offset="50%" stopColor="#FBBF24" />
+                  <stop offset="100%" stopColor="#B45309" />
+                </linearGradient>
+                <linearGradient id="rodDeepBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="#60A5FA" />
+                  <stop offset="50%" stopColor="#1844A6" />
+                  <stop offset="100%" stopColor="#1E3A5F" />
+                </linearGradient>
+              </defs>
+              
+              {/* Stadium curve - rods arranged in arc from bottom-left to bottom-right */}
+              {/* The arc curves up in the center where the content sits */}
+              
+              {/* Back row - smallest, furthest (blues/teals) */}
+              {[...Array(70)].map((_, i) => {
+                const t = i / 69;
+                const x = 50 + t * 1300;
+                const curveHeight = Math.sin(t * Math.PI) * 180;
+                const baseY = 500;
+                const height = 40 + curveHeight * 0.4 + (Math.random() * 15);
+                const y = baseY - height - curveHeight * 0.3;
+                const gradients = ['rodBlue', 'rodTeal', 'rodDeepBlue'];
+                const gradient = gradients[i % 3];
+                return <rect key={`b1-${i}`} x={x} y={y} width="3" height={height} rx="1.5" fill={`url(#${gradient})`} opacity={0.4 + t * 0.1} />;
+              })}
+              
+              {/* Middle-back row (purples) */}
+              {[...Array(80)].map((_, i) => {
+                const t = i / 79;
+                const x = 30 + t * 1340;
+                const curveHeight = Math.sin(t * Math.PI) * 160;
+                const baseY = 500;
+                const height = 60 + curveHeight * 0.5 + (Math.random() * 20);
+                const y = baseY - height - curveHeight * 0.2;
+                const gradients = ['rodPurple', 'rodPink', 'rodPurple'];
+                const gradient = gradients[i % 3];
+                return <rect key={`b2-${i}`} x={x} y={y} width="4" height={height} rx="2" fill={`url(#${gradient})`} opacity={0.5 + t * 0.15} />;
+              })}
+              
+              {/* Middle row (reds/pinks) */}
+              {[...Array(90)].map((_, i) => {
+                const t = i / 89;
+                const x = 15 + t * 1370;
+                const curveHeight = Math.sin(t * Math.PI) * 140;
+                const baseY = 500;
+                const height = 80 + curveHeight * 0.6 + (Math.random() * 25);
+                const y = baseY - height - curveHeight * 0.15;
+                const gradients = ['rodRed', 'rodPink', 'rodOrange'];
+                const gradient = gradients[i % 3];
+                return <rect key={`b3-${i}`} x={x} y={y} width="5" height={height} rx="2.5" fill={`url(#${gradient})`} opacity={0.6 + t * 0.2} />;
+              })}
+              
+              {/* Front-middle row (oranges/yellows) */}
+              {[...Array(100)].map((_, i) => {
+                const t = i / 99;
+                const x = 5 + t * 1390;
+                const curveHeight = Math.sin(t * Math.PI) * 120;
+                const baseY = 500;
+                const height = 100 + curveHeight * 0.7 + (Math.random() * 30);
+                const y = baseY - height - curveHeight * 0.1;
+                const gradients = ['rodOrange', 'rodYellow', 'rodRed'];
+                const gradient = gradients[i % 3];
+                return <rect key={`b4-${i}`} x={x} y={y} width="6" height={height} rx="3" fill={`url(#${gradient})`} opacity={0.7 + t * 0.2} />;
+              })}
+              
+              {/* Front row - tallest, closest (mixed vibrant) */}
+              {[...Array(110)].map((_, i) => {
+                const t = i / 109;
+                const x = t * 1400;
+                const curveHeight = Math.sin(t * Math.PI) * 100;
+                const baseY = 500;
+                const height = 130 + curveHeight * 0.8 + (Math.random() * 40);
+                const y = baseY - height;
+                const gradients = ['rodBlue', 'rodPurple', 'rodRed', 'rodOrange', 'rodYellow', 'rodTeal', 'rodPink', 'rodDeepBlue'];
+                const gradient = gradients[i % 8];
+                return <rect key={`b5-${i}`} x={x} y={y} width="7" height={height} rx="3.5" fill={`url(#${gradient})`} opacity={0.85} />;
+              })}
+              
+              {/* Sparkle effects */}
+              {[...Array(25)].map((_, i) => {
+                const x = 100 + (i * 50) + Math.random() * 30;
+                const y = 200 + Math.random() * 150;
+                return <circle key={`sp-${i}`} cx={x} cy={y} r={1.5 + Math.random() * 2} fill="white" opacity={0.5 + Math.random() * 0.5} />;
+              })}
+            </svg>
+          </div>
+          
+          {/* White gradient overlay to fade rods in center for content readability */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: `
+                radial-gradient(ellipse 60% 70% at 35% 40%, white 0%, rgba(255,255,255,0.95) 30%, rgba(255,255,255,0.7) 50%, transparent 70%),
+                linear-gradient(to bottom, white 0%, rgba(255,255,255,0.9) 20%, transparent 50%)
+              `
             }}
           />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
-            {/* Left side - Content */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
+          <div className="max-w-xl">
+            {/* Content - positioned in the "clear" center area of stadium */}
             <div className="space-y-6 text-left">
               <p className="text-sm font-medium text-gray-500 tracking-wide">
                 Payments processed on SwipesBlue: <span className="text-swipes-blue font-semibold">$2.4M+</span>
@@ -199,7 +220,7 @@ export default function Home() {
                 Less fees. More revenue.
               </p>
               
-              <p className="text-base md:text-lg text-gray-600 max-w-lg leading-relaxed">
+              <p className="text-base md:text-lg text-gray-600 leading-relaxed">
                 Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
               </p>
 
@@ -227,24 +248,6 @@ export default function Home() {
                   </Button>
                 </Link>
               </div>
-            </div>
-
-            {/* Right side - Mobile rods fallback */}
-            <div className="lg:hidden mt-12 h-48 relative overflow-hidden">
-              <svg 
-                className="w-full h-full"
-                viewBox="0 0 400 150" 
-                preserveAspectRatio="xMidYMax slice"
-                fill="none"
-              >
-                {[...Array(40)].map((_, i) => {
-                  const x = 5 + i * 10;
-                  const height = 60 + Math.sin(i * 0.3) * 40 + Math.random() * 20;
-                  const colors = ['#0000FF', '#064A6C', '#A855F7', '#EC4899', '#E00420', '#F97316', '#FBBF24', '#1844A6'];
-                  const color = colors[i % colors.length];
-                  return <rect key={`m-${i}`} x={x} y={150 - height} width="6" height={height} rx="3" fill={color} opacity={0.85} />;
-                })}
-              </svg>
             </div>
           </div>
         </div>
