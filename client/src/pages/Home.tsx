@@ -2,7 +2,7 @@ import { CreditCard, Code, LayoutDashboard, ShoppingCart, ArrowRight, Check, Shi
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
-import marchingColorsImage from "@assets/marching_colors_1769858000207.png";
+import heroImage from "@assets/stand_out_in_a_crowd3@0.5x_1769890244854.png";
 
 const stats = [
   { value: "$2.4M+", label: "Processed" },
@@ -81,7 +81,7 @@ export default function Home() {
                 <Link href="/shoppingcart">
                   <Button 
                     size="lg" 
-                    className="group bg-swipes-green hover:bg-swipes-green/90 text-white px-6 py-3 shadow-md transition-all font-medium"
+                    className="group bg-swipes-teal hover:bg-swipes-teal/90 text-white px-6 py-3 shadow-md transition-all font-medium"
                     style={{ borderRadius: '7px' }}
                     data-testid="button-hero-get-started"
                   >
@@ -103,11 +103,11 @@ export default function Home() {
               </div>
             </div>
             
-            {/* Right side - Marching Colors Image */}
+            {/* Right side - Stand Out Hero Image */}
             <div className="hidden lg:block">
               <img 
-                src={marchingColorsImage}
-                alt="Colorful abstract visual"
+                src={heroImage}
+                alt="Stand out in a crowd - colorful bars with dollar sign"
                 className="w-full h-auto max-h-[500px] object-contain"
                 data-testid="img-hero-visual"
               />

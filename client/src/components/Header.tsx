@@ -75,7 +75,7 @@ export default function Header() {
           </Link>
           <Link href="/shoppingcart" className="flex items-center">
             <Button 
-              className="group bg-swipes-green hover:bg-swipes-green/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
+              className="group bg-swipes-teal hover:bg-swipes-teal/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
               data-testid="button-get-started"
             >
               Get Started
