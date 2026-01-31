@@ -75,11 +75,11 @@ export default function Header() {
           </Link>
           <Link href="/shoppingcart" className="flex items-center">
             <Button 
-              className="group bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
+              className="group bg-swipes-green hover:bg-swipes-green/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
               data-testid="button-get-started"
             >
               Get Started
-              <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+              <ArrowRight className="ml-0 h-4 w-0 overflow-hidden group-hover:ml-2 group-hover:w-4 transition-all duration-200" />
             </Button>
           </Link>
         </div>
