@@ -54,87 +54,152 @@ const demos = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section with dynamic swoosh */}
+      {/* Hero Section with marching colored rods */}
       <section className="relative overflow-hidden bg-white min-h-[600px]">
-        {/* Dynamic Swoosh - flowing diagonal wave using brand colors */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        {/* Marching Colored Rods - Stadium of colors visual */}
+        <div className="absolute right-0 top-0 w-3/5 h-full overflow-hidden pointer-events-none hidden lg:block">
           <svg 
-            className="absolute right-0 top-0 h-full w-3/4 lg:w-2/3"
-            viewBox="0 0 800 600" 
+            className="absolute inset-0 w-full h-full"
+            viewBox="0 0 600 500" 
             preserveAspectRatio="xMaxYMid slice"
             fill="none"
           >
             <defs>
-              <linearGradient id="swoosh1" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#E00420" stopOpacity="0.9" />
-                <stop offset="30%" stopColor="#A855F7" stopOpacity="0.8" />
-                <stop offset="60%" stopColor="#0000FF" stopOpacity="0.85" />
-                <stop offset="100%" stopColor="#1844A6" stopOpacity="0.9" />
+              {/* Gradient for perspective fade */}
+              <linearGradient id="fadeMask" x1="0%" y1="50%" x2="100%" y2="50%">
+                <stop offset="0%" stopColor="white" stopOpacity="0" />
+                <stop offset="30%" stopColor="white" stopOpacity="0.3" />
+                <stop offset="100%" stopColor="white" stopOpacity="1" />
               </linearGradient>
-              <linearGradient id="swoosh2" x1="0%" y1="100%" x2="100%" y2="0%">
-                <stop offset="0%" stopColor="#1844A6" stopOpacity="0.7" />
-                <stop offset="40%" stopColor="#0000FF" stopOpacity="0.75" />
-                <stop offset="70%" stopColor="#064A6C" stopOpacity="0.8" />
-                <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.6" />
+              {/* Rod gradients for 3D effect */}
+              <linearGradient id="rodBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#0066FF" />
+                <stop offset="50%" stopColor="#0000FF" />
+                <stop offset="100%" stopColor="#000099" />
               </linearGradient>
-              <linearGradient id="swoosh3" x1="100%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#FBBF24" stopOpacity="0.8" />
-                <stop offset="50%" stopColor="#F59E0B" stopOpacity="0.7" />
-                <stop offset="100%" stopColor="#E00420" stopOpacity="0.6" />
+              <linearGradient id="rodTeal" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#0891B2" />
+                <stop offset="50%" stopColor="#064A6C" />
+                <stop offset="100%" stopColor="#042F44" />
               </linearGradient>
-              <linearGradient id="swoosh4" x1="0%" y1="50%" x2="100%" y2="50%">
-                <stop offset="0%" stopColor="#A855F7" stopOpacity="0.5" />
-                <stop offset="50%" stopColor="#EC4899" stopOpacity="0.6" />
-                <stop offset="100%" stopColor="#E00420" stopOpacity="0.5" />
+              <linearGradient id="rodPurple" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#C084FC" />
+                <stop offset="50%" stopColor="#A855F7" />
+                <stop offset="100%" stopColor="#7C3AED" />
+              </linearGradient>
+              <linearGradient id="rodPink" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#F472B6" />
+                <stop offset="50%" stopColor="#EC4899" />
+                <stop offset="100%" stopColor="#BE185D" />
+              </linearGradient>
+              <linearGradient id="rodRed" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#FF4060" />
+                <stop offset="50%" stopColor="#E00420" />
+                <stop offset="100%" stopColor="#991B1B" />
+              </linearGradient>
+              <linearGradient id="rodOrange" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#FDBA74" />
+                <stop offset="50%" stopColor="#F97316" />
+                <stop offset="100%" stopColor="#C2410C" />
+              </linearGradient>
+              <linearGradient id="rodYellow" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#FDE047" />
+                <stop offset="50%" stopColor="#FBBF24" />
+                <stop offset="100%" stopColor="#D97706" />
+              </linearGradient>
+              <linearGradient id="rodDeepBlue" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stopColor="#3B82F6" />
+                <stop offset="50%" stopColor="#1844A6" />
+                <stop offset="100%" stopColor="#1E3A5F" />
               </linearGradient>
             </defs>
             
-            {/* Main red-purple-blue swoosh */}
-            <path 
-              d="M400,0 Q600,100 700,200 Q800,300 750,400 Q700,500 800,600 L800,600 L800,0 Z" 
-              fill="url(#swoosh1)"
-            />
+            {/* Generate marching rods in curved formation */}
+            {/* Row 1 - Front row (tallest, closest) - Blues and Teals */}
+            {[...Array(25)].map((_, i) => {
+              const x = 50 + i * 22;
+              const curve = Math.sin((i / 24) * Math.PI) * 40;
+              const height = 180 + Math.random() * 60;
+              const y = 320 - curve;
+              const gradient = i % 3 === 0 ? 'rodBlue' : i % 3 === 1 ? 'rodTeal' : 'rodDeepBlue';
+              return <rect key={`r1-${i}`} x={x} y={y - height} width="4" height={height} rx="2" fill={`url(#${gradient})`} opacity={0.95} />;
+            })}
             
-            {/* Blue-teal swoosh */}
-            <path 
-              d="M500,0 Q650,150 720,280 Q790,400 700,520 Q650,580 800,600 L800,600 L800,0 Z" 
-              fill="url(#swoosh2)"
-              opacity="0.8"
-            />
+            {/* Row 2 - Purples and Pinks */}
+            {[...Array(30)].map((_, i) => {
+              const x = 35 + i * 19;
+              const curve = Math.sin((i / 29) * Math.PI) * 50;
+              const height = 160 + Math.random() * 50;
+              const y = 280 - curve;
+              const gradient = i % 3 === 0 ? 'rodPurple' : i % 3 === 1 ? 'rodPink' : 'rodPurple';
+              return <rect key={`r2-${i}`} x={x} y={y - height} width="3.5" height={height} rx="1.75" fill={`url(#${gradient})`} opacity={0.9} />;
+            })}
             
-            {/* Yellow-orange accent swoosh */}
-            <path 
-              d="M550,0 Q700,80 750,180 Q800,280 780,380 Q760,480 800,550 L800,0 Z" 
-              fill="url(#swoosh3)"
-              opacity="0.7"
-            />
+            {/* Row 3 - Reds and Oranges */}
+            {[...Array(35)].map((_, i) => {
+              const x = 20 + i * 17;
+              const curve = Math.sin((i / 34) * Math.PI) * 60;
+              const height = 140 + Math.random() * 45;
+              const y = 240 - curve;
+              const gradient = i % 3 === 0 ? 'rodRed' : i % 3 === 1 ? 'rodOrange' : 'rodPink';
+              return <rect key={`r3-${i}`} x={x} y={y - height} width="3" height={height} rx="1.5" fill={`url(#${gradient})`} opacity={0.85} />;
+            })}
             
-            {/* Purple-pink flowing accent */}
-            <path 
-              d="M600,100 Q720,200 780,320 Q800,400 790,480 Q780,560 800,600 L800,100 Z" 
-              fill="url(#swoosh4)"
-              opacity="0.5"
-            />
+            {/* Row 4 - Yellows and Oranges (back, smaller) */}
+            {[...Array(40)].map((_, i) => {
+              const x = 10 + i * 15;
+              const curve = Math.sin((i / 39) * Math.PI) * 70;
+              const height = 120 + Math.random() * 40;
+              const y = 200 - curve;
+              const gradient = i % 3 === 0 ? 'rodYellow' : i % 3 === 1 ? 'rodOrange' : 'rodYellow';
+              return <rect key={`r4-${i}`} x={x} y={y - height} width="2.5" height={height} rx="1.25" fill={`url(#${gradient})`} opacity={0.75} />;
+            })}
+            
+            {/* Row 5 - Far back (tiny, fading) */}
+            {[...Array(50)].map((_, i) => {
+              const x = 5 + i * 12;
+              const curve = Math.sin((i / 49) * Math.PI) * 80;
+              const height = 80 + Math.random() * 30;
+              const y = 160 - curve;
+              const colors = ['rodBlue', 'rodPurple', 'rodTeal', 'rodDeepBlue'];
+              const gradient = colors[i % 4];
+              return <rect key={`r5-${i}`} x={x} y={y - height} width="2" height={height} rx="1" fill={`url(#${gradient})`} opacity={0.5} />;
+            })}
+            
+            {/* Sparkle/light effects */}
+            {[...Array(15)].map((_, i) => {
+              const x = 100 + Math.random() * 400;
+              const y = 80 + Math.random() * 200;
+              return <circle key={`sp-${i}`} cx={x} cy={y} r={1 + Math.random() * 2} fill="white" opacity={0.6 + Math.random() * 0.4} />;
+            })}
           </svg>
+          
+          {/* White gradient fade on left edge */}
+          <div 
+            className="absolute inset-y-0 left-0 w-1/3"
+            style={{
+              background: 'linear-gradient(to right, white 0%, rgba(255,255,255,0.8) 40%, transparent 100%)'
+            }}
+          />
         </div>
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
           <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
             {/* Left side - Content */}
-            <div className="space-y-8 text-left">
+            <div className="space-y-6 text-left">
               <p className="text-sm font-medium text-gray-500 tracking-wide">
                 Payments processed on SwipesBlue: <span className="text-swipes-blue font-semibold">$2.4M+</span>
               </p>
               
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
+              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 leading-tight">
                 Built for businesses to grow
               </h1>
               
-              <p className="text-xl md:text-2xl font-medium text-swipes-red">
+              <p className="text-lg md:text-xl font-medium text-swipes-red">
                 Less fees. More revenue.
               </p>
               
-              <p className="text-lg text-gray-600 max-w-xl leading-relaxed">
+              <p className="text-base md:text-lg text-gray-600 max-w-lg leading-relaxed">
                 Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
               </p>
 
@@ -164,27 +229,21 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right side - Mobile swoosh fallback */}
-            <div className="lg:hidden mt-12">
+            {/* Right side - Mobile rods fallback */}
+            <div className="lg:hidden mt-12 h-48 relative overflow-hidden">
               <svg 
-                className="w-full h-48"
-                viewBox="0 0 400 200" 
-                preserveAspectRatio="xMidYMid slice"
+                className="w-full h-full"
+                viewBox="0 0 400 150" 
+                preserveAspectRatio="xMidYMax slice"
                 fill="none"
               >
-                <defs>
-                  <linearGradient id="swooshMobile" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#E00420" stopOpacity="0.9" />
-                    <stop offset="25%" stopColor="#FBBF24" stopOpacity="0.8" />
-                    <stop offset="50%" stopColor="#A855F7" stopOpacity="0.85" />
-                    <stop offset="75%" stopColor="#0000FF" stopOpacity="0.9" />
-                    <stop offset="100%" stopColor="#064A6C" stopOpacity="0.8" />
-                  </linearGradient>
-                </defs>
-                <path 
-                  d="M0,100 Q100,20 200,80 Q300,140 400,60 L400,200 L0,200 Z" 
-                  fill="url(#swooshMobile)"
-                />
+                {[...Array(40)].map((_, i) => {
+                  const x = 5 + i * 10;
+                  const height = 60 + Math.sin(i * 0.3) * 40 + Math.random() * 20;
+                  const colors = ['#0000FF', '#064A6C', '#A855F7', '#EC4899', '#E00420', '#F97316', '#FBBF24', '#1844A6'];
+                  const color = colors[i % colors.length];
+                  return <rect key={`m-${i}`} x={x} y={150 - height} width="6" height={height} rx="3" fill={color} opacity={0.85} />;
+                })}
               </svg>
             </div>
           </div>
