@@ -2,7 +2,7 @@ import { CreditCard, Code, LayoutDashboard, ShoppingCart, ArrowRight, Check, Shi
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
-import heroImage from "@assets/stand_out_in_a_crowd3@0.5x_1769890244854.png";
+import heroImage from "@assets/stand_out_in_a_crowd3_1769891865100.png";
 
 const stats = [
   { value: "$2.4M+", label: "Processed" },
