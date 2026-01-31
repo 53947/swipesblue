@@ -55,58 +55,100 @@ const demos = [
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
-          <div className="text-center space-y-8">
-            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-gray-900">
-              Built for businesses to grow
-            </h1>
-            
-            <p className="text-xl md:text-2xl font-medium text-swipes-red">
-              Less fees. More revenue.
-            </p>
-            
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Simple payment processing for small businesses and developers.
-              Accept cards, manage transactions, and scale without complexity.
-            </p>
+      {/* Hero Section - Stripe-inspired with colorful gradient */}
+      <section className="relative overflow-hidden bg-white min-h-[600px]">
+        {/* Colorful abstract gradient background - right side */}
+        <div className="absolute right-0 top-0 w-1/2 h-full overflow-hidden hidden lg:block">
+          <div 
+            className="absolute inset-0"
+            style={{
+              background: `
+                radial-gradient(ellipse 80% 60% at 70% 20%, rgba(168, 85, 247, 0.4) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 80% at 90% 60%, rgba(251, 146, 60, 0.5) 0%, transparent 50%),
+                radial-gradient(ellipse 70% 50% at 50% 80%, rgba(236, 72, 153, 0.4) 0%, transparent 50%),
+                radial-gradient(ellipse 50% 60% at 30% 40%, rgba(59, 130, 246, 0.3) 0%, transparent 50%),
+                linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(251, 191, 36, 0.3) 50%, rgba(236, 72, 153, 0.2) 100%)
+              `
+            }}
+          />
+        </div>
 
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-              <Link href="/shoppingcart">
-                <Button 
-                  size="lg" 
-                  className="bg-swipes-blue hover:bg-swipes-blue/90 text-white px-8 shadow-lg transition-all"
-                  data-testid="button-hero-get-started"
-                >
-                  Get Started
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/dashboard">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8"
-                  data-testid="button-hero-documentation"
-                >
-                  View Documentation
-                </Button>
-              </Link>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative">
+          <div className="lg:grid lg:grid-cols-2 lg:gap-16 items-center">
+            {/* Left side - Content */}
+            <div className="space-y-8 text-left">
+              <p className="text-sm font-medium text-gray-500 tracking-wide">
+                Payments processed on SwipesBlue: <span className="text-swipes-blue">$2.4M+</span>
+              </p>
+              
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight">
+                Financial infrastructure to{" "}
+                <span className="bg-gradient-to-r from-swipes-red via-swipes-blue to-green-500 bg-clip-text text-transparent">
+                  grow your revenue
+                </span>
+              </h1>
+              
+              <p className="text-lg md:text-xl text-gray-600 max-w-xl leading-relaxed">
+                Accept payments, offer financial services, and implement custom revenue models—from your first transaction to your billionth.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
+                <Link href="/shoppingcart">
+                  <Button 
+                    size="lg" 
+                    className="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-full shadow-md transition-all font-medium"
+                    data-testid="button-hero-get-started"
+                  >
+                    Get started
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/dashboard">
+                  <Button 
+                    size="lg" 
+                    variant="outline" 
+                    className="border-gray-300 text-indigo-600 hover:bg-gray-50 px-6 py-3 rounded-full font-medium"
+                    data-testid="button-hero-documentation"
+                  >
+                    Contact sales
+                  </Button>
+                </Link>
+              </div>
             </div>
 
-            <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-500">
+            {/* Right side - Gradient visual (mobile fallback) */}
+            <div className="lg:hidden mt-12">
+              <div 
+                className="h-64 rounded-2xl"
+                style={{
+                  background: `
+                    radial-gradient(ellipse 80% 60% at 70% 20%, rgba(168, 85, 247, 0.4) 0%, transparent 50%),
+                    radial-gradient(ellipse 60% 80% at 90% 60%, rgba(251, 146, 60, 0.5) 0%, transparent 50%),
+                    radial-gradient(ellipse 70% 50% at 50% 80%, rgba(236, 72, 153, 0.4) 0%, transparent 50%),
+                    linear-gradient(135deg, rgba(139, 92, 246, 0.2) 0%, rgba(251, 191, 36, 0.3) 50%, rgba(236, 72, 153, 0.2) 100%)
+                  `
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Company logos bar */}
+        <div className="border-t border-gray-100 bg-white/80 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 text-gray-400">
+              <span className="text-sm font-medium tracking-wide">Trusted by growing businesses</span>
               <div className="flex items-center gap-2">
                 <Shield className="h-4 w-4 text-green-600" />
-                <span>PCI Compliant</span>
+                <span className="text-sm text-gray-600">PCI Compliant</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-swipes-blue" />
-                <span>Real-time Processing</span>
+                <Zap className="h-4 w-4 text-amber-500" />
+                <span className="text-sm text-gray-600">Real-time</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-swipes-red" />
-                <span>24/7 Support</span>
+                <Clock className="h-4 w-4 text-indigo-500" />
+                <span className="text-sm text-gray-600">24/7 Support</span>
               </div>
             </div>
           </div>
