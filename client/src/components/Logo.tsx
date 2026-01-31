@@ -1,17 +1,19 @@
-import logoIcon from "@assets/swipesblue approved brandmark_1761367228448.png";
+import logoIcon from "@assets/SwipesBlue_logo_-_icon_1769846994249.png";
 
 interface LogoProps {
   variant?: "default" | "small" | "large";
   className?: string;
   showIcon?: boolean;
   iconOnly?: boolean;
+  showUrl?: boolean;
 }
 
 export default function Logo({ 
   variant = "default", 
   className = "", 
   showIcon = false,
-  iconOnly = false 
+  iconOnly = false,
+  showUrl = false
 }: LogoProps) {
   const textSizes = {
     small: "text-lg",
@@ -20,9 +22,9 @@ export default function Logo({
   };
   
   const iconSizes = {
-    small: "h-6 w-6",
-    default: "h-10 w-10",
-    large: "h-14 w-14"
+    small: "h-6 w-auto",
+    default: "h-8 w-auto",
+    large: "h-12 w-auto"
   };
 
   const textSize = textSizes[variant];
@@ -62,6 +64,14 @@ export default function Logo({
         >
           blue
         </span>
+        {showUrl && (
+          <span 
+            className={`font-archivo font-bold ${textSize} tracking-tight`} 
+            style={{ color: "#00FF40" }}
+          >
+            .com
+          </span>
+        )}
       </div>
     </div>
   );

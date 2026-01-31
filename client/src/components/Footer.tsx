@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import Logo from "./Logo";
+import Logo from "@/components/Logo";
 
 const footerLinks = {
   products: [
@@ -26,12 +26,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2 mb-4">
-              <span className="font-archivo-semi-expanded font-bold text-xl" style={{ color: "#E00420" }}>
-                swipes
-              </span>
-              <span className="font-archivo font-bold text-xl" style={{ color: "#0000FF" }}>
-                blue
-              </span>
+              <Logo showIcon variant="small" />
             </div>
             <p className="text-gray-300 text-sm leading-relaxed">
               Built for businesses to grow. Simple payment processing for small businesses and developers.
@@ -92,7 +87,7 @@ export default function Footer() {
 
         <div className="border-t border-white/10 mt-12 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-gray-400 text-sm">
-            © {new Date().getFullYear()} SwipesBlue. All rights reserved.
+            © {new Date().getFullYear()} SwipesBlue, Inc. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
             <Link href="/" data-testid="link-footer-terms">
