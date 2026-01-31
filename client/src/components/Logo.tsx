@@ -1,10 +1,9 @@
-import logoIcon from "@assets/SwipesBlue_logo_-_icon_1769846994249.png";
+import logoWithText from "@assets/SwipesBlue_logo_-_icon_1769846994249.png";
 
 interface LogoProps {
   variant?: "default" | "small" | "large";
   className?: string;
   showIcon?: boolean;
-  iconOnly?: boolean;
   showUrl?: boolean;
 }
 
@@ -12,45 +11,39 @@ export default function Logo({
   variant = "default", 
   className = "", 
   showIcon = false,
-  iconOnly = false,
   showUrl = false
 }: LogoProps) {
-  const textSizes = {
-    small: "text-lg",
-    default: "text-2xl",
-    large: "text-4xl"
-  };
-  
-  const iconSizes = {
+  const logoSizes = {
     small: "h-6 w-auto",
     default: "h-8 w-auto",
     large: "h-12 w-auto"
   };
 
-  const textSize = textSizes[variant];
-  const iconSize = iconSizes[variant];
+  const logoSize = logoSizes[variant];
   
-  if (iconOnly) {
+  if (showIcon) {
     return (
-      <img 
-        src={logoIcon} 
-        alt="SwipesBlue" 
-        className={`${iconSize} ${className}`}
-        data-testid="img-logo-icon"
-      />
+      <div className={`flex items-center ${className}`} data-testid="logo-container">
+        <img 
+          src={logoWithText} 
+          alt="SwipesBlue" 
+          className={logoSize}
+          data-testid="img-logo"
+        />
+      </div>
     );
   }
   
+  const textSizes = {
+    small: "text-lg",
+    default: "text-xl",
+    large: "text-3xl"
+  };
+
+  const textSize = textSizes[variant];
+  
   return (
-    <div className={`flex items-center gap-2 ${className}`} data-testid="logo-container">
-      {showIcon && (
-        <img 
-          src={logoIcon} 
-          alt="SwipesBlue Logo" 
-          className={iconSize}
-          data-testid="img-logo-icon"
-        />
-      )}
+    <div className={`flex items-center gap-1.5 ${className}`} data-testid="logo-container">
       <div className="flex items-baseline gap-0">
         <span 
           className={`font-archivo-semi-expanded font-bold ${textSize} tracking-tight`} 
