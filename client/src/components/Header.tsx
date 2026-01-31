@@ -37,7 +37,7 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center" data-testid="link-logo-home">
+        <Link href="/" className="flex items-center -mt-1.5" data-testid="link-logo-home">
           <Logo showIcon variant="default" />
         </Link>
 
