@@ -1,4 +1,4 @@
-import logoWithText from "@assets/SwipesBlue_logo_-_icon_1769846994249.png";
+import logoIcon from "@assets/swipesblue_logo_1769875241948.png";
 
 interface LogoProps {
   variant?: "default" | "small" | "large";
@@ -13,54 +13,79 @@ export default function Logo({
   showIcon = false,
   showUrl = false
 }: LogoProps) {
-  const logoSizes = {
-    small: "h-8 w-auto",
-    default: "h-10 w-auto",
-    large: "h-14 w-auto"
+  // Font sizes for different variants
+  const fontSizes = {
+    small: "16px",
+    default: "20px",
+    large: "28px"
+  };
+  
+  const iconSizes = {
+    small: "h-6 w-auto",
+    default: "h-8 w-auto",
+    large: "h-10 w-auto"
   };
 
-  const logoSize = logoSizes[variant];
+  const fontSize = fontSizes[variant];
+  const iconSize = iconSizes[variant];
   
-  if (showIcon) {
-    return (
-      <div className={`flex items-center ${className}`} data-testid="logo-container">
-        <img 
-          src={logoWithText} 
-          alt="SwipesBlue" 
-          className={logoSize}
-          data-testid="img-logo"
-        />
-      </div>
-    );
-  }
+  // Text shadow effects: black shadow (1px offset) + white glow (100px blur at 10% opacity)
+  const swipesTextShadow = `
+    1px 1px 0px #000000,
+    0px 0px 100px rgba(255, 255, 255, 0.1),
+    0px 0px 100px rgba(255, 255, 255, 0.1)
+  `;
   
-  const textSizes = {
-    small: "text-lg",
-    default: "text-xl",
-    large: "text-3xl"
-  };
-
-  const textSize = textSizes[variant];
+  const blueTextShadow = `
+    1px 1px 0px #000000,
+    0px 0px 100px rgba(255, 255, 255, 0.1),
+    0px 0px 100px rgba(255, 255, 255, 0.1)
+  `;
   
   return (
-    <div className={`flex items-center gap-1.5 ${className}`} data-testid="logo-container">
-      <div className="flex items-baseline gap-0">
+    <div className={`flex items-center gap-2 ${className}`} data-testid="logo-container">
+      {/* Icon - only show when showIcon is true */}
+      {showIcon && (
+        <img 
+          src={logoIcon} 
+          alt="" 
+          className={iconSize}
+          data-testid="img-logo-icon"
+        />
+      )}
+      
+      {/* Company Name with font styling */}
+      <div className="flex items-baseline" data-testid="company-name">
         <span 
-          className={`font-archivo-semi-expanded font-bold ${textSize} tracking-tight`} 
-          style={{ color: "#E00420" }}
+          className="font-archivo-semi-expanded font-bold lowercase"
+          style={{ 
+            color: "#E00420",
+            fontSize: fontSize,
+            textShadow: swipesTextShadow,
+            letterSpacing: "-0.02em"
+          }}
         >
           swipes
         </span>
         <span 
-          className={`font-archivo font-bold ${textSize} tracking-tight`} 
-          style={{ color: "#0000FF" }}
+          className="font-archivo-narrow font-bold lowercase"
+          style={{ 
+            color: "#0000FF",
+            fontSize: fontSize,
+            textShadow: blueTextShadow,
+            letterSpacing: "-0.02em"
+          }}
         >
           blue
         </span>
         {showUrl && (
           <span 
-            className={`font-archivo font-bold ${textSize} tracking-tight`} 
-            style={{ color: "#00FF40" }}
+            className="font-archivo font-bold lowercase"
+            style={{ 
+              color: "#00FF40",
+              fontSize: fontSize,
+              letterSpacing: "-0.02em"
+            }}
           >
             .com
           </span>

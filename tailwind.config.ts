@@ -105,6 +105,7 @@ export default {
         mono: ["SF Mono", "Monaco", "Inconsolata", "Fira Code", "monospace"],
         archivo: ["Archivo", "sans-serif"],
         "archivo-semi-expanded": ["Archivo Semi Expanded", "Archivo", "sans-serif"],
+        "archivo-narrow": ["Archivo Narrow", "Archivo", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {

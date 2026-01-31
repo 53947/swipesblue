@@ -2,10 +2,16 @@
 
 ## Company Branding (CRITICAL - DO NOT CHANGE)
 
+### Nomenclature (MASTER DEFINITIONS)
+- **Company Name** = Word Mark, the name of the company (previously referred to as Logo or Word Mark)
+- **Company Name and Logo** = Lockup, Logo + Icon, or Avatar - the symbol for the company
+- **URL** = Web address (swipesblue.com)
+- **Assets** = Images that support the above
+
 ### Naming Convention (IMPORTANT)
 - **Website URL:** swipesblue.com (all lowercase, with .com in green)
 - **Company Name:** SwipesBlue (PascalCase, no space)
-- **Logo/Branding:** icon + swipesblue (lowercase text with the icon)
+- **Company Name and Logo (Lockup):** icon + swipesblue (lowercase text with the icon)
 
 ### Company Name: SwipesBlue
 
