@@ -2,6 +2,7 @@ import { CreditCard, Code, LayoutDashboard, ShoppingCart, ArrowRight, Check, Shi
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
+import marchingColorsImage from "@assets/marching_colors_1769858000207.png";
 
 const stats = [
   { value: "$2.4M+", label: "Processed" },
@@ -56,32 +57,9 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       {/* Hero Section with marching colored rods image */}
       <section className="relative overflow-hidden bg-white min-h-[600px]">
-        {/* Marching Colored Rods - using actual image */}
-        <div className="absolute inset-0 pointer-events-none">
-          <img 
-            src="/attached_assets/marching_colors_1769856782721.png"
-            alt=""
-            className="absolute right-0 bottom-0 w-full h-full object-cover object-left-bottom"
-            style={{
-              objectPosition: 'left bottom'
-            }}
-          />
-          {/* White gradient overlay for content readability */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              background: `
-                radial-gradient(ellipse 55% 65% at 30% 45%, white 0%, rgba(255,255,255,0.98) 25%, rgba(255,255,255,0.85) 45%, transparent 65%),
-                linear-gradient(to right, white 0%, rgba(255,255,255,0.9) 30%, transparent 60%),
-                linear-gradient(to bottom, white 0%, rgba(255,255,255,0.8) 15%, transparent 40%)
-              `
-            }}
-          />
-        </div>
-
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
-          <div className="max-w-xl">
-            {/* Content - positioned in the "clear" center area of stadium */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            {/* Left side - Content */}
             <div className="space-y-6 text-left">
               <p className="text-sm font-medium text-gray-500 tracking-wide">
                 Payments processed on SwipesBlue: <span className="text-swipes-blue font-semibold">$2.4M+</span>
@@ -123,6 +101,16 @@ export default function Home() {
                   </Button>
                 </Link>
               </div>
+            </div>
+            
+            {/* Right side - Marching Colors Image */}
+            <div className="hidden lg:block">
+              <img 
+                src={marchingColorsImage}
+                alt="Colorful abstract visual"
+                className="w-full h-auto max-h-[500px] object-contain"
+                data-testid="img-hero-visual"
+              />
             </div>
           </div>
         </div>
