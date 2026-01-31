@@ -15,15 +15,15 @@ export default function Logo({
 }: LogoProps) {
   // Font sizes for different variants
   const fontSizes = {
-    small: "16px",
-    default: "20px",
-    large: "28px"
+    small: "18px",
+    default: "24px",
+    large: "32px"
   };
   
   const iconSizes = {
-    small: "h-6 w-auto",
-    default: "h-8 w-auto",
-    large: "h-10 w-auto"
+    small: "h-7 w-auto",
+    default: "h-10 w-auto",
+    large: "h-12 w-auto"
   };
 
   const fontSize = fontSizes[variant];
