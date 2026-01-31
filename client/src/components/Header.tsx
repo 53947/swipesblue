@@ -37,12 +37,12 @@ export default function Header() {
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center h-10" data-testid="link-logo-home">
+        <Link href="/" className="flex items-center" data-testid="link-logo-home">
           <Logo showIcon variant="default" />
         </Link>
 
         {/* Center: Navigation */}
-        <nav className="hidden md:flex items-center gap-6 h-10">
+        <nav className="hidden md:flex items-center gap-6">
           {navItems.map((item) => {
             const isActive = location === item.path;
             
@@ -50,10 +50,10 @@ export default function Header() {
               <Link
                 key={item.path}
                 href={item.path}
-                className="flex items-center h-10"
+                className="flex items-center"
                 data-testid={`link-nav-${item.label.toLowerCase()}`}
               >
-                <span className={`text-[15px] leading-10 transition-colors hover:text-swipes-blue-deep ${
+                <span className={`text-[15px] transition-colors hover:text-swipes-blue-deep ${
                   isActive ? "text-swipes-blue-deep font-medium" : "text-swipes-gray"
                 }`}>
                   {item.label}
@@ -64,16 +64,16 @@ export default function Header() {
         </nav>
 
         {/* Right: Sign in + Button */}
-        <div className="hidden md:flex items-center gap-4 h-10">
-          <Link href="/admin" className="flex items-center h-10">
+        <div className="hidden md:flex items-center gap-4">
+          <Link href="/admin" className="flex items-center">
             <span 
-              className="text-[15px] leading-10 text-swipes-gray hover:text-swipes-blue-deep transition-colors"
+              className="text-[15px] text-swipes-gray hover:text-swipes-blue-deep transition-colors"
               data-testid="link-sign-in"
             >
               Sign in
             </span>
           </Link>
-          <Link href="/shoppingcart" className="flex items-center h-10">
+          <Link href="/shoppingcart" className="flex items-center">
             <Button 
               className="bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
               data-testid="button-get-started"
