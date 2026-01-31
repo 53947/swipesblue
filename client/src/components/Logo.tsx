@@ -1,28 +1,66 @@
-import logoImage from "@assets/swipesblue brandmark potential_1761287293569.png";
+import logoIcon from "@assets/swipesblue approved brandmark_1761367228448.png";
 
-export default function Logo({ variant = "default", className = "", showIcon = false }: { variant?: "default" | "small"; className?: string; showIcon?: boolean }) {
-  const textSize = variant === "small" ? "text-lg" : "text-2xl";
-  const iconSize = variant === "small" ? "h-8" : "h-12";
+interface LogoProps {
+  variant?: "default" | "small" | "large";
+  className?: string;
+  showIcon?: boolean;
+  iconOnly?: boolean;
+}
+
+export default function Logo({ 
+  variant = "default", 
+  className = "", 
+  showIcon = false,
+  iconOnly = false 
+}: LogoProps) {
+  const textSizes = {
+    small: "text-lg",
+    default: "text-2xl",
+    large: "text-4xl"
+  };
+  
+  const iconSizes = {
+    small: "h-6 w-6",
+    default: "h-10 w-10",
+    large: "h-14 w-14"
+  };
+
+  const textSize = textSizes[variant];
+  const iconSize = iconSizes[variant];
+  
+  if (iconOnly) {
+    return (
+      <img 
+        src={logoIcon} 
+        alt="SwipesBlue" 
+        className={`${iconSize} ${className}`}
+        data-testid="img-logo-icon"
+      />
+    );
+  }
   
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
+    <div className={`flex items-center gap-2 ${className}`} data-testid="logo-container">
       {showIcon && (
         <img 
-          src={logoImage} 
+          src={logoIcon} 
           alt="SwipesBlue Logo" 
           className={iconSize}
-          data-testid="img-swoosh-logo"
+          data-testid="img-logo-icon"
         />
       )}
-      <div className="flex items-center gap-0">
-        <span className={`font-archivo-semi-expanded font-bold ${textSize} ml-[1px] mr-[1px]`} style={{ color: "#FF0040" }}>
-          SWIPES
+      <div className="flex items-baseline gap-0">
+        <span 
+          className={`font-archivo-semi-expanded font-bold ${textSize} tracking-tight`} 
+          style={{ color: "#E00420" }}
+        >
+          swipes
         </span>
-        <span className={`font-archivo font-bold ${textSize} ml-[1px] mr-[1px]`} style={{ color: "#0000FF" }}>
-          BLUE
-        </span>
-        <span className={`font-archivo font-bold ${textSize} ml-[1px] mr-[1px]`} style={{ color: "#00FF40" }}>
-          .COM
+        <span 
+          className={`font-archivo font-bold ${textSize} tracking-tight`} 
+          style={{ color: "#0000FF" }}
+        >
+          blue
         </span>
       </div>
     </div>

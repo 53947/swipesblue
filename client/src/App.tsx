@@ -1,9 +1,10 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import AdminLayout from "@/components/AdminLayout";
 import Home from "@/pages/Home";
 import Dashboard from "@/pages/Dashboard";
@@ -13,6 +14,8 @@ import ShoppingCart from "@/pages/ShoppingCart";
 import Checkout from "@/pages/Checkout";
 import Orders from "@/pages/Orders";
 import BrandStudio from "@/pages/BrandStudio";
+import Pricing from "@/pages/Pricing";
+import Demo from "@/pages/Demo";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import Merchants from "@/pages/admin/Merchants";
 import AdminTransactions from "@/pages/admin/AdminTransactions";
@@ -24,6 +27,8 @@ function Router() {
   return (
     <Switch>
       <Route path="/" component={Home} />
+      <Route path="/pricing" component={Pricing} />
+      <Route path="/demo" component={Demo} />
       <Route path="/dashboard" component={Dashboard} />
       <Route path="/transactions" component={Transactions} />
       <Route path="/products" component={Products} />
@@ -74,14 +79,26 @@ function Router() {
   );
 }
 
+function AppLayout() {
+  const [location] = useLocation();
+  const isAdminRoute = location.startsWith("/admin");
+  
+  return (
+    <div className="min-h-screen bg-background flex flex-col">
+      {!isAdminRoute && <Header />}
+      <main className="flex-1">
+        <Router />
+      </main>
+      {!isAdminRoute && <Footer />}
+    </div>
+  );
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <div className="min-h-screen bg-background">
-          <Header />
-          <Router />
-        </div>
+        <AppLayout />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>

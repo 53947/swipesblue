@@ -1,447 +1,353 @@
-import { useState, useEffect } from "react";
-import { CreditCard, ShoppingCart as CartIcon, Check, Package, Palette, ArrowRight, Zap, Shield, Globe } from "lucide-react";
+import { CreditCard, Code, LayoutDashboard, ShoppingCart, ArrowRight, Check, Shield, Zap, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import Logo from "@/components/Logo";
 import { Link } from "wouter";
 
+const stats = [
+  { value: "$2.4M+", label: "Processed" },
+  { value: "99.99%", label: "Uptime" },
+  { value: "500+", label: "Businesses" },
+  { value: "<2 sec", label: "Avg Response" },
+];
+
+const features = [
+  {
+    icon: CreditCard,
+    title: "Payment Processing",
+    description: "Accept all major cards online and in-person. Competitive rates with no hidden fees.",
+    link: "/demo",
+    linkText: "Learn more",
+    color: "#E00420",
+  },
+  {
+    icon: Code,
+    title: "Developer API",
+    description: "RESTful API with clear docs. Integrate in minutes, not days.",
+    link: "/admin/api-keys",
+    linkText: "View docs",
+    color: "#0000FF",
+  },
+  {
+    icon: LayoutDashboard,
+    title: "Merchant Dashboard",
+    description: "Real-time transaction monitoring. See every payment as it happens.",
+    link: "/dashboard",
+    linkText: "See dashboard",
+    color: "#1844A6",
+  },
+  {
+    icon: ShoppingCart,
+    title: "E-commerce Tools",
+    description: "Cart, checkout, and subscription management for your online store.",
+    link: "/products",
+    linkText: "Explore tools",
+    color: "#A855F7",
+  },
+];
+
+const demos = [
+  { icon: ShoppingCart, label: "Cart", href: "/shoppingcart" },
+  { icon: CreditCard, label: "Checkout", href: "/checkout" },
+  { icon: LayoutDashboard, label: "Orders", href: "/orders" },
+];
+
 export default function Home() {
-  const [transactionState, setTransactionState] = useState<"idle" | "processing" | "success" | "error">("idle");
-  const [formData, setFormData] = useState({
-    cardNumber: "",
-    expiry: "",
-    cvv: "",
-    amount: "99.99"
-  });
-
-  useEffect(() => {
-    if (transactionState === "success" || transactionState === "error") {
-      console.log("Success/Error state detected, setting timeout to reset");
-      const timer = setTimeout(() => {
-        console.log("Resetting to idle");
-        setTransactionState("idle");
-      }, 4000);
-      
-      return () => {
-        console.log("Cleaning up timer");
-        clearTimeout(timer);
-      };
-    }
-  }, [transactionState]);
-
-  const handleDemoTransaction = async (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Demo transaction started", formData);
-    setTransactionState("processing");
-    
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    const isSuccess = formData.cardNumber.replace(/\s/g, '').startsWith("4242");
-    console.log("Card number check:", formData.cardNumber, "-> isSuccess:", isSuccess);
-    
-    if (isSuccess) {
-      console.log("Setting success state");
-      setTransactionState("success");
-    } else {
-      console.log("Setting error state");
-      setTransactionState("error");
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-background">
-      <section className="relative overflow-hidden border-b border-[#E5E5E5]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+    <div className="min-h-screen bg-white">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden bg-gradient-to-br from-swipes-blue-deep via-swipes-blue-deep to-swipes-teal">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(168,85,247,0.15),transparent_50%)]" />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-32 relative">
           <div className="text-center space-y-8">
             <div className="flex justify-center mb-8">
-              <Logo showIcon variant="default" className="scale-150" />
+              <Logo showIcon variant="large" />
             </div>
             
-            <h1 className="text-5xl md:text-6xl font-bold tracking-tight">
-              <span style={{ color: "#FF0040" }}>Payment Infrastructure</span>
-              <br />
-              <span className="text-foreground">for Modern Commerce</span>
+            <h1 className="text-4xl md:text-6xl font-bold tracking-tight text-white">
+              Built for businesses to grow
             </h1>
             
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Build faster with modular payment tools. Subscribe to what you need—cart, checkout, or complete platform—and scale as you grow.
+            <p className="text-xl md:text-2xl font-medium text-swipes-purple">
+              Less fees. More revenue.
+            </p>
+            
+            <p className="text-lg text-gray-300 max-w-2xl mx-auto">
+              Simple payment processing for small businesses and developers.
+              Accept cards, manage transactions, and scale without complexity.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
               <Link href="/shoppingcart">
-                <Button size="lg" className="bg-[#FF0040] text-white px-8" data-testid="button-get-started">
+                <Button 
+                  size="lg" 
+                  className="bg-swipes-red hover:bg-swipes-red/90 text-white px-8 shadow-lg hover:shadow-cta-glow transition-all"
+                  data-testid="button-hero-get-started"
+                >
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
-              <Link href="/transactions">
-                <Button size="lg" variant="outline" data-testid="button-view-demo">
-                  View Demo
+              <Link href="/dashboard">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-white/30 text-white hover:bg-white/10 px-8"
+                  data-testid="button-hero-documentation"
+                >
+                  View Documentation
                 </Button>
               </Link>
             </div>
 
-            <div className="flex items-center justify-center gap-8 pt-8 text-sm text-muted-foreground">
+            <div className="flex flex-wrap items-center justify-center gap-8 pt-8 text-sm text-gray-300">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4" style={{ color: "#00FF40" }} />
+                <Shield className="h-4 w-4 text-green-400" />
                 <span>PCI Compliant</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4" style={{ color: "#0000FF" }} />
+                <Zap className="h-4 w-4 text-swipes-orange" />
                 <span>Real-time Processing</span>
               </div>
               <div className="flex items-center gap-2">
-                <Globe className="h-4 w-4" style={{ color: "#FF0040" }} />
-                <span>Global Payments</span>
+                <Clock className="h-4 w-4 text-swipes-purple" />
+                <span>24/7 Support</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-20 bg-muted/30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-              <Zap className="h-8 w-8" style={{ color: "#0000FF" }} />
-              <span style={{ color: "#0000FF" }}>Try It Live</span>
-            </h2>
-            <p className="text-muted-foreground text-lg">
-              Test our payment processing in real-time with instant feedback
-            </p>
-          </div>
-
-          <div className="max-w-2xl mx-auto">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5" style={{ color: "#FF0040" }} />
-                  Demo Transaction
-                </CardTitle>
-                <CardDescription>
-                  Use card number 4242 4242 4242 4242 for success, any other for decline
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handleDemoTransaction} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="demo-card">Card Number</Label>
-                    <Input
-                      id="demo-card"
-                      placeholder="4242 4242 4242 4242"
-                      value={formData.cardNumber}
-                      onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                      disabled={transactionState !== "idle"}
-                      data-testid="input-demo-card"
-                    />
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-expiry">Expiry</Label>
-                      <Input
-                        id="demo-expiry"
-                        placeholder="MM/YY"
-                        value={formData.expiry}
-                        onChange={(e) => setFormData({ ...formData, expiry: e.target.value })}
-                        disabled={transactionState !== "idle"}
-                        data-testid="input-demo-expiry"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="demo-cvv">CVV</Label>
-                      <Input
-                        id="demo-cvv"
-                        placeholder="123"
-                        value={formData.cvv}
-                        onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
-                        disabled={transactionState !== "idle"}
-                        data-testid="input-demo-cvv"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="demo-amount">Amount</Label>
-                    <Input
-                      id="demo-amount"
-                      placeholder="99.99"
-                      value={formData.amount}
-                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                      disabled={transactionState !== "idle"}
-                      data-testid="input-demo-amount"
-                    />
-                  </div>
-
-                  <Button 
-                    type="submit" 
-                    className="w-full bg-[#0000FF] text-white"
-                    disabled={transactionState !== "idle"}
-                    data-testid="button-process-demo"
-                  >
-                    {transactionState === "processing" && "Processing..."}
-                    {transactionState === "success" && "Success!"}
-                    {transactionState === "error" && "Declined"}
-                    {transactionState === "idle" && "Process Payment"}
-                  </Button>
-                </form>
-              </CardContent>
-              {(transactionState === "success" || transactionState === "error") && (
-                <CardFooter>
-                  <div 
-                    className={`w-full p-4 rounded-md ${
-                      transactionState === "success" ? "bg-[#00FF40]/10" : "bg-[#FF0040]/10"
-                    }`}
-                    role="status"
-                    aria-live="polite"
-                    data-testid={transactionState === "success" ? "message-success" : "message-error"}
-                  >
-                    <div className="flex items-center gap-2">
-                      {transactionState === "success" ? (
-                        <>
-                          <Check className="h-5 w-5" style={{ color: "#00FF40" }} data-testid="icon-success" />
-                          <span style={{ color: "#00FF40" }} className="font-medium" data-testid="text-success">
-                            Transaction approved • ${formData.amount}
-                          </span>
-                        </>
-                      ) : (
-                        <>
-                          <span className="text-xl" style={{ color: "#FF0040" }} data-testid="icon-error">×</span>
-                          <span style={{ color: "#FF0040" }} className="font-medium" data-testid="text-error">
-                            Transaction declined • Insufficient funds
-                          </span>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </CardFooter>
-              )}
-            </Card>
+      {/* Stats Bar */}
+      <section className="bg-swipes-gray-light border-y border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {stats.map((stat, index) => (
+              <div key={index} className="text-center">
+                <div className="text-3xl md:text-4xl font-bold text-swipes-blue-deep">
+                  {stat.value}
+                </div>
+                <div className="text-sm text-swipes-gray mt-1">
+                  {stat.label}
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      <section className="py-20">
+      {/* Features Grid */}
+      <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
-              <Package className="h-8 w-8" style={{ color: "#FF0040" }} />
-              <span style={{ color: "#FF0040" }}>Build Your Stack</span>
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
+              Everything you need to accept payments
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Subscribe to individual apps or get the complete platform
+            <p className="mt-4 text-lg text-swipes-gray max-w-2xl mx-auto">
+              Modular tools that work together seamlessly. Start small and scale as you grow.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8 mb-12">
-            <Card className="relative hover-elevate" data-testid="card-product-shoppingcart">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <CartIcon className="h-6 w-6" style={{ color: "#00FF40" }} />
-                  <Badge variant="secondary">App</Badge>
-                </div>
-                <CardTitle className="text-2xl">
-                  <span style={{ color: "#09080e" }}>/</span>
-                  <span style={{ color: "#00FF40" }}>shoppingcart</span>
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Powerful cart management for any website or platform
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-3xl font-bold" style={{ color: "#FF0040" }}>
-                  $59<span className="text-lg text-muted-foreground">/mo</span>
-                </div>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Multi-device cart sync</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Abandoned cart recovery</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Real-time inventory</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>API & webhook integration</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link href="/shoppingcart" className="w-full">
-                  <Button variant="outline" className="w-full" data-testid="button-demo-shoppingcart">
-                    View Demo
-                  </Button>
-                </Link>
-                <Button className="w-full bg-[#00FF40] text-black" data-testid="button-subscribe-shoppingcart">
-                  Subscribe
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="relative hover-elevate" data-testid="card-product-checkout">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <CreditCard className="h-6 w-6" style={{ color: "#00FF40" }} />
-                  <Badge variant="secondary">App</Badge>
-                </div>
-                <CardTitle className="text-2xl">
-                  <span style={{ color: "#09080e" }}>/</span>
-                  <span style={{ color: "#00FF40" }}>checkout</span>
-                </CardTitle>
-                <CardDescription className="text-base">
-                  Optimized checkout experience with one-click payments
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-3xl font-bold" style={{ color: "#FF0040" }}>
-                  $129<span className="text-lg text-muted-foreground">/mo</span>
-                </div>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>One-click checkout</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Saved payment methods</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>PCI-compliant tokenization</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Multiple payment gateways</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link href="/checkout" className="w-full">
-                  <Button variant="outline" className="w-full" data-testid="button-demo-checkout">
-                    View Demo
-                  </Button>
-                </Link>
-                <Button className="w-full bg-[#00FF40] text-black" data-testid="button-subscribe-checkout">
-                  Subscribe
-                </Button>
-              </CardFooter>
-            </Card>
-
-            <Card className="relative hover-elevate" data-testid="card-product-brandstudio">
-              <CardHeader>
-                <div className="flex items-center gap-2 mb-2">
-                  <Palette className="h-6 w-6" style={{ color: "#00FF40" }} />
-                  <Badge variant="secondary">Premium</Badge>
-                </div>
-                <CardTitle className="text-2xl">
-                  <span style={{ color: "#09080e" }}>/</span>
-                  <span style={{ color: "#00FF40" }}>brand-studio</span>
-                </CardTitle>
-                <CardDescription className="text-base">
-                  White-label gateway with full brand customization
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-3xl font-bold" style={{ color: "#FF0040" }}>
-                  $249<span className="text-lg text-muted-foreground">/mo</span>
-                </div>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Custom branding & colors</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Upload logos & assets</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>White-label gateway</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Check className="h-4 w-4 mt-0.5" style={{ color: "#00FF40" }} />
-                    <span>Priority support</span>
-                  </li>
-                </ul>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-2">
-                <Link href="/brand-studio" className="w-full">
-                  <Button variant="outline" className="w-full" data-testid="button-demo-brandstudio">
-                    View Demo
-                  </Button>
-                </Link>
-                <Button className="w-full bg-[#00FF40] text-black" data-testid="button-subscribe-brandstudio">
-                  Subscribe
-                </Button>
-              </CardFooter>
-            </Card>
+          <div className="grid md:grid-cols-2 gap-6">
+            {features.map((feature) => {
+              const Icon = feature.icon;
+              return (
+                <Card 
+                  key={feature.title}
+                  className="border border-gray-200 rounded-card shadow-card-subtle hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5"
+                >
+                  <CardContent className="p-8">
+                    <div 
+                      className="w-12 h-12 rounded-lg flex items-center justify-center mb-6"
+                      style={{ backgroundColor: `${feature.color}15` }}
+                    >
+                      <Icon className="h-6 w-6" style={{ color: feature.color }} />
+                    </div>
+                    <h3 className="text-xl font-semibold text-swipes-black mb-3">
+                      {feature.title}
+                    </h3>
+                    <p className="text-swipes-gray mb-6 leading-relaxed">
+                      {feature.description}
+                    </p>
+                    <Link href={feature.link}>
+                      <span className="inline-flex items-center text-swipes-blue-pure font-medium hover:underline">
+                        {feature.linkText}
+                        <ArrowRight className="ml-1 h-4 w-4" />
+                      </span>
+                    </Link>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
-
-          <Card className="bg-gradient-to-br from-[#FF0040]/5 to-[#0000FF]/5 border-2" style={{ borderColor: "#FF0040" }} data-testid="card-bundle">
-            <CardHeader className="text-center">
-              <div className="flex justify-center mb-2">
-                <Badge className="bg-[#FF0040] text-white">Best Value</Badge>
-              </div>
-              <CardTitle className="text-3xl">Complete Platform Bundle</CardTitle>
-              <CardDescription className="text-lg">
-                Get all three apps with premium features and save 40%
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center space-y-4">
-                <div>
-                  <div className="text-5xl font-bold" style={{ color: "#FF0040" }}>
-                    $329<span className="text-2xl text-muted-foreground">/mo</span>
-                  </div>
-                  <p className="text-muted-foreground mt-2">
-                    Save $108/month (25% discount) compared to individual subscriptions
-                  </p>
-                </div>
-                
-                <div className="flex items-center justify-center gap-4 text-sm">
-                  <div className="flex items-center gap-2">
-                    <Package className="h-4 w-4" style={{ color: "#00FF40" }} />
-                    <span>All Apps Included</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" style={{ color: "#00FF40" }} />
-                    <span>Enterprise Support</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Zap className="h-4 w-4" style={{ color: "#00FF40" }} />
-                    <span>Priority Features</span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="flex justify-center">
-              <Button size="lg" className="bg-[#FF0040] text-white px-12" data-testid="button-subscribe-bundle">
-                Start Free Trial
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </CardFooter>
-          </Card>
         </div>
       </section>
 
-      <section className="py-20 bg-muted/30 border-t border-[#E5E5E5]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold mb-4">
-            Ready to <span style={{ color: "#0000FF" }}>build better</span> commerce?
+      {/* Pricing Preview */}
+      <section className="py-20 md:py-28 bg-swipes-gray-light">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
+              Simple, transparent pricing
+            </h2>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            <Card className="border border-gray-200 rounded-card bg-white">
+              <CardContent className="p-8 text-center">
+                <div className="text-sm font-semibold text-swipes-gray uppercase tracking-wider mb-4">
+                  Transaction
+                </div>
+                <div className="mb-6">
+                  <span className="text-4xl font-bold text-swipes-red">2.9% + 30¢</span>
+                  <div className="text-sm text-swipes-gray mt-1">per transaction</div>
+                </div>
+                <ul className="space-y-3 text-left mb-8">
+                  {["No monthly fees", "No setup fees", "No hidden costs"].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-swipes-gray">
+                      <Check className="h-4 w-4 text-swipes-blue-pure flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/shoppingcart">
+                  <Button className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white">
+                    Start processing
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="border border-gray-200 rounded-card bg-white">
+              <CardContent className="p-8 text-center">
+                <div className="text-sm font-semibold text-swipes-gray uppercase tracking-wider mb-4">
+                  E-commerce
+                </div>
+                <div className="mb-6">
+                  <span className="text-sm text-swipes-gray">Starting at</span>
+                  <div className="text-4xl font-bold text-swipes-red">$99/month</div>
+                </div>
+                <ul className="space-y-3 text-left mb-8">
+                  {["Shopping cart", "Checkout system", "Subscription billing"].map((item) => (
+                    <li key={item} className="flex items-center gap-2 text-swipes-gray">
+                      <Check className="h-4 w-4 text-swipes-blue-pure flex-shrink-0" />
+                      <span>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/pricing">
+                  <Button variant="outline" className="w-full border-swipes-blue-deep text-swipes-blue-deep hover:bg-swipes-blue-deep hover:text-white">
+                    View plans
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-8">
+            <Link href="/pricing">
+              <span className="text-swipes-blue-pure font-medium hover:underline inline-flex items-center">
+                See full pricing details
+                <ArrowRight className="ml-1 h-4 w-4" />
+              </span>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Developer Preview */}
+      <section className="py-20 md:py-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
+                Start accepting payments in minutes
+              </h2>
+              <p className="text-lg text-swipes-gray mb-8 leading-relaxed">
+                Our RESTful API is designed for developers who want to integrate fast without the complexity. 
+                Clear documentation, predictable responses, and sandbox testing.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/dashboard">
+                  <Button className="bg-swipes-red hover:bg-swipes-red/90 text-white">
+                    Read the docs
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+                <Link href="/admin/api-keys">
+                  <Button variant="outline" className="border-swipes-blue-deep text-swipes-blue-deep hover:bg-swipes-blue-deep hover:text-white">
+                    Get API keys
+                  </Button>
+                </Link>
+              </div>
+            </div>
+
+            <div className="bg-swipes-black rounded-card p-6 overflow-x-auto">
+              <pre className="text-sm font-mono">
+                <code className="text-gray-300">
+{`curl https://api.swipesblue.com/v1/payments \\
+  -H "Authorization: Bearer sk_live_..." \\
+  -d amount=2000 \\
+  -d currency=usd \\
+  -d description="Payment for order #1234"`}
+                </code>
+              </pre>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Demo Section */}
+      <section className="py-20 md:py-28 bg-swipes-gray-light">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
+              See it in action
+            </h2>
+            <p className="mt-4 text-lg text-swipes-gray">
+              Experience SwipesBlue-powered commerce with our live demos.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4 md:gap-6 max-w-lg mx-auto">
+            {demos.map((demo) => {
+              const Icon = demo.icon;
+              return (
+                <Link key={demo.label} href={demo.href}>
+                  <Card className="border border-gray-200 rounded-card bg-white hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
+                    <CardContent className="p-6 text-center">
+                      <Icon className="h-8 w-8 mx-auto mb-3 text-swipes-blue-deep" />
+                      <div className="font-medium text-swipes-black mb-2">{demo.label}</div>
+                      <span className="text-sm text-swipes-blue-pure inline-flex items-center">
+                        Try
+                        <ArrowRight className="ml-1 h-3 w-3" />
+                      </span>
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 md:py-28 bg-gradient-to-r from-swipes-blue-deep to-swipes-teal">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Ready to get started?
           </h2>
-          <p className="text-muted-foreground text-lg mb-8">
-            Join thousands of businesses processing payments with SwipesBlue
+          <p className="text-lg text-gray-300 mb-8 max-w-xl mx-auto">
+            Create your account in minutes and start accepting payments today.
           </p>
           <Link href="/shoppingcart">
-            <Button size="lg" className="bg-[#FF0040] text-white px-8" data-testid="button-cta-start">
+            <Button 
+              size="lg" 
+              className="bg-swipes-red hover:bg-swipes-red/90 text-white px-10 shadow-lg hover:shadow-cta-glow transition-all"
+              data-testid="button-cta-get-started"
+            >
               Get Started Free
             </Button>
           </Link>

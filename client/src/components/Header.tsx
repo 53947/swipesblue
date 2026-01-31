@@ -1,68 +1,83 @@
 import { Link, useLocation } from "wouter";
 import Logo from "./Logo";
-import { ShoppingCart as CartIcon, Menu, CreditCard, Palette, Home as HomeIcon, LayoutDashboard, Receipt, Package, FileText } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface NavItem {
   path: string;
   label: string;
-  icon?: React.ElementType;
 }
 
 const navItems: NavItem[] = [
-  { path: "/", label: "Home", icon: HomeIcon },
-  { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { path: "/transactions", label: "Transactions", icon: Receipt },
-  { path: "/products", label: "Products", icon: Package },
-  { path: "/orders", label: "Orders", icon: FileText },
-  { path: "/shoppingcart", label: "shoppingcart", icon: CartIcon },
-  { path: "/checkout", label: "checkout", icon: CreditCard },
-  { path: "/brand-studio", label: "brand-studio", icon: Palette },
+  { path: "/demo", label: "Products" },
+  { path: "/pricing", label: "Pricing" },
+  { path: "/dashboard", label: "Dashboard" },
 ];
 
 export default function Header() {
   const [location] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 bg-background border-b border-[#E5E5E5]">
+    <header 
+      className={`sticky top-0 z-50 bg-white transition-shadow duration-200 ${
+        scrolled ? "shadow-md" : "border-b border-gray-100"
+      }`}
+      data-testid="header"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-18">
-          <Link href="/" className="flex-shrink-0">
-            <Logo showIcon />
-          </Link>
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex-shrink-0">
+              <Logo showIcon variant="default" />
+            </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
-            {navItems.map((item) => {
-              const isActive = location === item.path;
-              const isAppRoute = item.path === "/shoppingcart" || item.path === "/checkout" || item.path === "/brand-studio";
-              const Icon = item.icon;
-              
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  data-testid={`link-nav-${item.label.toLowerCase().replace(/\s/g, '-')}`}
-                >
-                  <span className={`flex items-center gap-1.5 text-base transition-opacity hover:opacity-70 ${
-                    isActive ? 'font-medium' : ''
-                  }`}>
-                    {Icon && <Icon className="h-4 w-4" style={{ color: isAppRoute ? "#00FF40" : "#09080e" }} />}
-                    {isAppRoute && (
-                      <span style={{ color: "#09080e" }}>/</span>
-                    )}
-                    <span style={{ color: isAppRoute ? "#00FF40" : "#09080e" }}>{item.label}</span>
-                  </span>
-                </Link>
-              );
-            })}
-          </nav>
+            <nav className="hidden md:flex items-center gap-6">
+              {navItems.map((item) => {
+                const isActive = location === item.path;
+                
+                return (
+                  <Link
+                    key={item.path}
+                    href={item.path}
+                    data-testid={`link-nav-${item.label.toLowerCase()}`}
+                  >
+                    <span className={`text-[15px] transition-colors hover:text-swipes-blue-deep ${
+                      isActive ? "text-swipes-blue-deep font-medium" : "text-swipes-gray"
+                    }`}>
+                      {item.label}
+                    </span>
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
 
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-4">
+            <Link href="/admin">
+              <span 
+                className="text-[15px] text-swipes-gray hover:text-swipes-blue-deep transition-colors"
+                data-testid="link-sign-in"
+              >
+                Sign in
+              </span>
+            </Link>
             <Link href="/shoppingcart">
-              <Button size="icon" variant="ghost" data-testid="button-cart">
-                <CartIcon className="h-5 w-5" />
+              <Button 
+                className="bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
+                data-testid="button-get-started"
+              >
+                Get Started
               </Button>
             </Link>
           </div>
@@ -74,16 +89,15 @@ export default function Header() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             data-testid="button-mobile-menu"
           >
-            <Menu className="h-5 w-5" />
+            {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
         </div>
 
         {mobileMenuOpen && (
-          <div className="md:hidden py-4 border-t border-border">
+          <div className="md:hidden py-4 border-t border-gray-100">
             <nav className="flex flex-col gap-4">
               {navItems.map((item) => {
-                const isAppRoute = item.path === "/shoppingcart" || item.path === "/checkout" || item.path === "/brand-studio";
-                const Icon = item.icon;
+                const isActive = location === item.path;
                 
                 return (
                   <Link
@@ -91,16 +105,24 @@ export default function Header() {
                     href={item.path}
                     onClick={() => setMobileMenuOpen(false)}
                   >
-                    <span className="flex items-center gap-1.5">
-                      {Icon && <Icon className="h-4 w-4" style={{ color: isAppRoute ? "#00FF40" : "#09080e" }} />}
-                      {isAppRoute && (
-                        <span style={{ color: "#09080e" }}>/</span>
-                      )}
-                      <span style={{ color: isAppRoute ? "#00FF40" : "#09080e" }}>{item.label}</span>
+                    <span className={`text-[15px] ${
+                      isActive ? "text-swipes-blue-deep font-medium" : "text-swipes-gray"
+                    }`}>
+                      {item.label}
                     </span>
                   </Link>
                 );
               })}
+              <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
+                <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                  <span className="text-[15px] text-swipes-gray">Sign in</span>
+                </Link>
+                <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)}>
+                  <Button className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white">
+                    Get Started
+                  </Button>
+                </Link>
+              </div>
             </nav>
           </div>
         )}

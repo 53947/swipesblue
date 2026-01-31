@@ -9,6 +9,7 @@ export default {
         lg: ".5625rem", /* 9px */
         md: ".375rem", /* 6px */
         sm: ".1875rem", /* 3px */
+        card: "12px",
       },
       colors: {
         // Flat / base colors (regular buttons)
@@ -92,9 +93,6 @@ export default {
           gray: "#6B7280",
           "gray-light": "#F5F5F5",
         },
-      },
-      borderRadius: {
-        card: "12px",
       },
       boxShadow: {
         "card-subtle": "0 4px 12px rgba(0, 0, 0, 0.05)",
