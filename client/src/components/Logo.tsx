@@ -62,7 +62,7 @@ export default function Logo({
             color: "#E00420",
             fontSize: fontSize,
             textShadow: swipesTextShadow,
-            letterSpacing: "-0.02em"
+            letterSpacing: "0.02em"
           }}
         >
           swipes
@@ -73,7 +73,7 @@ export default function Logo({
             color: "#0000FF",
             fontSize: fontSize,
             textShadow: blueTextShadow,
-            letterSpacing: "-0.02em"
+            letterSpacing: "0.02em"
           }}
         >
           blue
