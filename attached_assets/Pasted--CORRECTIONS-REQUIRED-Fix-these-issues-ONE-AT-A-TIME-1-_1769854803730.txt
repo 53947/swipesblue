@@ -1,0 +1,54 @@
+## CORRECTIONS REQUIRED — Fix these issues ONE AT A TIME
+
+### 1. HEADER LOGO
+Still duplicated. Show "swipesblue" ONE TIME only (icon + wordmark together). Remove the duplicate text.
+
+### 2. HERO VISUAL
+Replace the current pastel gradient blob with a dynamic "swoosh" design inspired by the attached image (swooch_in_color.png).
+
+**Requirements:**
+- Create a flowing, curved swoosh/wave design
+- Use the SwipesBlue brand colors: Red (#E00420), Blue Pure (#0000FF), Blue Deep (#1844A6), Purple (#A855F7), Teal (#064A6C)
+- Should feel like motion/movement (represents the "swipe" in SwipesBlue)
+- Position on the right side of the hero, flowing diagonally
+- Do NOT copy the attached image exactly — use it as inspiration to create something original
+- Keep the white background — the swoosh should sit ON the white, not replace it
+
+### 3. HEADLINE COPY
+Change to MY tagline, not Stripe's:
+
+**Main headline:** "Built for businesses to grow"
+**Sub headline:** "Less fees. More revenue."
+**Description:** "Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity."
+
+### 4. SECONDARY BUTTON
+Change "Contact sales" to "View Documentation"
+
+### 5. BUTTON STYLING — GLOBAL FIX
+Buttons are inconsistent across the site. Some are rounded, some are square.
+
+**Fix ALL buttons site-wide to use this standard:**
+```css
+border-radius: 7px;
+```
+
+This applies to:
+- Primary buttons (red)
+- Secondary/outline buttons
+- All buttons on every page
+
+No fully rounded buttons (pill shape). No sharp square corners. **7px border-radius everywhere.**
+
+---
+
+## PROCESS
+
+1. Fix issue #1 (header logo) → Show me → Wait for approval
+2. Fix issue #2 (hero swoosh) → Show me → Wait for approval
+3. Fix issue #3 (headline copy) → Show me → Wait for approval
+4. Fix issue #4 (secondary button) → Show me → Wait for approval
+5. Fix issue #5 (button styling global) → Show me → Wait for approval
+
+Do NOT proceed to the next fix until I approve the current one.
+
+Start with #1 now.

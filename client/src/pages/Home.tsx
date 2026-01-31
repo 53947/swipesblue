@@ -1,7 +1,6 @@
 import { CreditCard, Code, LayoutDashboard, ShoppingCart, ArrowRight, Check, Shield, Zap, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import Logo from "@/components/Logo";
 import { Link } from "wouter";
 
 const stats = [
