@@ -81,12 +81,12 @@ export default function Home() {
                 <Link href="/shoppingcart">
                   <Button 
                     size="lg" 
-                    className="bg-swipes-red hover:bg-swipes-red/90 text-white px-6 py-3 shadow-md transition-all font-medium"
+                    className="group bg-swipes-red hover:bg-swipes-red/90 text-white px-6 py-3 shadow-md transition-all font-medium"
                     style={{ borderRadius: '7px' }}
                     data-testid="button-hero-get-started"
                   >
                     Get Started
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                    <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
                   </Button>
                 </Link>
                 <Link href="/dashboard">

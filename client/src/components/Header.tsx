@@ -1,6 +1,6 @@
 import { Link, useLocation } from "wouter";
 import Logo from "./Logo";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect } from "react";
 
@@ -75,10 +75,11 @@ export default function Header() {
           </Link>
           <Link href="/shoppingcart" className="flex items-center">
             <Button 
-              className="bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
+              className="group bg-swipes-red hover:bg-swipes-red/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all"
               data-testid="button-get-started"
             >
               Get Started
+              <ArrowRight className="ml-2 h-4 w-4 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
             </Button>
           </Link>
         </div>
