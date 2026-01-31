@@ -38,7 +38,7 @@ export default function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center gap-8">
-            <Link href="/" className="flex-shrink-0">
+            <Link href="/" className="flex-shrink-0" data-testid="link-logo-home">
               <Logo showIcon variant="default" />
             </Link>
 
@@ -104,6 +104,7 @@ export default function Header() {
                     key={item.path}
                     href={item.path}
                     onClick={() => setMobileMenuOpen(false)}
+                    data-testid={`link-mobile-nav-${item.label.toLowerCase()}`}
                   >
                     <span className={`text-[15px] ${
                       isActive ? "text-swipes-blue-deep font-medium" : "text-swipes-gray"
@@ -114,11 +115,11 @@ export default function Header() {
                 );
               })}
               <div className="pt-4 border-t border-gray-100 flex flex-col gap-3">
-                <Link href="/admin" onClick={() => setMobileMenuOpen(false)}>
+                <Link href="/admin" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-sign-in">
                   <span className="text-[15px] text-swipes-gray">Sign in</span>
                 </Link>
-                <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white">
+                <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-get-started">
+                  <Button className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white" data-testid="button-mobile-get-started">
                     Get Started
                   </Button>
                 </Link>

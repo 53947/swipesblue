@@ -45,7 +45,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.products.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href}>
+                  <Link href={link.href} data-testid={`link-footer-product-${link.label.toLowerCase()}`}>
                     <span className="text-gray-400 hover:text-white transition-colors text-sm">
                       {link.label}
                     </span>
@@ -62,7 +62,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.resources.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href}>
+                  <Link href={link.href} data-testid={`link-footer-resource-${link.label.toLowerCase().replace(/\s+/g, '-')}`}>
                     <span className="text-gray-400 hover:text-white transition-colors text-sm">
                       {link.label}
                     </span>
@@ -79,7 +79,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.company.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href}>
+                  <Link href={link.href} data-testid={`link-footer-company-${link.label.toLowerCase()}`}>
                     <span className="text-gray-400 hover:text-white transition-colors text-sm">
                       {link.label}
                     </span>
@@ -95,12 +95,12 @@ export default function Footer() {
             © {new Date().getFullYear()} SwipesBlue. All rights reserved.
           </p>
           <div className="flex items-center gap-6">
-            <Link href="/">
+            <Link href="/" data-testid="link-footer-terms">
               <span className="text-gray-400 hover:text-white transition-colors text-sm">
                 Terms
               </span>
             </Link>
-            <Link href="/">
+            <Link href="/" data-testid="link-footer-privacy">
               <span className="text-gray-400 hover:text-white transition-colors text-sm">
                 Privacy
               </span>
