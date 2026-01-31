@@ -84,6 +84,7 @@ export default {
         },
         swipes: {
           red: "#E00420",
+          green: "#00FF40",
           "blue-pure": "#0000FF",
           "blue-deep": "#1844A6",
           teal: "#064A6C",
