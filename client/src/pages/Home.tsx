@@ -86,7 +86,7 @@ export default function Home() {
                     data-testid="button-hero-get-started"
                   >
                     Get Started
-                    <ArrowRight className="ml-0 h-4 w-0 overflow-hidden group-hover:ml-2 group-hover:w-4 transition-all duration-200" />
+                    <ArrowRight className="h-4 w-0 opacity-0 group-hover:w-4 group-hover:ml-2 group-hover:opacity-100 transition-all duration-200" />
                   </Button>
                 </Link>
                 <Link href="/dashboard">
