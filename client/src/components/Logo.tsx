@@ -1,4 +1,4 @@
-import logoIcon from "@assets/swipesblue_logo_1769875241948.png";
+import logoIcon from "@assets/swipesblue_logo_1769971645259.png";
 
 interface LogoProps {
   variant?: "default" | "small" | "large";
