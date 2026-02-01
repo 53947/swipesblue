@@ -84,12 +84,14 @@ function AppLayout() {
   const isAdminRoute = location.startsWith("/admin");
   
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {!isAdminRoute && <Header />}
-      <main className="flex-1">
-        <Router />
-      </main>
-      {!isAdminRoute && <Footer />}
+    <div className="min-h-screen bg-[#F6F9FC]">
+      <div className="max-w-[1400px] mx-auto bg-white min-h-screen flex flex-col border-x border-gray-200">
+        {!isAdminRoute && <Header />}
+        <main className="flex-1">
+          <Router />
+        </main>
+        {!isAdminRoute && <Footer />}
+      </div>
     </div>
   );
 }
