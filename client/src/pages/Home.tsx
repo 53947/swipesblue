@@ -81,12 +81,16 @@ export default function Home() {
                 <Link href="/shoppingcart">
                   <Button 
                     size="lg" 
-                    className="group bg-swipes-teal hover:bg-swipes-teal/90 text-white px-6 py-3 shadow-md transition-all font-medium"
+                    className="group bg-swipes-teal hover:bg-swipes-teal/90 text-white px-6 py-3 shadow-md transition-all font-medium justify-center"
                     style={{ borderRadius: '7px' }}
                     data-testid="button-hero-get-started"
                   >
-                    Get Started
-                    <ArrowRight className="h-4 w-0 opacity-0 group-hover:w-4 group-hover:ml-2 group-hover:opacity-100 transition-all duration-200" />
+                    <span className="flex items-center">
+                      Get Started
+                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </span>
+                    </span>
                   </Button>
                 </Link>
                 <Link href="/dashboard">

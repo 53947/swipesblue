@@ -1,0 +1,80 @@
+## SwipesBlue Final Polish — Let's Get This Right
+
+We're close to having a professional, Stripe-quality site. These final fixes will take it from "almost there" to "ready to impress."
+
+---
+
+### FIX 1: Header Alignment
+
+**The issue:** Navigation links (Products, Pricing, Dashboard) are floating higher than the logo text. Everything should sit on the same visual line.
+
+**The solution:**
+- Apply `display: flex` and `align-items: center` to the header container
+- All elements should be vertically centered in a single row:
+  - Left: Logo (icon + "swipesblue" text)
+  - Center: Nav links
+  - Right: Sign in + Get Started button
+
+**Success looks like:** One clean horizontal line across the header — no elements floating higher or lower than others.
+
+---
+
+### FIX 2: Hero Visual Element
+
+**The issue:** The right side of the hero section is empty white space. You confirmed the image was added, but nothing is rendering.
+
+**The solution:**
+Use the attached image file (marching_colors.png) directly. Add it to the right side of the hero section.
+
+- Position it on the right half of the hero
+- Size/crop appropriately so it flows with the layout
+- The image sits ON the white background
+- Do NOT recreate it, do NOT use it as "inspiration" — use the actual image file I provided
+
+**Success looks like:** The hero section has the tagline on the left and the marching_colors.png image displaying on the right.
+
+---
+
+### FIX 3: Remaining Polish (After 1 & 2 Are Approved)
+
+**A. Footer**
+- Match Stripe's footer: white or light gray (#F5F5F5) background
+- Multi-column layout with category headers (Products, Resources, Company, Support)
+- Clean typography, generous whitespace
+- Copyright line at bottom
+- Reference: https://stripe.com (scroll to footer)
+
+**B. Mega Menus**
+- Navigation dropdowns should be full-width Stripe-style mega menus
+- White background, organized columns, category headers
+- Smooth open/close animation
+- Reference: https://stripe.com — click "Products" in their nav
+
+**C. Button Consistency**
+- Audit ALL buttons site-wide
+- Every button should use: `border-radius: 7px`
+- No pill-shaped buttons (too rounded)
+- No sharp square corners (0px)
+- Consistent across homepage, pricing, demo pages, dashboard, admin
+
+---
+
+## Execution Plan
+
+| Step | Task | Deliverable |
+|------|------|-------------|
+| 1 | Fix header alignment | Screenshot for approval |
+| 2 | Add marching_colors.png to hero | Screenshot for approval |
+| 3a | Update footer to match Stripe | Screenshot for approval |
+| 3b | Implement mega menus | Screenshot for approval |
+| 3c | Audit and fix button border-radius | Confirmation + screenshot |
+
+**Do each step one at a time. Wait for my approval before proceeding to the next.**
+
+---
+
+## Let's Finish Strong
+
+We're in the final stretch. These fixes will elevate SwipesBlue from a good site to a professional, trust-building gateway that competes visually with Stripe.
+
+**Start with Fix 1 (header alignment) now. Show me the result.**
