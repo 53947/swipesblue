@@ -59,7 +59,7 @@ export default function Products() {
       {/* Demo Banner */}
       <div className="bg-swipes-blue-deep text-white py-3 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
-          <span className="bg-swipes-purple/20 text-swipes-purple px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
+          <span className="bg-white/20 text-white px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
           <span>This is a live demo of the SwipesBlue product catalog</span>
         </div>
       </div>
@@ -141,7 +141,7 @@ export default function Products() {
               <CardContent className="flex-1">
                 <p className="text-sm text-muted-foreground mb-4">{product.description}</p>
                 <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-swipes-red" data-testid={`price-${product.id}`}>
+                  <span className="text-2xl font-bold text-swipes-blue-deep" data-testid={`price-${product.id}`}>
                     ${parseFloat(product.price).toFixed(2)}
                   </span>
                   {product.stock !== undefined && product.stock > 0 && (
@@ -153,7 +153,7 @@ export default function Products() {
               </CardContent>
               <CardFooter>
                 <Button
-                  className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white"
+                  className="w-full bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white"
                   onClick={() => handleAddToCart(product.id)}
                   disabled={product.stock === 0}
                   data-testid={`button-add-to-cart-${product.id}`}

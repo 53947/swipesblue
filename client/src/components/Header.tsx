@@ -1,35 +1,57 @@
 import { Link, useLocation } from "wouter";
 import Logo from "./Logo";
-import { Menu, X, ArrowRight, CreditCard, Code, LayoutDashboard, ShoppingCart, Zap, Shield, ChevronDown, FileText, Settings, Users, Key, Webhook } from "lucide-react";
+import { Menu, X, ArrowRight, CreditCard, Code, LayoutDashboard, ShoppingCart, ChevronDown, FileText, Settings, Users, Key, Webhook, Package, Palette, Mail, BookOpen, Phone, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { useState, useEffect, useRef } from "react";
 
-const megaMenus = {
+type BadgeType = "FREE" | "NEW" | "PRO" | null;
+
+interface MenuItem {
+  icon: any;
+  label: string;
+  description: string;
+  href: string;
+  badge?: BadgeType;
+  price?: string;
+}
+
+interface MenuColumn {
+  title: string;
+  subtitle?: string;
+  items: MenuItem[];
+  ctaLabel?: string;
+  ctaHref?: string;
+}
+
+const megaMenus: Record<string, { columns: MenuColumn[] }> = {
   products: {
     columns: [
       {
-        title: "Payments",
+        title: "E-Commerce Suite",
+        subtitle: "Everything you need to sell online",
         items: [
-          { icon: CreditCard, label: "Payment Processing", description: "Accept cards and digital wallets", href: "/demo" },
-          { icon: ShoppingCart, label: "E-commerce", description: "Online store integration", href: "/products" },
-          { icon: Zap, label: "Instant Payouts", description: "Fast access to your funds", href: "/demo" },
-        ]
+          { icon: Package, label: "Product Catalog", description: "List and manage products", href: "/products", badge: "FREE" },
+          { icon: ShoppingCart, label: "Shopping Cart", description: "Add to cart, update qty", href: "/shoppingcart", badge: "FREE" },
+          { icon: CreditCard, label: "Checkout", description: "Secure payment processing", href: "/checkout", badge: "FREE" },
+          { icon: LayoutDashboard, label: "Order Management", description: "Track and fulfill orders", href: "/orders", badge: "FREE" },
+          { icon: Palette, label: "Brand Studio", description: "White-label your checkout", href: "/brand-studio", badge: "PRO", price: "$79/mo" },
+          { icon: Mail, label: "Abandoned Cart Recovery", description: "Recover lost sales", href: "/demo", badge: "NEW", price: "From $29/mo" },
+        ],
+        ctaLabel: "View All E-Commerce Features",
+        ctaHref: "/demo"
       },
       {
-        title: "Business Tools",
+        title: "Developer Tools",
+        subtitle: "Build custom payment integrations",
         items: [
-          { icon: LayoutDashboard, label: "Dashboard", description: "Monitor your business", href: "/dashboard" },
-          { icon: FileText, label: "Invoicing", description: "Send and track invoices", href: "/demo" },
-          { icon: Shield, label: "Fraud Protection", description: "Advanced security features", href: "/demo" },
-        ]
-      },
-      {
-        title: "Developer",
-        items: [
-          { icon: Code, label: "API", description: "Build custom integrations", href: "/admin/api-keys" },
+          { icon: Code, label: "Payment API", description: "Accept payments anywhere", href: "/admin/api-keys", price: "2.9% + 30¢" },
           { icon: Webhook, label: "Webhooks", description: "Real-time event notifications", href: "/admin/webhooks" },
           { icon: Key, label: "API Keys", description: "Manage your credentials", href: "/admin/api-keys" },
-        ]
+          { icon: BookOpen, label: "Documentation", description: "API reference & guides", href: "/dashboard", badge: "FREE" },
+        ],
+        ctaLabel: "View API Documentation",
+        ctaHref: "/dashboard"
       }
     ]
   },
@@ -38,7 +60,7 @@ const megaMenus = {
       {
         title: "Documentation",
         items: [
-          { icon: FileText, label: "Getting Started", description: "Quick start guide", href: "/dashboard" },
+          { icon: BookOpen, label: "Getting Started", description: "Quick start guide", href: "/dashboard" },
           { icon: Code, label: "API Reference", description: "Complete API docs", href: "/admin/api-keys" },
           { icon: Settings, label: "Integration Guides", description: "Step-by-step tutorials", href: "/demo" },
         ]
@@ -46,8 +68,9 @@ const megaMenus = {
       {
         title: "Support",
         items: [
-          { icon: Users, label: "Contact Sales", description: "Talk to our team", href: "/" },
-          { icon: Shield, label: "Help Center", description: "FAQs and support", href: "/" },
+          { icon: Users, label: "Help Center", description: "FAQs and tutorials", href: "/" },
+          { icon: Phone, label: "Contact Sales", description: "Talk to our team", href: "/" },
+          { icon: Activity, label: "System Status", description: "Uptime and incidents", href: "/" },
         ]
       }
     ]
@@ -200,40 +223,70 @@ export default function Header() {
       </div>
 
       {/* Mega Menu Dropdowns */}
-      {activeMenu && megaMenus[activeMenu as keyof typeof megaMenus] && (
+      {activeMenu && megaMenus[activeMenu] && (
         <div 
           className="absolute left-0 right-0 bg-white border-t border-gray-100 shadow-lg animate-in fade-in slide-in-from-top-2 duration-200"
           onMouseEnter={() => handleMouseEnter(activeMenu)}
           onMouseLeave={handleMouseLeave}
         >
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="grid grid-cols-3 gap-8">
-              {megaMenus[activeMenu as keyof typeof megaMenus].columns.map((column, colIndex) => (
-                <div key={colIndex} className={colIndex > 0 ? "border-l border-gray-100 pl-8" : ""}>
-                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-4">
-                    {column.title}
-                  </h3>
+            <div className={`grid gap-8 ${activeMenu === 'products' ? 'grid-cols-2' : 'grid-cols-2'}`}>
+              {megaMenus[activeMenu].columns.map((column, colIndex) => (
+                <div key={colIndex} className={colIndex > 0 ? "border-l border-gray-200 pl-8" : ""}>
+                  <div className="mb-6">
+                    <h3 className="text-sm font-bold text-swipes-black uppercase tracking-wider">
+                      {column.title}
+                    </h3>
+                    {column.subtitle && (
+                      <p className="text-sm text-swipes-pro-gray mt-1">{column.subtitle}</p>
+                    )}
+                  </div>
                   <ul className="space-y-1">
-                    {column.items.map((item, itemIndex) => (
-                      <li key={itemIndex}>
-                        <Link href={item.href} onClick={() => setActiveMenu(null)}>
-                          <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer">
-                            <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-swipes-teal/10 to-swipes-blue-pure/10 flex items-center justify-center group-hover:from-swipes-teal/20 group-hover:to-swipes-blue-pure/20 transition-colors">
-                              <item.icon className="h-5 w-5 text-swipes-teal" />
-                            </div>
-                            <div>
-                              <div className="text-sm font-medium text-gray-900 group-hover:text-swipes-blue-deep transition-colors">
-                                {item.label}
+                    {column.items.map((item, itemIndex) => {
+                      const Icon = item.icon;
+                      return (
+                        <li key={itemIndex}>
+                          <Link href={item.href} onClick={() => setActiveMenu(null)}>
+                            <div className="flex items-start gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors group cursor-pointer">
+                              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-gradient-to-br from-swipes-blue-deep/10 to-swipes-teal/10 flex items-center justify-center group-hover:from-swipes-blue-deep/20 group-hover:to-swipes-teal/20 transition-colors">
+                                <Icon className="h-5 w-5 text-swipes-blue-deep" />
                               </div>
-                              <div className="text-sm text-gray-500">
-                                {item.description}
+                              <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-sm font-medium text-gray-900 group-hover:text-swipes-blue-deep transition-colors">
+                                    {item.label}
+                                  </span>
+                                  {item.badge && (
+                                    <span className={`text-xs font-semibold px-2 py-0.5 rounded ${
+                                      item.badge === 'FREE' ? 'bg-swipes-trusted-green text-white' :
+                                      item.badge === 'NEW' ? 'bg-swipes-gold text-black' :
+                                      item.badge === 'PRO' ? 'bg-swipes-blue-deep text-white' : ''
+                                    }`}>
+                                      {item.badge}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-sm text-gray-500">
+                                  {item.description}
+                                </div>
+                                {item.price && (
+                                  <div className="text-xs text-swipes-pro-gray mt-1">{item.price}</div>
+                                )}
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
+                          </Link>
+                        </li>
+                      );
+                    })}
                   </ul>
+                  {column.ctaLabel && column.ctaHref && (
+                    <Link href={column.ctaHref} onClick={() => setActiveMenu(null)}>
+                      <span className="inline-flex items-center text-sm font-medium text-swipes-blue-deep hover:underline mt-4">
+                        {column.ctaLabel}
+                        <ArrowRight className="ml-1 h-4 w-4" />
+                      </span>
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>

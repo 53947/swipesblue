@@ -18,7 +18,7 @@ const features = [
     description: "Accept all major cards online and in-person. Competitive rates with no hidden fees.",
     link: "/demo",
     linkText: "Learn more",
-    color: "#E00420",
+    color: "#1844A6",
   },
   {
     icon: Code,
@@ -26,7 +26,7 @@ const features = [
     description: "RESTful API with clear docs. Integrate in minutes, not days.",
     link: "/admin/api-keys",
     linkText: "View docs",
-    color: "#0000FF",
+    color: "#064A6C",
   },
   {
     icon: LayoutDashboard,
@@ -34,7 +34,7 @@ const features = [
     description: "Real-time transaction monitoring. See every payment as it happens.",
     link: "/dashboard",
     linkText: "See dashboard",
-    color: "#1844A6",
+    color: "#10B981",
   },
   {
     icon: ShoppingCart,
@@ -42,7 +42,7 @@ const features = [
     description: "Cart, checkout, and subscription management for your online store.",
     link: "/products",
     linkText: "Explore tools",
-    color: "#A855F7",
+    color: "#064A6C",
   },
 ];
 
@@ -69,7 +69,7 @@ export default function Home() {
                 Built for businesses to grow
               </h1>
               
-              <p className="text-lg md:text-xl font-medium text-swipes-red">
+              <p className="text-lg md:text-xl font-medium text-swipes-blue-deep">
                 Less fees. More revenue.
               </p>
               
@@ -222,7 +222,7 @@ export default function Home() {
                   Transaction
                 </div>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-swipes-red">2.9% + 30¢</span>
+                  <span className="text-4xl font-bold text-swipes-blue-deep">2.9% + 30¢</span>
                   <div className="text-sm text-swipes-gray mt-1">per transaction</div>
                 </div>
                 <ul className="space-y-3 text-left mb-8">
@@ -234,7 +234,7 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link href="/shoppingcart">
-                  <Button className="w-full bg-swipes-red hover:bg-swipes-red/90 text-white">
+                  <Button className="w-full bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white">
                     Start processing
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -249,7 +249,7 @@ export default function Home() {
                 </div>
                 <div className="mb-6">
                   <span className="text-sm text-swipes-gray">Starting at</span>
-                  <div className="text-4xl font-bold text-swipes-red">$99/month</div>
+                  <div className="text-4xl font-bold text-swipes-blue-deep">$99/month</div>
                 </div>
                 <ul className="space-y-3 text-left mb-8">
                   {["Shopping cart", "Checkout system", "Subscription billing"].map((item) => (
@@ -294,7 +294,7 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/dashboard">
-                  <Button className="bg-swipes-red hover:bg-swipes-red/90 text-white">
+                  <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white">
                     Read the docs
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -368,7 +368,7 @@ export default function Home() {
           <Link href="/shoppingcart">
             <Button 
               size="lg" 
-              className="bg-swipes-red hover:bg-swipes-red/90 text-white px-10 shadow-lg hover:shadow-cta-glow transition-all"
+              className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-10 shadow-lg hover:shadow-cta-glow transition-all"
               data-testid="button-cta-get-started"
             >
               Get Started Free

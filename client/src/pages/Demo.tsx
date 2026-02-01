@@ -9,28 +9,28 @@ const demos = [
     title: "Product Catalog",
     description: "Browse a sample product catalog with categories, search, and filtering.",
     href: "/products",
-    color: "#A855F7",
+    color: "#1844A6",
   },
   {
     icon: ShoppingCart,
     title: "Shopping Cart",
     description: "Add items to cart, update quantities, and see real-time totals.",
     href: "/shoppingcart",
-    color: "#E00420",
+    color: "#064A6C",
   },
   {
     icon: CreditCard,
     title: "Checkout Flow",
     description: "Experience our secure, streamlined checkout process.",
     href: "/checkout",
-    color: "#0000FF",
+    color: "#1844A6",
   },
   {
     icon: Receipt,
     title: "Order History",
     description: "View order details, status tracking, and transaction history.",
     href: "/orders",
-    color: "#1844A6",
+    color: "#10B981",
   },
   {
     icon: LayoutDashboard,
@@ -44,7 +44,7 @@ const demos = [
     title: "Brand Studio",
     description: "Customize your checkout experience with your brand colors and logo.",
     href: "/brand-studio",
-    color: "#F9A800",
+    color: "#FFD700",
   },
 ];
 
@@ -104,7 +104,7 @@ export default function Demo() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="text-sm font-semibold text-swipes-red uppercase tracking-wider mb-4">
+              <div className="text-sm font-semibold text-swipes-blue-deep uppercase tracking-wider mb-4">
                 For Developers
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
@@ -116,7 +116,7 @@ export default function Demo() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/admin/api-keys">
-                  <Button className="bg-swipes-red hover:bg-swipes-red/90 text-white">
+                  <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white">
                     Get API Keys
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -152,8 +152,8 @@ export default function Demo() {
               
               <div className="bg-white rounded-card p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-swipes-purple/10 rounded flex items-center justify-center">
-                    <span className="text-swipes-purple font-bold text-sm">API</span>
+                  <div className="w-8 h-8 bg-swipes-teal/10 rounded flex items-center justify-center">
+                    <span className="text-swipes-teal font-bold text-sm">API</span>
                   </div>
                   <span className="font-medium text-swipes-black">REST API</span>
                 </div>
@@ -176,7 +176,7 @@ export default function Demo() {
           <Link href="/shoppingcart">
             <Button 
               size="lg" 
-              className="bg-swipes-red hover:bg-swipes-red/90 text-white px-10"
+              className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-10"
             >
               Get Started Free
             </Button>

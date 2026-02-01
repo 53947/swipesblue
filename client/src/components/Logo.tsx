@@ -59,7 +59,7 @@ export default function Logo({
         <span 
           className="font-archivo-semi-expanded font-bold lowercase"
           style={{ 
-            color: "#E00420",
+            color: "#374151",
             fontSize: fontSize,
             textShadow: swipesTextShadow,
             letterSpacing: "0.02em"
@@ -82,7 +82,7 @@ export default function Logo({
           <span 
             className="font-archivo font-bold lowercase"
             style={{ 
-              color: "#00FF40",
+              color: "#10B981",
               fontSize: fontSize,
               letterSpacing: "-0.02em"
             }}

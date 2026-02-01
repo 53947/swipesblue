@@ -105,14 +105,14 @@ export default function Pricing() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="text-sm font-semibold text-swipes-red uppercase tracking-wider mb-4">
+              <div className="text-sm font-semibold text-swipes-blue-deep uppercase tracking-wider mb-4">
                 Transaction Pricing
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
                 Pay only for what you use
               </h2>
               <div className="mb-8">
-                <span className="text-5xl font-bold text-swipes-red">2.9% + 30¢</span>
+                <span className="text-5xl font-bold text-swipes-blue-deep">2.9% + 30¢</span>
                 <span className="text-xl text-swipes-gray ml-2">per transaction</span>
               </div>
               <ul className="space-y-3 mb-8">
@@ -124,7 +124,7 @@ export default function Pricing() {
                 ))}
               </ul>
               <Link href="/shoppingcart">
-                <Button className="bg-swipes-red hover:bg-swipes-red/90 text-white px-8">
+                <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-8">
                   Start accepting payments
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
@@ -162,7 +162,7 @@ export default function Pricing() {
       <section className="py-20 bg-swipes-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <div className="text-sm font-semibold text-swipes-red uppercase tracking-wider mb-4">
+            <div className="text-sm font-semibold text-swipes-blue-deep uppercase tracking-wider mb-4">
               E-commerce Plans
             </div>
             <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
@@ -178,12 +178,12 @@ export default function Pricing() {
               <Card 
                 key={tier.name}
                 className={`border rounded-card bg-white relative ${
-                  tier.popular ? "border-swipes-red shadow-lg" : "border-gray-200"
+                  tier.popular ? "border-swipes-gold shadow-lg" : "border-gray-200"
                 }`}
               >
                 {tier.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-swipes-red text-white text-xs font-semibold px-3 py-1 rounded-full">
+                    <span className="bg-swipes-gold text-black text-xs font-semibold px-3 py-1 rounded-full">
                       Most Popular
                     </span>
                   </div>
@@ -210,8 +210,8 @@ export default function Pricing() {
                   <Button 
                     className={`w-full ${
                       tier.popular 
-                        ? "bg-swipes-red hover:bg-swipes-red/90 text-white" 
-                        : "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white"
+                        ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" 
+                        : "bg-swipes-teal hover:bg-swipes-teal/90 text-white"
                     }`}
                   >
                     {tier.cta}
@@ -262,7 +262,7 @@ export default function Pricing() {
           <Link href="/shoppingcart">
             <Button 
               size="lg" 
-              className="bg-swipes-red hover:bg-swipes-red/90 text-white px-10"
+              className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-10"
             >
               Get Started Free
             </Button>
