@@ -2,15 +2,17 @@
 
 ## Company Branding (CRITICAL - DO NOT CHANGE)
 
-### Brand Asset Files
+### Brand Asset Files (Latest - January 2026)
 
 | Asset | File Name | Usage |
 |-------|-----------|-------|
-| Company Name | `swipesblue_Company_Name.png` | Text-only logo |
-| Logo (Icon) | `swipesblue_logo.png` | Icon only (card with blue swipe ring) |
-| Full Lockup | `swipesblue_Company_Name_with_Logo.png` | Icon + text combined — USE FOR HEADER |
-| URL Version | `swipesblue_url.png` | With .com in green |
-| Color Palette | `Color_palette.webp` | Reference |
+| Company Name | `swipesblue_Company_Name_1769971645259.png` | Text-only logo (reference only - use code instead) |
+| Logo (Icon) | `swipesblue_logo_1769971645259.png` | Icon only (gray card with blue swipe ring) |
+| Full Lockup | `swipesslue_Company_Name_with_Logo_1769971645259.png` | Icon + text combined (reference) |
+| URL Version | `swipesblue_url_1769971645259.png` | With .com in green |
+| Color Palette | `Color_palette_1769971645258.png` | Reference |
+
+**Note:** The header uses Logo (Icon) + code-generated company name text, NOT the full lockup image.
 
 **Note:** All assets have transparent backgrounds. No background removal needed.
 
