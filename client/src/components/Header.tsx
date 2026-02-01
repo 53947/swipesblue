@@ -59,19 +59,25 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
     columns: [
       {
         title: "Documentation",
+        subtitle: "Learn how to integrate SwipesBlue",
         items: [
-          { icon: BookOpen, label: "Getting Started", description: "Quick start guide", href: "/dashboard" },
-          { icon: Code, label: "API Reference", description: "Complete API docs", href: "/admin/api-keys" },
-          { icon: Settings, label: "Integration Guides", description: "Step-by-step tutorials", href: "/demo" },
-        ]
+          { icon: BookOpen, label: "Getting Started", description: "Quick start guide", href: "/docs/getting-started", badge: "FREE" },
+          { icon: Code, label: "API Reference", description: "Complete API docs", href: "/docs/api" },
+          { icon: Settings, label: "Integration Guides", description: "Step-by-step tutorials", href: "/docs/guides" },
+        ],
+        ctaLabel: "Browse All Docs",
+        ctaHref: "/docs"
       },
       {
         title: "Support",
+        subtitle: "Get help when you need it",
         items: [
-          { icon: Users, label: "Help Center", description: "FAQs and tutorials", href: "/" },
-          { icon: Phone, label: "Contact Sales", description: "Talk to our team", href: "/" },
-          { icon: Activity, label: "System Status", description: "Uptime and incidents", href: "/" },
-        ]
+          { icon: Users, label: "Help Center", description: "FAQs and tutorials", href: "/support" },
+          { icon: Phone, label: "Contact Sales", description: "Talk to our team", href: "/contact" },
+          { icon: Activity, label: "System Status", description: "Uptime and incidents", href: "/status" },
+        ],
+        ctaLabel: "Get Support",
+        ctaHref: "/support"
       }
     ]
   }

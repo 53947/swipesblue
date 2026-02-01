@@ -16,14 +16,14 @@ export default function Logo({
   // Font sizes for different variants
   const fontSizes = {
     small: "18px",
-    default: "24px",
-    large: "32px"
+    default: "30px",
+    large: "36px"
   };
   
   const iconSizes = {
-    small: "h-7 w-auto",
-    default: "h-10 w-auto",
-    large: "h-12 w-auto"
+    small: "h-8 w-auto",
+    default: "h-12 w-auto",
+    large: "h-14 w-auto"
   };
 
   const fontSize = fontSizes[variant];
