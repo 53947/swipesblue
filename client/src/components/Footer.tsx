@@ -33,9 +33,9 @@ export default function Footer() {
     <footer className="bg-[#F6F9FC] border-t border-gray-200" data-testid="footer">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
         {/* Main footer content */}
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-12">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-8 lg:gap-0">
           {/* Logo and tagline */}
-          <div className="col-span-2">
+          <div className="col-span-2 pr-8">
             <div className="mb-6">
               <Logo showIcon variant="default" />
             </div>
@@ -45,7 +45,7 @@ export default function Footer() {
           </div>
 
           {/* Products */}
-          <div>
+          <div className="border-l border-gray-200 pl-8">
             <h4 className="font-semibold text-sm text-gray-900 mb-4">
               Products
             </h4>
@@ -63,7 +63,7 @@ export default function Footer() {
           </div>
 
           {/* Developers */}
-          <div>
+          <div className="border-l border-gray-200 pl-8">
             <h4 className="font-semibold text-sm text-gray-900 mb-4">
               Developers
             </h4>
@@ -81,7 +81,7 @@ export default function Footer() {
           </div>
 
           {/* Company */}
-          <div>
+          <div className="border-l border-gray-200 pl-8">
             <h4 className="font-semibold text-sm text-gray-900 mb-4">
               Company
             </h4>
@@ -99,7 +99,7 @@ export default function Footer() {
           </div>
 
           {/* Support */}
-          <div>
+          <div className="border-l border-gray-200 pl-8">
             <h4 className="font-semibold text-sm text-gray-900 mb-4">
               Support
             </h4>
