@@ -3,66 +3,109 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link } from "wouter";
 
-const transactionFeatures = [
-  "All major credit and debit cards",
-  "Real-time fraud protection",
-  "Instant payouts available",
-  "No monthly fees",
-  "No setup fees",
-  "No hidden costs",
-  "PCI DSS compliant",
-  "24/7 support",
-];
-
 const ecommerceTiers = [
+  {
+    name: "FREE",
+    price: "$0",
+    period: "/mo",
+    description: "Get started selling online",
+    features: [
+      "Up to 25 products",
+      "Shopping cart",
+      "Basic checkout",
+      "Order history",
+      "Basic dashboard",
+    ],
+    cta: "Start Free",
+    ctaLink: "/demo",
+    popular: false,
+    badge: "FREE",
+  },
   {
     name: "Starter",
     price: "$29",
-    period: "/month",
-    description: "Perfect for small businesses just getting started",
+    period: "/mo",
+    description: "For growing businesses",
     features: [
-      "Shopping cart widget",
-      "Basic checkout flow",
-      "Up to 100 products",
-      "Email support",
+      "Unlimited products",
+      "Abandoned cart recovery (basic)",
+      "Discount codes",
       "Basic analytics",
+      "Email support",
     ],
-    cta: "Start free trial",
+    cta: "Get Started",
+    ctaLink: "/demo",
     popular: false,
+    badge: null,
   },
   {
-    name: "Professional",
-    price: "$99",
-    period: "/month",
-    description: "For growing businesses with advanced needs",
+    name: "Pro",
+    price: "$79",
+    period: "/mo",
+    description: "Advanced tools for scaling",
     features: [
       "Everything in Starter",
-      "Advanced checkout customization",
-      "Unlimited products",
-      "Subscription billing",
-      "Priority support",
+      "Brand Studio (white-label)",
+      "Advanced abandoned cart",
+      "Inventory alerts",
       "Advanced analytics",
-      "Custom domain",
+      "Priority support",
     ],
-    cta: "Start free trial",
+    cta: "Get Started",
+    ctaLink: "/demo",
     popular: true,
+    badge: "POPULAR",
   },
   {
     name: "Enterprise",
-    price: "Custom",
-    period: "",
-    description: "For large organizations with custom requirements",
+    price: "$199",
+    period: "/mo",
+    description: "For large organizations",
     features: [
-      "Everything in Professional",
-      "Dedicated account manager",
+      "Everything in Pro",
+      "Multi-store support",
+      "API access",
+      "Webhooks",
       "Custom integrations",
-      "SLA guarantee",
-      "Volume discounts",
-      "White-label options",
-      "On-premise available",
+      "Dedicated support",
     ],
-    cta: "Contact sales",
+    cta: "Contact Us",
+    ctaLink: "/contact",
     popular: false,
+    badge: null,
+  },
+];
+
+const developerTiers = [
+  {
+    name: "Payment API",
+    price: "2.9% + 30¢",
+    period: "per transaction",
+    description: "Integrate payments anywhere",
+    features: [
+      "Full API access",
+      "Webhooks",
+      "API keys",
+      "Documentation",
+      "Community support",
+    ],
+    cta: "Get API Keys",
+    ctaLink: "/admin/api-keys",
+  },
+  {
+    name: "API Pro",
+    price: "$99/mo",
+    subPrice: "+ 2.5% + 25¢ per transaction",
+    description: "For high-volume developers",
+    features: [
+      "Everything in Payment API",
+      "Lower transaction fees",
+      "Higher rate limits",
+      "Priority support",
+      "Dedicated account manager",
+    ],
+    cta: "Contact Sales",
+    ctaLink: "/contact",
   },
 ];
 
@@ -73,7 +116,7 @@ const faqs = [
   },
   {
     question: "Are there any hidden fees?",
-    answer: "No. Our pricing is completely transparent. You only pay the transaction fee (2.9% + 30¢) with no monthly fees, setup fees, or hidden costs.",
+    answer: "No. Our pricing is completely transparent. Transaction fees (2.9% + 30¢) apply to all plans including FREE.",
   },
   {
     question: "Can I cancel anytime?",
@@ -82,6 +125,10 @@ const faqs = [
   {
     question: "Do you offer volume discounts?",
     answer: "Yes, we offer custom pricing for businesses processing over $100,000/month. Contact our sales team to learn more.",
+  },
+  {
+    question: "What's the difference between E-Commerce Suite and Developer API?",
+    answer: "E-Commerce Suite is a complete solution for merchants who want to sell products online with our pre-built tools. Developer API is for developers who want to integrate SwipesBlue payments into their own custom platforms.",
   },
 ];
 
@@ -95,127 +142,147 @@ export default function Pricing() {
             Simple, transparent pricing
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            No hidden fees. No surprises. Just straightforward pricing that scales with your business.
+            Choose the plan that fits your business. All plans include transaction processing.
           </p>
         </div>
       </section>
 
-      {/* Transaction Pricing */}
-      <section className="py-20">
+      {/* E-Commerce Suite */}
+      <section className="py-20" data-testid="section-ecommerce-pricing">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="text-sm font-semibold text-swipes-blue-deep uppercase tracking-wider mb-4">
-                Transaction Pricing
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
-                Pay only for what you use
-              </h2>
-              <div className="mb-8">
-                <span className="text-5xl font-bold text-swipes-blue-deep">2.9% + 30¢</span>
-                <span className="text-xl text-swipes-gray ml-2">per transaction</span>
-              </div>
-              <ul className="space-y-3 mb-8">
-                {transactionFeatures.map((feature) => (
-                  <li key={feature} className="flex items-center gap-3 text-swipes-gray">
-                    <Check className="h-5 w-5 text-green-500 flex-shrink-0" />
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
-              <Link href="/shoppingcart">
-                <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-8">
-                  Start accepting payments
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </div>
-
-            <Card className="border border-gray-200 rounded-card bg-swipes-gray-light">
-              <CardContent className="p-8">
-                <h3 className="font-semibold text-swipes-black mb-4">Example transaction</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-swipes-gray">Sale amount</span>
-                    <span className="font-medium text-swipes-black">$100.00</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-swipes-gray">SwipesBlue fee (2.9%)</span>
-                    <span className="font-medium text-swipes-black">-$2.90</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-swipes-gray">Fixed fee</span>
-                    <span className="font-medium text-swipes-black">-$0.30</span>
-                  </div>
-                  <div className="border-t border-gray-300 pt-3 flex justify-between">
-                    <span className="font-semibold text-swipes-black">You receive</span>
-                    <span className="font-bold text-swipes-blue-deep text-xl">$96.80</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* E-commerce Tiers */}
-      <section className="py-20 bg-swipes-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <div className="text-sm font-semibold text-swipes-blue-deep uppercase tracking-wider mb-4">
-              E-commerce Plans
-            </div>
-            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
-              Complete e-commerce solutions
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-4">
+              E-Commerce Suite
             </h2>
-            <p className="mt-4 text-lg text-swipes-gray max-w-2xl mx-auto">
-              Everything you need to run your online store. All plans include transaction processing.
+            <p className="text-lg text-swipes-pro-gray max-w-2xl mx-auto">
+              Everything you need to sell online
             </p>
           </div>
 
-          <div className="grid md:grid-cols-3 gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
             {ecommerceTiers.map((tier) => (
               <Card 
                 key={tier.name}
-                className={`border rounded-card bg-white relative ${
-                  tier.popular ? "border-swipes-gold shadow-lg" : "border-gray-200"
+                className={`border rounded-[7px] bg-white relative ${
+                  tier.popular ? "border-swipes-gold shadow-lg ring-2 ring-swipes-gold" : "border-gray-200"
                 }`}
+                data-testid={`card-pricing-${tier.name.toLowerCase()}`}
               >
-                {tier.popular && (
+                {tier.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-swipes-gold text-black text-xs font-semibold px-3 py-1 rounded-full">
-                      Most Popular
+                    <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
+                      tier.badge === "POPULAR" ? "bg-swipes-gold text-black" :
+                      tier.badge === "FREE" ? "bg-swipes-trusted-green text-white" : ""
+                    }`}>
+                      {tier.badge}
                     </span>
                   </div>
                 )}
-                <CardHeader className="text-center pt-8">
+                <CardHeader className="text-center pt-8 pb-4">
                   <CardTitle className="text-xl font-semibold text-swipes-black">
                     {tier.name}
                   </CardTitle>
                   <div className="mt-4">
                     <span className="text-4xl font-bold text-swipes-black">{tier.price}</span>
-                    <span className="text-swipes-gray">{tier.period}</span>
+                    <span className="text-swipes-pro-gray">{tier.period}</span>
                   </div>
-                  <p className="text-sm text-swipes-gray mt-2">{tier.description}</p>
+                  <p className="text-sm text-swipes-pro-gray mt-2">{tier.description}</p>
                 </CardHeader>
                 <CardContent className="pt-0">
-                  <ul className="space-y-3 mb-8">
+                  <ul className="space-y-3 mb-6">
                     {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2 text-sm text-swipes-gray">
-                        <Check className="h-4 w-4 text-swipes-blue-pure flex-shrink-0 mt-0.5" />
+                      <li key={feature} className="flex items-start gap-2 text-sm text-swipes-pro-gray">
+                        <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button 
-                    className={`w-full ${
-                      tier.popular 
-                        ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" 
-                        : "bg-swipes-teal hover:bg-swipes-teal/90 text-white"
-                    }`}
-                  >
-                    {tier.cta}
-                  </Button>
+                  <Link href={tier.ctaLink}>
+                    <Button 
+                      className={`w-full group ${
+                        tier.popular 
+                          ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" 
+                          : "bg-transparent border-2 border-swipes-teal text-swipes-teal hover:bg-swipes-teal hover:text-white"
+                      }`}
+                      data-testid={`button-pricing-${tier.name.toLowerCase()}`}
+                    >
+                      <span className="flex items-center justify-center">
+                        {tier.cta}
+                        <span className="inline-flex w-0 opacity-0 group-hover:w-5 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </span>
+                      </span>
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <p className="text-swipes-pro-gray">
+              <span className="font-semibold text-swipes-black">+ 2.9% + 30¢</span> per transaction on all plans
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Developer API */}
+      <section className="py-20 bg-gray-50" data-testid="section-developer-pricing">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-4">
+              Developer API
+            </h2>
+            <p className="text-lg text-swipes-pro-gray max-w-2xl mx-auto">
+              Build custom payment integrations
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {developerTiers.map((tier) => (
+              <Card 
+                key={tier.name}
+                className="border border-gray-200 rounded-[7px] bg-white"
+                data-testid={`card-pricing-${tier.name.toLowerCase().replace(/\s+/g, '-')}`}
+              >
+                <CardHeader className="text-center pt-8 pb-4">
+                  <CardTitle className="text-xl font-semibold text-swipes-black">
+                    {tier.name}
+                  </CardTitle>
+                  <div className="mt-4">
+                    <span className="text-3xl font-bold text-swipes-black">{tier.price}</span>
+                  </div>
+                  {tier.subPrice && (
+                    <p className="text-sm text-swipes-pro-gray mt-1">{tier.subPrice}</p>
+                  )}
+                  {!tier.subPrice && (
+                    <p className="text-sm text-swipes-pro-gray mt-1">{tier.period}</p>
+                  )}
+                  <p className="text-sm text-swipes-pro-gray mt-2">{tier.description}</p>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <ul className="space-y-3 mb-6">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2 text-sm text-swipes-pro-gray">
+                        <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
+                        <span>{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={tier.ctaLink}>
+                    <Button 
+                      className="w-full group bg-swipes-teal hover:bg-swipes-teal/90 text-white"
+                      data-testid={`button-pricing-${tier.name.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      <span className="flex items-center justify-center">
+                        {tier.cta}
+                        <span className="inline-flex w-0 opacity-0 group-hover:w-5 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                          <ArrowRight className="h-4 w-4 ml-1" />
+                        </span>
+                      </span>
+                    </Button>
+                  </Link>
                 </CardContent>
               </Card>
             ))}
@@ -224,7 +291,7 @@ export default function Pricing() {
       </section>
 
       {/* FAQ */}
-      <section className="py-20">
+      <section className="py-20" data-testid="section-faq">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold text-swipes-black">
@@ -232,15 +299,15 @@ export default function Pricing() {
             </h2>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {faqs.map((faq) => (
-              <Card key={faq.question} className="border border-gray-200 rounded-card">
+              <Card key={faq.question} className="border border-gray-200 rounded-[7px]">
                 <CardContent className="p-6">
                   <div className="flex items-start gap-3">
                     <HelpCircle className="h-5 w-5 text-swipes-blue-deep flex-shrink-0 mt-0.5" />
                     <div>
                       <h3 className="font-semibold text-swipes-black mb-2">{faq.question}</h3>
-                      <p className="text-swipes-gray">{faq.answer}</p>
+                      <p className="text-swipes-pro-gray">{faq.answer}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -259,12 +326,18 @@ export default function Pricing() {
           <p className="text-lg text-gray-300 mb-8 max-w-xl mx-auto">
             Create your account in minutes and start accepting payments today.
           </p>
-          <Link href="/shoppingcart">
+          <Link href="/demo">
             <Button 
               size="lg" 
-              className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-10"
+              className="group bg-white text-swipes-blue-deep hover:bg-gray-100 px-10"
+              data-testid="button-cta-get-started"
             >
-              Get Started Free
+              <span className="flex items-center">
+                Get Started Free
+                <span className="inline-flex w-0 opacity-0 group-hover:w-5 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                  <ArrowRight className="h-4 w-4 ml-1" />
+                </span>
+              </span>
             </Button>
           </Link>
         </div>
