@@ -1,5 +1,6 @@
 import { Link, useLocation } from "wouter";
 import Logo from "./Logo";
+import fullLockup from "@assets/swipesslue_Company_Name_with_Logo_1769875171865.png";
 import { Menu, X, ArrowRight, CreditCard, Code, LayoutDashboard, ShoppingCart, ChevronDown, FileText, Settings, Users, Key, Webhook, Package, Palette, Mail, BookOpen, Phone, Activity } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -125,9 +126,14 @@ export default function Header() {
       ref={menuRef}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        {/* Left: Logo */}
-        <Link href="/" className="flex items-center -mt-1.5" data-testid="link-logo-home">
-          <Logo showIcon variant="default" />
+        {/* Left: Full Lockup (Logo + Company Name) */}
+        <Link href="/" className="flex items-center" data-testid="link-logo-home">
+          <img 
+            src={fullLockup} 
+            alt="SwipesBlue" 
+            className="h-10 w-auto"
+            data-testid="img-header-logo"
+          />
         </Link>
 
         {/* Center: Navigation */}
