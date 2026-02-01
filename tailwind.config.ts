@@ -10,6 +10,7 @@ export default {
         md: ".375rem", /* 6px */
         sm: ".1875rem", /* 3px */
         card: "12px",
+        button: "7px", /* 7px for all buttons */
       },
       colors: {
         // Flat / base colors (regular buttons)
