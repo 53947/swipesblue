@@ -24,6 +24,7 @@ import Merchants from "@/pages/admin/Merchants";
 import AdminTransactions from "@/pages/admin/AdminTransactions";
 import ApiKeys from "@/pages/admin/ApiKeys";
 import Webhooks from "@/pages/admin/Webhooks";
+import RateManagement from "@/pages/admin/RateManagement";
 import NotFound from "@/pages/not-found";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
@@ -201,15 +202,7 @@ function Router() {
         {() => (
           <ProtectedAdminRoute>
             <AdminLayout>
-              <div className="space-y-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-swipes-black mb-2">Rate Management</h1>
-                  <p className="text-swipes-pro-gray">Configure transaction rates and fees.</p>
-                </div>
-                <div className="p-6 bg-white rounded-[7px] border border-gray-200">
-                  <p className="text-swipes-pro-gray">Rate Management Worksheet coming soon with DeepSeek AI integration.</p>
-                </div>
-              </div>
+              <RateManagement />
             </AdminLayout>
           </ProtectedAdminRoute>
         )}

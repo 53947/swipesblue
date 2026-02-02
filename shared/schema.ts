@@ -294,3 +294,127 @@ export const insertWebhookDeliverySchema = createInsertSchema(webhookDeliveries)
 
 export type InsertWebhookDelivery = z.infer<typeof insertWebhookDeliverySchema>;
 export type WebhookDelivery = typeof webhookDeliveries.$inferSelect;
+
+// Rates Active table - current live transaction rates for each tier
+export const ratesActive = pgTable("rates_active", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tierName: text("tier_name").notNull(), // 'FREE' | 'Starter' | 'Pro' | 'Enterprise' | 'API' | 'API Pro'
+  tierType: text("tier_type").notNull(), // 'ecommerce' | 'developer'
+  monthlyFee: decimal("monthly_fee", { precision: 10, scale: 2 }).notNull().default("0"),
+  transactionPercent: decimal("transaction_percent", { precision: 5, scale: 3 }).notNull(), // e.g., 2.900 for 2.9%
+  transactionFlat: decimal("transaction_flat", { precision: 10, scale: 2 }).notNull(), // e.g., 0.30 for 30¢
+  description: text("description"),
+  features: json("features"), // Array of feature strings
+  isActive: boolean("is_active").notNull().default(true),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertRatesActiveSchema = createInsertSchema(ratesActive).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertRatesActive = z.infer<typeof insertRatesActiveSchema>;
+export type RatesActive = typeof ratesActive.$inferSelect;
+
+// Rates Staged table - pending rate changes waiting for approval
+export const ratesStaged = pgTable("rates_staged", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tierName: text("tier_name").notNull(),
+  tierType: text("tier_type").notNull(),
+  monthlyFee: decimal("monthly_fee", { precision: 10, scale: 2 }).notNull().default("0"),
+  transactionPercent: decimal("transaction_percent", { precision: 5, scale: 3 }).notNull(),
+  transactionFlat: decimal("transaction_flat", { precision: 10, scale: 2 }).notNull(),
+  description: text("description"),
+  features: json("features"),
+  isActive: boolean("is_active").notNull().default(true),
+  displayOrder: integer("display_order").notNull().default(0),
+  status: text("status").notNull().default("pending"), // 'pending' | 'approved' | 'rejected'
+  createdBy: text("created_by"),
+  approvedBy: text("approved_by"),
+  effectiveDate: timestamp("effective_date"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertRatesStagedSchema = createInsertSchema(ratesStaged).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertRatesStaged = z.infer<typeof insertRatesStagedSchema>;
+export type RatesStaged = typeof ratesStaged.$inferSelect;
+
+// Costs Baseline table - base costs from payment processor (NMI)
+export const costsBaseline = pgTable("costs_baseline", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(), // 'interchange_plus' | 'per_transaction' | 'monthly_gateway'
+  description: text("description"),
+  percentCost: decimal("percent_cost", { precision: 5, scale: 3 }), // e.g., 1.800 for 1.8%
+  flatCost: decimal("flat_cost", { precision: 10, scale: 2 }), // e.g., 0.10 for 10¢
+  targetMarginPercent: decimal("target_margin_percent", { precision: 5, scale: 2 }), // Target profit margin
+  notes: text("notes"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCostsBaselineSchema = createInsertSchema(costsBaseline).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCostsBaseline = z.infer<typeof insertCostsBaselineSchema>;
+export type CostsBaseline = typeof costsBaseline.$inferSelect;
+
+// Rates Audit Log table - tracks all rate changes
+export const ratesAuditLog = pgTable("rates_audit_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  action: text("action").notNull(), // 'create' | 'update' | 'delete' | 'approve' | 'reject'
+  tableName: text("table_name").notNull(), // Which table was modified
+  recordId: text("record_id").notNull(), // ID of the modified record
+  previousValues: json("previous_values"), // Values before change
+  newValues: json("new_values"), // Values after change
+  changedBy: text("changed_by"),
+  reason: text("reason"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertRatesAuditLogSchema = createInsertSchema(ratesAuditLog).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertRatesAuditLog = z.infer<typeof insertRatesAuditLogSchema>;
+export type RatesAuditLog = typeof ratesAuditLog.$inferSelect;
+
+// Add-On Products table - optional add-ons for e-commerce tiers
+export const addOnProducts = pgTable("add_on_products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+  description: text("description"),
+  monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull(),
+  yearlyPrice: decimal("yearly_price", { precision: 10, scale: 2 }),
+  features: json("features"), // Array of feature strings
+  requiredTier: text("required_tier"), // Minimum tier required (null = any tier)
+  category: text("category").notNull().default("general"), // 'marketing' | 'analytics' | 'security' | 'integration' | 'general'
+  icon: text("icon"), // Lucide icon name
+  isActive: boolean("is_active").notNull().default(true),
+  displayOrder: integer("display_order").notNull().default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertAddOnProductSchema = createInsertSchema(addOnProducts).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertAddOnProduct = z.infer<typeof insertAddOnProductSchema>;
+export type AddOnProduct = typeof addOnProducts.$inferSelect;

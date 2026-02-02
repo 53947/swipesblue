@@ -1684,6 +1684,309 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // Rate Management API Endpoints
+  // ========================================
+
+  // Get all active rates
+  app.get("/api/admin/rates", requireAdmin, async (_req, res) => {
+    try {
+      const rates = await storage.getAllRatesActive();
+      res.json(rates);
+    } catch (error) {
+      console.error("Error fetching rates:", error);
+      res.status(500).json({ error: "Failed to fetch rates" });
+    }
+  });
+
+  // Get rates by tier type
+  app.get("/api/admin/rates/type/:tierType", requireAdmin, async (req, res) => {
+    try {
+      const rates = await storage.getRatesByType(req.params.tierType);
+      res.json(rates);
+    } catch (error) {
+      console.error("Error fetching rates by type:", error);
+      res.status(500).json({ error: "Failed to fetch rates" });
+    }
+  });
+
+  // Create new rate
+  app.post("/api/admin/rates", requireAdmin, async (req, res) => {
+    try {
+      const rateSchema = z.object({
+        tierName: z.string().min(1),
+        tierType: z.enum(["ecommerce", "developer"]),
+        monthlyFee: z.string().or(z.number()).transform(v => String(v)),
+        transactionPercent: z.string().or(z.number()).transform(v => String(v)),
+        transactionFlat: z.string().or(z.number()).transform(v => String(v)),
+        description: z.string().optional(),
+        features: z.array(z.string()).optional(),
+        isActive: z.boolean().optional().default(true),
+        displayOrder: z.number().optional().default(0),
+      });
+
+      const validated = rateSchema.parse(req.body);
+      const rate = await storage.createRatesActive(validated);
+
+      // Log the creation
+      await storage.createRatesAuditLog({
+        action: "create",
+        tableName: "rates_active",
+        recordId: rate.id,
+        newValues: validated,
+        changedBy: "admin",
+      });
+
+      res.json(rate);
+    } catch (error) {
+      console.error("Error creating rate:", error);
+      res.status(500).json({ error: "Failed to create rate" });
+    }
+  });
+
+  // Update rate
+  app.patch("/api/admin/rates/:id", requireAdmin, async (req, res) => {
+    try {
+      const existingRate = await storage.getRatesActive(req.params.id);
+      if (!existingRate) {
+        return res.status(404).json({ error: "Rate not found" });
+      }
+
+      const rateSchema = z.object({
+        tierName: z.string().min(1).optional(),
+        tierType: z.enum(["ecommerce", "developer"]).optional(),
+        monthlyFee: z.string().or(z.number()).transform(v => String(v)).optional(),
+        transactionPercent: z.string().or(z.number()).transform(v => String(v)).optional(),
+        transactionFlat: z.string().or(z.number()).transform(v => String(v)).optional(),
+        description: z.string().optional(),
+        features: z.array(z.string()).optional(),
+        isActive: z.boolean().optional(),
+        displayOrder: z.number().optional(),
+      });
+
+      const validated = rateSchema.parse(req.body);
+      const rate = await storage.updateRatesActive(req.params.id, validated);
+
+      // Log the update
+      await storage.createRatesAuditLog({
+        action: "update",
+        tableName: "rates_active",
+        recordId: req.params.id,
+        previousValues: existingRate,
+        newValues: validated,
+        changedBy: "admin",
+      });
+
+      res.json(rate);
+    } catch (error) {
+      console.error("Error updating rate:", error);
+      res.status(500).json({ error: "Failed to update rate" });
+    }
+  });
+
+  // Delete rate
+  app.delete("/api/admin/rates/:id", requireAdmin, async (req, res) => {
+    try {
+      const existingRate = await storage.getRatesActive(req.params.id);
+      if (!existingRate) {
+        return res.status(404).json({ error: "Rate not found" });
+      }
+
+      const deleted = await storage.deleteRatesActive(req.params.id);
+
+      // Log the deletion
+      await storage.createRatesAuditLog({
+        action: "delete",
+        tableName: "rates_active",
+        recordId: req.params.id,
+        previousValues: existingRate,
+        changedBy: "admin",
+      });
+
+      res.json({ success: deleted });
+    } catch (error) {
+      console.error("Error deleting rate:", error);
+      res.status(500).json({ error: "Failed to delete rate" });
+    }
+  });
+
+  // Get costs baseline
+  app.get("/api/admin/costs", requireAdmin, async (_req, res) => {
+    try {
+      const costs = await storage.getAllCostsBaseline();
+      res.json(costs);
+    } catch (error) {
+      console.error("Error fetching costs:", error);
+      res.status(500).json({ error: "Failed to fetch costs" });
+    }
+  });
+
+  // Create/update cost baseline
+  app.post("/api/admin/costs", requireAdmin, async (req, res) => {
+    try {
+      const costSchema = z.object({
+        name: z.string().min(1),
+        description: z.string().optional(),
+        percentCost: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        flatCost: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        targetMarginPercent: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        notes: z.string().optional(),
+      });
+
+      const validated = costSchema.parse(req.body);
+      const cost = await storage.createCostsBaseline(validated);
+      res.json(cost);
+    } catch (error) {
+      console.error("Error creating cost:", error);
+      res.status(500).json({ error: "Failed to create cost" });
+    }
+  });
+
+  // Update cost baseline
+  app.patch("/api/admin/costs/:id", requireAdmin, async (req, res) => {
+    try {
+      const costSchema = z.object({
+        name: z.string().min(1).optional(),
+        description: z.string().optional(),
+        percentCost: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        flatCost: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        targetMarginPercent: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        notes: z.string().optional(),
+      });
+
+      const validated = costSchema.parse(req.body);
+      const cost = await storage.updateCostsBaseline(req.params.id, validated);
+      res.json(cost);
+    } catch (error) {
+      console.error("Error updating cost:", error);
+      res.status(500).json({ error: "Failed to update cost" });
+    }
+  });
+
+  // Get audit logs
+  app.get("/api/admin/rates/audit", requireAdmin, async (req, res) => {
+    try {
+      const limit = parseInt(req.query.limit as string) || 50;
+      const logs = await storage.getRatesAuditLogs(limit);
+      res.json(logs);
+    } catch (error) {
+      console.error("Error fetching audit logs:", error);
+      res.status(500).json({ error: "Failed to fetch audit logs" });
+    }
+  });
+
+  // ========================================
+  // Add-On Products API Endpoints
+  // ========================================
+
+  // Get all add-ons (admin)
+  app.get("/api/admin/addons", requireAdmin, async (_req, res) => {
+    try {
+      const addons = await storage.getAllAddOnProducts();
+      res.json(addons);
+    } catch (error) {
+      console.error("Error fetching add-ons:", error);
+      res.status(500).json({ error: "Failed to fetch add-ons" });
+    }
+  });
+
+  // Create add-on (admin)
+  app.post("/api/admin/addons", requireAdmin, async (req, res) => {
+    try {
+      const addOnSchema = z.object({
+        name: z.string().min(1),
+        slug: z.string().min(1),
+        description: z.string().optional(),
+        monthlyPrice: z.string().or(z.number()).transform(v => String(v)),
+        yearlyPrice: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        features: z.array(z.string()).optional(),
+        requiredTier: z.string().optional(),
+        category: z.string().optional().default("general"),
+        icon: z.string().optional(),
+        isActive: z.boolean().optional().default(true),
+        displayOrder: z.number().optional().default(0),
+      });
+
+      const validated = addOnSchema.parse(req.body);
+      const addOn = await storage.createAddOnProduct(validated);
+      res.json(addOn);
+    } catch (error) {
+      console.error("Error creating add-on:", error);
+      res.status(500).json({ error: "Failed to create add-on" });
+    }
+  });
+
+  // Update add-on (admin)
+  app.patch("/api/admin/addons/:id", requireAdmin, async (req, res) => {
+    try {
+      const addOnSchema = z.object({
+        name: z.string().min(1).optional(),
+        slug: z.string().min(1).optional(),
+        description: z.string().optional(),
+        monthlyPrice: z.string().or(z.number()).transform(v => String(v)).optional(),
+        yearlyPrice: z.string().or(z.number()).transform(v => v ? String(v) : null).optional(),
+        features: z.array(z.string()).optional(),
+        requiredTier: z.string().optional(),
+        category: z.string().optional(),
+        icon: z.string().optional(),
+        isActive: z.boolean().optional(),
+        displayOrder: z.number().optional(),
+      });
+
+      const validated = addOnSchema.parse(req.body);
+      const addOn = await storage.updateAddOnProduct(req.params.id, validated);
+      res.json(addOn);
+    } catch (error) {
+      console.error("Error updating add-on:", error);
+      res.status(500).json({ error: "Failed to update add-on" });
+    }
+  });
+
+  // Delete add-on (admin)
+  app.delete("/api/admin/addons/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteAddOnProduct(req.params.id);
+      res.json({ success: deleted });
+    } catch (error) {
+      console.error("Error deleting add-on:", error);
+      res.status(500).json({ error: "Failed to delete add-on" });
+    }
+  });
+
+  // Public API: Get active add-ons
+  app.get("/api/addons", async (_req, res) => {
+    try {
+      const addons = await storage.getActiveAddOnProducts();
+      res.json(addons);
+    } catch (error) {
+      console.error("Error fetching add-ons:", error);
+      res.status(500).json({ error: "Failed to fetch add-ons" });
+    }
+  });
+
+  // Public API: Get rates for pricing page (no auth required)
+  app.get("/api/rates", async (_req, res) => {
+    try {
+      const rates = await storage.getAllRatesActive();
+      // Only return active rates with public-facing fields
+      const publicRates = rates
+        .filter(r => r.isActive)
+        .map(r => ({
+          tierName: r.tierName,
+          tierType: r.tierType,
+          monthlyFee: r.monthlyFee,
+          transactionPercent: r.transactionPercent,
+          transactionFlat: r.transactionFlat,
+          description: r.description,
+          features: r.features,
+        }));
+      res.json(publicRates);
+    } catch (error) {
+      console.error("Error fetching public rates:", error);
+      res.status(500).json({ error: "Failed to fetch rates" });
+    }
+  });
+
   const httpServer = createServer(app);
 
   return httpServer;

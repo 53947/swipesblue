@@ -24,6 +24,14 @@ import {
   type InsertWebhookEndpoint,
   type WebhookDelivery,
   type InsertWebhookDelivery,
+  type RatesActive,
+  type InsertRatesActive,
+  type CostsBaseline,
+  type InsertCostsBaseline,
+  type RatesAuditLog,
+  type InsertRatesAuditLog,
+  type AddOnProduct,
+  type InsertAddOnProduct,
   users,
   products,
   cartItems,
@@ -36,6 +44,10 @@ import {
   partnerPaymentTransactions,
   webhookEndpoints,
   webhookDeliveries,
+  ratesActive,
+  costsBaseline,
+  ratesAuditLog,
+  addOnProducts,
 } from "@shared/schema";
 import { eq, and, desc, like, or, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -131,6 +143,34 @@ export interface IStorage {
   getPendingWebhookDeliveries(before: Date): Promise<WebhookDelivery[]>;
   createWebhookDelivery(delivery: InsertWebhookDelivery): Promise<WebhookDelivery>;
   updateWebhookDelivery(id: string, delivery: Partial<InsertWebhookDelivery>): Promise<WebhookDelivery | undefined>;
+
+  // Rates Active operations
+  getRatesActive(id: string): Promise<RatesActive | undefined>;
+  getRatesByTierName(tierName: string): Promise<RatesActive | undefined>;
+  getRatesByType(tierType: string): Promise<RatesActive[]>;
+  getAllRatesActive(): Promise<RatesActive[]>;
+  createRatesActive(rate: InsertRatesActive): Promise<RatesActive>;
+  updateRatesActive(id: string, rate: Partial<InsertRatesActive>): Promise<RatesActive | undefined>;
+  deleteRatesActive(id: string): Promise<boolean>;
+
+  // Costs Baseline operations
+  getCostsBaseline(id: string): Promise<CostsBaseline | undefined>;
+  getAllCostsBaseline(): Promise<CostsBaseline[]>;
+  createCostsBaseline(cost: InsertCostsBaseline): Promise<CostsBaseline>;
+  updateCostsBaseline(id: string, cost: Partial<InsertCostsBaseline>): Promise<CostsBaseline | undefined>;
+
+  // Rates Audit Log operations
+  createRatesAuditLog(log: InsertRatesAuditLog): Promise<RatesAuditLog>;
+  getRatesAuditLogs(limit?: number): Promise<RatesAuditLog[]>;
+
+  // Add-On Products operations
+  getAddOnProduct(id: string): Promise<AddOnProduct | undefined>;
+  getAddOnProductBySlug(slug: string): Promise<AddOnProduct | undefined>;
+  getAllAddOnProducts(): Promise<AddOnProduct[]>;
+  getActiveAddOnProducts(): Promise<AddOnProduct[]>;
+  createAddOnProduct(addOn: InsertAddOnProduct): Promise<AddOnProduct>;
+  updateAddOnProduct(id: string, addOn: Partial<InsertAddOnProduct>): Promise<AddOnProduct | undefined>;
+  deleteAddOnProduct(id: string): Promise<boolean>;
 }
 
 export class DbStorage implements IStorage {
@@ -621,6 +661,128 @@ export class DbStorage implements IStorage {
       .where(eq(webhookDeliveries.id, id))
       .returning();
     return result[0];
+  }
+
+  // Rates Active operations
+  async getRatesActive(id: string): Promise<RatesActive | undefined> {
+    const result = await db.select().from(ratesActive).where(eq(ratesActive.id, id));
+    return result[0];
+  }
+
+  async getRatesByTierName(tierName: string): Promise<RatesActive | undefined> {
+    const result = await db.select().from(ratesActive).where(eq(ratesActive.tierName, tierName));
+    return result[0];
+  }
+
+  async getRatesByType(tierType: string): Promise<RatesActive[]> {
+    return await db
+      .select()
+      .from(ratesActive)
+      .where(eq(ratesActive.tierType, tierType))
+      .orderBy(ratesActive.displayOrder);
+  }
+
+  async getAllRatesActive(): Promise<RatesActive[]> {
+    return await db.select().from(ratesActive).orderBy(ratesActive.displayOrder);
+  }
+
+  async createRatesActive(rate: InsertRatesActive): Promise<RatesActive> {
+    const result = await db.insert(ratesActive).values(rate).returning();
+    return result[0];
+  }
+
+  async updateRatesActive(id: string, rate: Partial<InsertRatesActive>): Promise<RatesActive | undefined> {
+    const result = await db
+      .update(ratesActive)
+      .set({ ...rate, updatedAt: new Date() })
+      .where(eq(ratesActive.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteRatesActive(id: string): Promise<boolean> {
+    const result = await db.delete(ratesActive).where(eq(ratesActive.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Costs Baseline operations
+  async getCostsBaseline(id: string): Promise<CostsBaseline | undefined> {
+    const result = await db.select().from(costsBaseline).where(eq(costsBaseline.id, id));
+    return result[0];
+  }
+
+  async getAllCostsBaseline(): Promise<CostsBaseline[]> {
+    return await db.select().from(costsBaseline);
+  }
+
+  async createCostsBaseline(cost: InsertCostsBaseline): Promise<CostsBaseline> {
+    const result = await db.insert(costsBaseline).values(cost).returning();
+    return result[0];
+  }
+
+  async updateCostsBaseline(id: string, cost: Partial<InsertCostsBaseline>): Promise<CostsBaseline | undefined> {
+    const result = await db
+      .update(costsBaseline)
+      .set({ ...cost, updatedAt: new Date() })
+      .where(eq(costsBaseline.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Rates Audit Log operations
+  async createRatesAuditLog(log: InsertRatesAuditLog): Promise<RatesAuditLog> {
+    const result = await db.insert(ratesAuditLog).values(log).returning();
+    return result[0];
+  }
+
+  async getRatesAuditLogs(limit: number = 50): Promise<RatesAuditLog[]> {
+    return await db
+      .select()
+      .from(ratesAuditLog)
+      .orderBy(desc(ratesAuditLog.createdAt))
+      .limit(limit);
+  }
+
+  // Add-On Products operations
+  async getAddOnProduct(id: string): Promise<AddOnProduct | undefined> {
+    const result = await db.select().from(addOnProducts).where(eq(addOnProducts.id, id));
+    return result[0];
+  }
+
+  async getAddOnProductBySlug(slug: string): Promise<AddOnProduct | undefined> {
+    const result = await db.select().from(addOnProducts).where(eq(addOnProducts.slug, slug));
+    return result[0];
+  }
+
+  async getAllAddOnProducts(): Promise<AddOnProduct[]> {
+    return await db.select().from(addOnProducts).orderBy(addOnProducts.displayOrder);
+  }
+
+  async getActiveAddOnProducts(): Promise<AddOnProduct[]> {
+    return await db
+      .select()
+      .from(addOnProducts)
+      .where(eq(addOnProducts.isActive, true))
+      .orderBy(addOnProducts.displayOrder);
+  }
+
+  async createAddOnProduct(addOn: InsertAddOnProduct): Promise<AddOnProduct> {
+    const result = await db.insert(addOnProducts).values(addOn).returning();
+    return result[0];
+  }
+
+  async updateAddOnProduct(id: string, addOn: Partial<InsertAddOnProduct>): Promise<AddOnProduct | undefined> {
+    const result = await db
+      .update(addOnProducts)
+      .set({ ...addOn, updatedAt: new Date() })
+      .where(eq(addOnProducts.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteAddOnProduct(id: string): Promise<boolean> {
+    const result = await db.delete(addOnProducts).where(eq(addOnProducts.id, id)).returning();
+    return result.length > 0;
   }
 }
 
