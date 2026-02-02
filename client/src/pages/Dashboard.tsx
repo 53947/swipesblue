@@ -12,10 +12,10 @@ export default function Dashboard() {
   ];
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+    <div className="p-8 space-y-8">
       <div>
-        <h1 className="text-4xl font-bold mb-2" style={{ color: "#0000FF" }}>Dashboard</h1>
-        <p className="text-muted-foreground">Monitor your payment gateway performance</p>
+        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Dashboard</h1>
+        <p className="text-swipes-pro-gray">Monitor your payment gateway performance</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">

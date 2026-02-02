@@ -58,7 +58,7 @@ const ecommerceTiers = [
   },
   {
     name: "Enterprise",
-    price: "$199",
+    price: "$299",
     period: "/mo",
     description: "For large organizations",
     features: [
@@ -79,7 +79,7 @@ const ecommerceTiers = [
 const developerTiers = [
   {
     name: "Payment API",
-    price: "2.9% + 30¢",
+    price: "2.70% + $0.30",
     period: "per transaction",
     description: "Integrate payments anywhere",
     features: [
@@ -90,19 +90,18 @@ const developerTiers = [
       "Community support",
     ],
     cta: "Get API Keys",
-    ctaLink: "/admin/api-keys",
+    ctaLink: "/dashboard/api-keys",
   },
   {
     name: "API Pro",
     price: "$99/mo",
-    subPrice: "+ 2.5% + 25¢ per transaction",
+    subPrice: "+ 2.70% + $0.30 per transaction",
     description: "For high-volume developers",
     features: [
       "Everything in Payment API",
-      "Lower transaction fees",
       "Higher rate limits",
       "Priority support",
-      "Dedicated account manager",
+      "Technical account manager",
     ],
     cta: "Contact Sales",
     ctaLink: "/contact",
@@ -116,7 +115,7 @@ const faqs = [
   },
   {
     question: "Are there any hidden fees?",
-    answer: "No. Our pricing is completely transparent. Transaction fees (2.9% + 30¢) apply to all plans including FREE.",
+    answer: "No. Our pricing is completely transparent. Transaction fees (2.70% + $0.30) apply to all plans including FREE.",
   },
   {
     question: "Can I cancel anytime?",
@@ -221,7 +220,7 @@ export default function Pricing() {
 
           <div className="text-center mt-8">
             <p className="text-swipes-pro-gray">
-              <span className="font-semibold text-swipes-black">+ 2.9% + 30¢</span> per transaction on all plans
+              <span className="font-semibold text-swipes-black">+ 2.70% + $0.30</span> per transaction on all plans
             </p>
           </div>
         </div>
