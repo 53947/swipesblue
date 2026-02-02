@@ -81,7 +81,7 @@ export default function Home() {
                 <Link href="/shoppingcart">
                   <Button 
                     size="lg" 
-                    className="group bg-swipes-teal text-white shadow-md font-medium"
+                    className="group bg-swipes-blue-deep text-white shadow-md font-medium"
                     data-testid="button-hero-get-started"
                   >
                     <span className="flex items-center">

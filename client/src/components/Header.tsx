@@ -203,7 +203,7 @@ export default function Header() {
           </Link>
           <Link href="/shoppingcart" className="flex items-center">
             <Button 
-              className="group bg-swipes-teal hover:bg-swipes-teal/90 text-white px-5 shadow-sm hover:shadow-cta-glow transition-all justify-center"
+              className="group bg-swipes-blue-deep text-white px-5 shadow-sm transition-all justify-center"
               data-testid="button-get-started"
             >
               <span className="flex items-center">
@@ -318,7 +318,7 @@ export default function Header() {
                 <span className="text-[15px] text-swipes-gray">Sign in</span>
               </Link>
               <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-get-started">
-                <Button className="w-full bg-swipes-teal hover:bg-swipes-teal/90 text-white" data-testid="button-mobile-get-started">
+                <Button className="w-full bg-swipes-blue-deep text-white" data-testid="button-mobile-get-started">
                   Get Started
                 </Button>
               </Link>
