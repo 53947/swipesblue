@@ -49,7 +49,7 @@ export default function OrderSummary({
           {discount > 0 && (
             <div className="flex justify-between text-sm">
               <span className="text-muted-foreground">Discount</span>
-              <span style={{ color: "#00FF40" }} data-testid="text-discount">-${discount.toFixed(2)}</span>
+              <span style={{ color: "#10B981" }} data-testid="text-discount">-${discount.toFixed(2)}</span>
             </div>
           )}
         </div>
@@ -58,13 +58,13 @@ export default function OrderSummary({
 
         <div className="flex justify-between text-lg font-bold">
           <span>Total</span>
-          <span style={{ color: "#0000FF" }} data-testid="text-total">${total.toFixed(2)}</span>
+          <span style={{ color: "#1844A6" }} data-testid="text-total">${total.toFixed(2)}</span>
         </div>
 
         {showCta && (
           <Button 
             className="w-full" 
-            style={{ backgroundColor: "#0000FF", color: "white" }}
+            style={{ backgroundColor: "#1844A6", color: "white" }}
             onClick={onCheckout}
             data-testid="button-checkout"
           >

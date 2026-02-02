@@ -25,11 +25,11 @@ export default function TransactionTable({ transactions, onViewDetails }: Transa
   const getStatusColor = (status: Transaction["status"]) => {
     switch (status) {
       case "success":
-        return "bg-[#00FF40] text-[#09080e]";
+        return "bg-[#10B981] text-white";
       case "pending":
-        return "bg-[#0000FF] text-white";
+        return "bg-[#FFD700] text-[#09080e]";
       case "failed":
-        return "bg-[#FF0040] text-white";
+        return "bg-[#DC2626] text-white";
     }
   };
 
@@ -90,7 +90,7 @@ export default function TransactionTable({ transactions, onViewDetails }: Transa
                   <td className="py-4 px-4 text-sm">{transaction.date}</td>
                   <td className="py-4 px-4 text-sm font-mono text-muted-foreground">{transaction.id}</td>
                   <td className="py-4 px-4 text-sm">{transaction.customer}</td>
-                  <td className="py-4 px-4 text-sm font-semibold" style={{ color: "#0000FF" }}>{transaction.amount}</td>
+                  <td className="py-4 px-4 text-sm font-semibold" style={{ color: "#1844A6" }}>{transaction.amount}</td>
                   <td className="py-4 px-4">
                     <Badge className={`${getStatusColor(transaction.status)} no-default-hover-elevate no-default-active-elevate`}>
                       {transaction.status}

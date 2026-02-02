@@ -31,9 +31,9 @@ export default function CheckoutProgress({ currentStep, steps = defaultSteps }: 
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-colors ${
                     isComplete
-                      ? "border-[#00FF40] bg-[#00FF40]"
+                      ? "border-[#10B981] bg-[#10B981]"
                       : isCurrent
-                      ? "border-[#0000FF] bg-[#0000FF]"
+                      ? "border-[#1844A6] bg-[#1844A6]"
                       : "border-border bg-background"
                   }`}
                   data-testid={`step-indicator-${step.id}`}
@@ -61,7 +61,7 @@ export default function CheckoutProgress({ currentStep, steps = defaultSteps }: 
 
               {!isLast && (
                 <div className="flex-1 h-0.5 mx-4" style={{ 
-                  backgroundColor: isComplete ? "#00FF40" : "#E5E5E5" 
+                  backgroundColor: isComplete ? "#10B981" : "#E5E5E5" 
                 }} />
               )}
             </div>

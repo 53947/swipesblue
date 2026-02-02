@@ -31,7 +31,7 @@ export default function PaymentForm({ onSubmit, isProcessing }: PaymentFormProps
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Lock className="h-5 w-5" style={{ color: "#0000FF" }} />
+          <Lock className="h-5 w-5" style={{ color: "#1844A6" }} />
           Payment Information
         </CardTitle>
       </CardHeader>
@@ -96,7 +96,7 @@ export default function PaymentForm({ onSubmit, isProcessing }: PaymentFormProps
           <Button
             type="submit"
             className="w-full"
-            style={{ backgroundColor: "#0000FF", color: "white" }}
+            style={{ backgroundColor: "#1844A6", color: "white" }}
             disabled={isProcessing}
             data-testid="button-place-order"
           >

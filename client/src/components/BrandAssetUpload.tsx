@@ -76,7 +76,7 @@ export default function BrandAssetUpload({
       <CardContent className="space-y-4">
         <div
           className={`border-2 border-dashed rounded-md p-8 text-center transition-colors ${
-            dragActive ? "border-[#0000FF] bg-muted" : "border-border"
+            dragActive ? "border-[#1844A6] bg-muted" : "border-border"
           }`}
           onDragEnter={handleDrag}
           onDragLeave={handleDrag}
@@ -99,7 +99,7 @@ export default function BrandAssetUpload({
             <Button
               type="button"
               variant="outline"
-              style={{ borderColor: "#0000FF", color: "#0000FF" }}
+              style={{ borderColor: "#1844A6", color: "#1844A6" }}
               onClick={() => document.getElementById(`upload-${category}`)?.click()}
               data-testid={`button-upload-${category}`}
             >
@@ -114,12 +114,12 @@ export default function BrandAssetUpload({
               <div
                 key={asset.id}
                 className={`relative p-4 rounded-md border-2 transition-colors ${
-                  asset.isActive ? "border-[#0000FF]" : "border-border"
+                  asset.isActive ? "border-[#1844A6]" : "border-border"
                 }`}
                 data-testid={`asset-${asset.id}`}
               >
                 {asset.isActive && (
-                  <div className="absolute top-2 right-2 bg-[#00FF40] rounded-full p-1">
+                  <div className="absolute top-2 right-2 bg-[#10B981] rounded-full p-1">
                     <Check className="h-3 w-3 text-white" />
                   </div>
                 )}
@@ -147,7 +147,7 @@ export default function BrandAssetUpload({
                     size="icon"
                     variant="ghost"
                     onClick={() => onDelete?.(asset.id)}
-                    style={{ color: "#FF0040" }}
+                    style={{ color: "#DC2626" }}
                     data-testid={`button-delete-${asset.id}`}
                   >
                     <X className="h-4 w-4" />

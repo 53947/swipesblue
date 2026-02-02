@@ -29,11 +29,11 @@ export default function Orders() {
   const getPaymentStatusColor = (paymentStatus: string) => {
     switch (paymentStatus) {
       case "paid":
-        return "bg-[#00FF40] text-[#09080e]";
+        return "bg-[#10B981] text-white";
       case "pending":
-        return "bg-[#0000FF] text-white";
+        return "bg-[#FFD700] text-[#09080e]";
       case "failed":
-        return "bg-[#FF0040] text-white";
+        return "bg-[#DC2626] text-white";
       default:
         return "bg-muted text-muted-foreground";
     }
@@ -130,12 +130,12 @@ export default function Orders() {
                     {parseFloat(order.discount) > 0 && (
                       <div className="flex justify-between text-sm mb-1">
                         <span className="text-muted-foreground">Discount</span>
-                        <span style={{ color: "#00FF40" }} data-testid={`discount-${order.id}`}>-${parseFloat(order.discount).toFixed(2)}</span>
+                        <span style={{ color: "#10B981" }} data-testid={`discount-${order.id}`}>-${parseFloat(order.discount).toFixed(2)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-lg font-bold mt-2">
                       <span>Total</span>
-                      <span style={{ color: "#0000FF" }} data-testid={`total-${order.id}`}>${parseFloat(order.total).toFixed(2)}</span>
+                      <span style={{ color: "#1844A6" }} data-testid={`total-${order.id}`}>${parseFloat(order.total).toFixed(2)}</span>
                     </div>
                   </div>
                 </div>

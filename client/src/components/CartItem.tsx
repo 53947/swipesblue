@@ -36,7 +36,7 @@ export default function CartItem({ id, name, price, quantity, image, onUpdateQua
           className="h-8 w-8"
           onClick={() => onUpdateQuantity(id, Math.max(1, quantity - 1))}
           data-testid={`button-decrease-${id}`}
-          style={{ borderColor: "#0000FF", color: "#0000FF" }}
+          style={{ borderColor: "#1844A6", color: "#1844A6" }}
         >
           <Minus className="h-3 w-3" />
         </Button>
@@ -47,13 +47,13 @@ export default function CartItem({ id, name, price, quantity, image, onUpdateQua
           className="h-8 w-8"
           onClick={() => onUpdateQuantity(id, quantity + 1)}
           data-testid={`button-increase-${id}`}
-          style={{ borderColor: "#0000FF", color: "#0000FF" }}
+          style={{ borderColor: "#1844A6", color: "#1844A6" }}
         >
           <Plus className="h-3 w-3" />
         </Button>
       </div>
 
-      <div className="w-24 text-right font-semibold" style={{ color: "#0000FF" }} data-testid={`total-${id}`}>
+      <div className="w-24 text-right font-semibold" style={{ color: "#1844A6" }} data-testid={`total-${id}`}>
         ${(price * quantity).toFixed(2)}
       </div>
 
@@ -62,7 +62,7 @@ export default function CartItem({ id, name, price, quantity, image, onUpdateQua
         variant="ghost"
         onClick={() => onRemove(id)}
         data-testid={`button-remove-${id}`}
-        style={{ color: "#FF0040" }}
+        style={{ color: "#DC2626" }}
       >
         <X className="h-4 w-4" />
       </Button>

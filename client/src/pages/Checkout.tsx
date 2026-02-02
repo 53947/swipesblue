@@ -143,7 +143,7 @@ export default function Checkout() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
-            <span className="text-4xl font-bold" style={{ color: "#00FF40" }}>/</span>
+            <span className="text-4xl font-bold" style={{ color: "#10B981" }}>/</span>
             <h1 className="text-4xl font-bold" style={{ color: "#09080e" }}>checkout</h1>
           </div>
           <p className="text-muted-foreground">Complete your secure purchase</p>
@@ -274,7 +274,7 @@ export default function Checkout() {
                   <Button
                     type="submit"
                     className="w-full"
-                    style={{ backgroundColor: "#0000FF", color: "white" }}
+                    style={{ backgroundColor: "#1844A6", color: "white" }}
                     data-testid="button-continue-payment"
                   >
                     Continue to Payment
@@ -304,10 +304,10 @@ export default function Checkout() {
           {currentStep === 3 && (
             <Card>
               <CardContent className="py-16 text-center">
-                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6" style={{ backgroundColor: "#00FF40" }}>
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-full mb-6" style={{ backgroundColor: "#10B981" }}>
                   <Check className="h-8 w-8 text-white" />
                 </div>
-                <h2 className="text-2xl font-bold mb-2" style={{ color: "#00FF40" }}>Order Confirmed!</h2>
+                <h2 className="text-2xl font-bold mb-2" style={{ color: "#10B981" }}>Order Confirmed!</h2>
                 <p className="text-muted-foreground mb-6">
                   Thank you for your purchase. Your order has been successfully processed.
                 </p>
