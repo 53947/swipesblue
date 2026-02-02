@@ -13,10 +13,10 @@ export default function Logo({
   showIcon = false,
   showUrl = false
 }: LogoProps) {
-  // Font sizes for different variants
+  // Font sizes for different variants (spec says 24px for header)
   const fontSizes = {
     small: "18px",
-    default: "30px",
+    default: "24px",
     large: "36px"
   };
   
