@@ -154,6 +154,11 @@ export default function Footer() {
                   Cookies
                 </span>
               </Link>
+              <Link href="/admin" data-testid="link-footer-admin">
+                <span className="text-gray-400 hover:text-gray-600 transition-colors text-sm">
+                  Site Admin
+                </span>
+              </Link>
             </div>
           </div>
         </div>
