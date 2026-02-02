@@ -1,30 +1,30 @@
 import { Link } from "wouter";
 import Logo from "@/components/Logo";
+import { ExternalLink } from "lucide-react";
 
 const footerLinks = {
   products: [
     { label: "Payments", href: "/demo" },
-    { label: "E-commerce", href: "/products" },
-    { label: "Terminal", href: "/demo" },
-    { label: "Invoicing", href: "/demo" },
+    { label: "E-commerce Suite", href: "/products" },
+    { label: "Pricing", href: "/pricing" },
+    { label: "Dashboard", href: "/dashboard" },
   ],
   developers: [
     { label: "Documentation", href: "/dashboard" },
-    { label: "API Reference", href: "/admin/api-keys" },
-    { label: "Webhooks", href: "/admin/webhooks" },
+    { label: "API Keys", href: "/dashboard/api-keys" },
+    { label: "Webhooks", href: "/dashboard/webhooks" },
     { label: "Status", href: "/" },
   ],
-  company: [
-    { label: "About", href: "/" },
-    { label: "Customers", href: "/" },
-    { label: "Partners", href: "/" },
-    { label: "Blog", href: "/" },
+  platforms: [
+    { label: "SwipesBlue.com", href: "/", external: false },
+    { label: "HostsBlue.com", href: "https://hostsblue.com", external: true },
+    { label: "BusinessBlueprint.io", href: "https://businessblueprint.io", external: true },
   ],
   support: [
     { label: "Help Center", href: "/" },
     { label: "Contact Sales", href: "/" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Dashboard", href: "/dashboard" },
+    { label: "About", href: "/" },
+    { label: "Blog", href: "/" },
   ],
 };
 
@@ -40,7 +40,7 @@ export default function Footer() {
               <Logo showIcon variant="default" />
             </div>
             <p className="text-gray-500 text-sm leading-relaxed max-w-xs">
-              Financial infrastructure for the internet. Accept payments, send payouts, and manage your business online.
+              Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export default function Footer() {
             <ul className="space-y-3">
               {footerLinks.products.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} data-testid={`link-footer-product-${link.label.toLowerCase()}`}>
+                  <Link href={link.href} data-testid={`link-footer-product-${link.label.toLowerCase().replace(/\s+/g, '-')}`}>
                     <span className="text-gray-500 hover:text-gray-900 transition-colors text-sm">
                       {link.label}
                     </span>
@@ -80,19 +80,32 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Company */}
+          {/* Platforms */}
           <div className="border-l border-gray-200 pl-8">
             <h4 className="font-semibold text-sm text-gray-900 mb-4">
-              Company
+              Platforms
             </h4>
             <ul className="space-y-3">
-              {footerLinks.company.map((link) => (
+              {footerLinks.platforms.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} data-testid={`link-footer-company-${link.label.toLowerCase()}`}>
-                    <span className="text-gray-500 hover:text-gray-900 transition-colors text-sm">
+                  {link.external ? (
+                    <a 
+                      href={link.href} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-gray-500 hover:text-gray-900 transition-colors text-sm inline-flex items-center gap-1"
+                      data-testid={`link-footer-platform-${link.label.toLowerCase().replace(/\./g, '-')}`}
+                    >
                       {link.label}
-                    </span>
-                  </Link>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ) : (
+                    <Link href={link.href} data-testid={`link-footer-platform-${link.label.toLowerCase().replace(/\./g, '-')}`}>
+                      <span className="text-gray-500 hover:text-gray-900 transition-colors text-sm">
+                        {link.label}
+                      </span>
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

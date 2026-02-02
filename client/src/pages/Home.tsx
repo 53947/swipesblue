@@ -24,7 +24,7 @@ const features = [
     icon: Code,
     title: "Developer API",
     description: "RESTful API with clear docs. Integrate in minutes, not days.",
-    link: "/admin/api-keys",
+    link: "/dashboard/api-keys",
     linkText: "View docs",
     color: "#064A6C",
   },
@@ -62,7 +62,7 @@ export default function Home() {
             {/* Left side - Content */}
             <div className="space-y-6 text-left">
               <p className="text-sm font-medium text-gray-500 tracking-wide">
-                Payments processed on SwipesBlue: <span className="text-swipes-blue font-semibold">$2.4M+</span>
+                Payments processed on SwipesBlue: <span className="text-swipes-blue-deep font-semibold">$2.4M+</span>
               </p>
               
               <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 leading-tight">
@@ -81,8 +81,7 @@ export default function Home() {
                 <Link href="/shoppingcart">
                   <Button 
                     size="lg" 
-                    className="group bg-swipes-teal hover:bg-swipes-teal/90 text-white px-6 py-3 shadow-md transition-all font-medium justify-center"
-                    style={{ borderRadius: '7px' }}
+                    className="group bg-swipes-teal text-white shadow-md font-medium"
                     data-testid="button-hero-get-started"
                   >
                     <span className="flex items-center">
@@ -97,8 +96,7 @@ export default function Home() {
                   <Button 
                     size="lg" 
                     variant="outline" 
-                    className="border-gray-300 text-gray-700 hover:bg-gray-50 px-6 py-3 font-medium"
-                    style={{ borderRadius: '7px' }}
+                    className="border-gray-300 text-gray-700 font-medium"
                     data-testid="button-hero-documentation"
                   >
                     View Documentation
@@ -193,7 +191,7 @@ export default function Home() {
                       {feature.description}
                     </p>
                     <Link href={feature.link}>
-                      <span className="inline-flex items-center text-swipes-blue-pure font-medium hover:underline">
+                      <span className="inline-flex items-center text-swipes-blue-deep font-medium hover:underline">
                         {feature.linkText}
                         <ArrowRight className="ml-1 h-4 w-4" />
                       </span>
@@ -222,19 +220,19 @@ export default function Home() {
                   Transaction
                 </div>
                 <div className="mb-6">
-                  <span className="text-4xl font-bold text-swipes-blue-deep">2.9% + 30¢</span>
+                  <span className="text-4xl font-bold text-swipes-blue-deep">2.70% + $0.30</span>
                   <div className="text-sm text-swipes-gray mt-1">per transaction</div>
                 </div>
                 <ul className="space-y-3 text-left mb-8">
                   {["No monthly fees", "No setup fees", "No hidden costs"].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-swipes-gray">
-                      <Check className="h-4 w-4 text-swipes-blue-pure flex-shrink-0" />
+                      <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
                 <Link href="/shoppingcart">
-                  <Button className="w-full bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white">
+                  <Button className="w-full bg-swipes-blue-deep text-white">
                     Start processing
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -245,22 +243,23 @@ export default function Home() {
             <Card className="border border-gray-200 rounded-card bg-white">
               <CardContent className="p-8 text-center">
                 <div className="text-sm font-semibold text-swipes-gray uppercase tracking-wider mb-4">
-                  E-commerce
+                  E-commerce Suite
                 </div>
                 <div className="mb-6">
                   <span className="text-sm text-swipes-gray">Starting at</span>
-                  <div className="text-4xl font-bold text-swipes-blue-deep">$99/month</div>
+                  <div className="text-4xl font-bold text-swipes-blue-deep">FREE</div>
+                  <div className="text-sm text-swipes-gray mt-1">+ paid tiers from $29/mo</div>
                 </div>
                 <ul className="space-y-3 text-left mb-8">
                   {["Shopping cart", "Checkout system", "Subscription billing"].map((item) => (
                     <li key={item} className="flex items-center gap-2 text-swipes-gray">
-                      <Check className="h-4 w-4 text-swipes-blue-pure flex-shrink-0" />
+                      <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0" />
                       <span>{item}</span>
                     </li>
                   ))}
                 </ul>
                 <Link href="/pricing">
-                  <Button variant="outline" className="w-full border-swipes-blue-deep text-swipes-blue-deep hover:bg-swipes-blue-deep hover:text-white">
+                  <Button variant="outline" className="w-full border-swipes-blue-deep text-swipes-blue-deep">
                     View plans
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -271,7 +270,7 @@ export default function Home() {
 
           <div className="text-center mt-8">
             <Link href="/pricing">
-              <span className="text-swipes-blue-pure font-medium hover:underline inline-flex items-center">
+              <span className="text-swipes-blue-deep font-medium hover:underline inline-flex items-center">
                 See full pricing details
                 <ArrowRight className="ml-1 h-4 w-4" />
               </span>
@@ -294,13 +293,13 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/dashboard">
-                  <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white">
+                  <Button className="bg-swipes-blue-deep text-white">
                     Read the docs
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
-                <Link href="/admin/api-keys">
-                  <Button variant="outline" className="border-swipes-blue-deep text-swipes-blue-deep hover:bg-swipes-blue-deep hover:text-white">
+                <Link href="/dashboard/api-keys">
+                  <Button variant="outline" className="border-swipes-blue-deep text-swipes-blue-deep">
                     Get API keys
                   </Button>
                 </Link>
@@ -343,7 +342,7 @@ export default function Home() {
                     <CardContent className="p-6 text-center">
                       <Icon className="h-8 w-8 mx-auto mb-3 text-swipes-blue-deep" />
                       <div className="font-medium text-swipes-black mb-2">{demo.label}</div>
-                      <span className="text-sm text-swipes-blue-pure inline-flex items-center">
+                      <span className="text-sm text-swipes-blue-deep inline-flex items-center">
                         Try
                         <ArrowRight className="ml-1 h-3 w-3" />
                       </span>
@@ -368,7 +367,7 @@ export default function Home() {
           <Link href="/shoppingcart">
             <Button 
               size="lg" 
-              className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-10 shadow-lg hover:shadow-cta-glow transition-all"
+              className="bg-swipes-blue-deep text-white shadow-lg"
               data-testid="button-cta-get-started"
             >
               Get Started Free

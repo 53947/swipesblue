@@ -87,7 +87,7 @@ export default function Products() {
             variant={selectedCategory === null ? "default" : "outline"}
             onClick={() => setSelectedCategory(null)}
             data-testid="button-category-all"
-            className={selectedCategory === null ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" : "border-swipes-blue-deep text-swipes-blue-deep"}
+            className={selectedCategory === null ? "bg-swipes-blue-deep text-white" : "border-swipes-blue-deep text-swipes-blue-deep"}
           >
             All
           </Button>
@@ -97,7 +97,7 @@ export default function Products() {
               variant={selectedCategory === category ? "default" : "outline"}
               onClick={() => setSelectedCategory(category as string)}
               data-testid={`button-category-${category?.toLowerCase().replace(/\s/g, '-')}`}
-              className={selectedCategory === category ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" : "border-swipes-blue-deep text-swipes-blue-deep"}
+              className={selectedCategory === category ? "bg-swipes-blue-deep text-white" : "border-swipes-blue-deep text-swipes-blue-deep"}
             >
               {category}
             </Button>
@@ -153,7 +153,7 @@ export default function Products() {
               </CardContent>
               <CardFooter>
                 <Button
-                  className="w-full bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white"
+                  className="w-full bg-swipes-blue-deep text-white"
                   onClick={() => handleAddToCart(product.id)}
                   disabled={product.stock === 0}
                   data-testid={`button-add-to-cart-${product.id}`}

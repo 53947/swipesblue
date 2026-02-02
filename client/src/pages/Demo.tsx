@@ -86,7 +86,7 @@ export default function Demo() {
                       <p className="text-swipes-gray mb-6 leading-relaxed">
                         {demo.description}
                       </p>
-                      <span className="inline-flex items-center text-swipes-blue-pure font-medium group-hover:underline">
+                      <span className="inline-flex items-center text-swipes-blue-deep font-medium group-hover:underline">
                         Try demo
                         <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
                       </span>
@@ -115,14 +115,14 @@ export default function Demo() {
                 React, Vue, WordPress, or Shopify, SwipesBlue integrates seamlessly.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/admin/api-keys">
-                  <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white">
+                <Link href="/dashboard/api-keys">
+                  <Button className="bg-swipes-blue-deep text-white">
                     Get API Keys
                     <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
                 </Link>
                 <Link href="/dashboard">
-                  <Button variant="outline" className="border-swipes-blue-deep text-swipes-blue-deep hover:bg-swipes-blue-deep hover:text-white">
+                  <Button variant="outline" className="border-swipes-blue-deep text-swipes-blue-deep">
                     View Documentation
                   </Button>
                 </Link>
@@ -132,8 +132,8 @@ export default function Demo() {
             <div className="space-y-4">
               <div className="bg-white rounded-card p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-swipes-blue-pure/10 rounded flex items-center justify-center">
-                    <span className="text-swipes-blue-pure font-bold text-sm">WP</span>
+                  <div className="w-8 h-8 bg-swipes-blue-deep/10 rounded flex items-center justify-center">
+                    <span className="text-swipes-blue-deep font-bold text-sm">WP</span>
                   </div>
                   <span className="font-medium text-swipes-black">WordPress / WooCommerce</span>
                 </div>
@@ -176,7 +176,7 @@ export default function Demo() {
           <Link href="/shoppingcart">
             <Button 
               size="lg" 
-              className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white px-10"
+              className="bg-swipes-blue-deep text-white"
             >
               Get Started Free
             </Button>

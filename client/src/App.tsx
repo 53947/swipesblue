@@ -17,6 +17,7 @@ import Orders from "@/pages/Orders";
 import BrandStudio from "@/pages/BrandStudio";
 import Pricing from "@/pages/Pricing";
 import Demo from "@/pages/Demo";
+import Developers from "@/pages/Developers";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import Merchants from "@/pages/admin/Merchants";
 import AdminTransactions from "@/pages/admin/AdminTransactions";
@@ -30,6 +31,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/pricing" component={Pricing} />
       <Route path="/demo" component={Demo} />
+      <Route path="/developers" component={Developers} />
       
       {/* Public Product Demo Pages */}
       <Route path="/products" component={Products} />
@@ -162,6 +164,21 @@ function Router() {
         {() => (
           <AdminLayout>
             <AdminTransactions />
+          </AdminLayout>
+        )}
+      </Route>
+      <Route path="/admin/rates">
+        {() => (
+          <AdminLayout>
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-2xl font-bold text-swipes-black mb-2">Rate Management</h1>
+                <p className="text-swipes-pro-gray">Configure transaction rates and fees.</p>
+              </div>
+              <div className="p-6 bg-white rounded-[7px] border border-gray-200">
+                <p className="text-swipes-pro-gray">Rate Management Worksheet coming soon with DeepSeek AI integration.</p>
+              </div>
+            </div>
           </AdminLayout>
         )}
       </Route>

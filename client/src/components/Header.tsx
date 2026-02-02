@@ -45,13 +45,13 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
         title: "Developer Tools",
         subtitle: "Build custom payment integrations",
         items: [
-          { icon: Code, label: "Payment API", description: "Accept payments anywhere", href: "/admin/api-keys", price: "2.9% + 30¢" },
-          { icon: Webhook, label: "Webhooks", description: "Real-time event notifications", href: "/admin/webhooks" },
-          { icon: Key, label: "API Keys", description: "Manage your credentials", href: "/admin/api-keys" },
-          { icon: BookOpen, label: "Documentation", description: "API reference & guides", href: "/dashboard", badge: "FREE" },
+          { icon: Code, label: "Payment API", description: "Accept payments anywhere", href: "/developers", price: "2.70% + $0.30" },
+          { icon: Webhook, label: "Webhooks", description: "Real-time event notifications", href: "/dashboard/webhooks" },
+          { icon: Key, label: "API Keys", description: "Manage your credentials", href: "/dashboard/api-keys" },
+          { icon: BookOpen, label: "Documentation", description: "API reference & guides", href: "/developers", badge: "FREE" },
         ],
         ctaLabel: "View API Documentation",
-        ctaHref: "/dashboard"
+        ctaHref: "/developers"
       }
     ]
   },

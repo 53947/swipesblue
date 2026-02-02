@@ -200,8 +200,8 @@ export default function Pricing() {
                     <Button 
                       className={`w-full group ${
                         tier.popular 
-                          ? "bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white" 
-                          : "bg-transparent border-2 border-swipes-teal text-swipes-teal hover:bg-swipes-teal hover:text-white"
+                          ? "bg-swipes-blue-deep text-white" 
+                          : "bg-transparent border-2 border-swipes-teal text-swipes-teal"
                       }`}
                       data-testid={`button-pricing-${tier.name.toLowerCase()}`}
                     >
@@ -271,7 +271,7 @@ export default function Pricing() {
                   </ul>
                   <Link href={tier.ctaLink}>
                     <Button 
-                      className="w-full group bg-swipes-teal hover:bg-swipes-teal/90 text-white"
+                      className="w-full group bg-swipes-teal text-white"
                       data-testid={`button-pricing-${tier.name.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       <span className="flex items-center justify-center">
@@ -328,7 +328,7 @@ export default function Pricing() {
           <Link href="/demo">
             <Button 
               size="lg" 
-              className="group bg-white text-swipes-blue-deep hover:bg-gray-100 px-10"
+              className="group bg-white text-swipes-blue-deep"
               data-testid="button-cta-get-started"
             >
               <span className="flex items-center">
