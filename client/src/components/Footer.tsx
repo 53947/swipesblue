@@ -1,6 +1,10 @@
 import { Link } from "wouter";
 import Logo from "@/components/Logo";
 import { ExternalLink } from "lucide-react";
+import triadBlueIcon from "@assets/Final_Master_Triad_Blue_Icon_1770041420368.png";
+import swipesBlueIcon from "@assets/swipesblue_logo_1769971645259.png";
+import hostsBlueIcon from "@assets/HostsBlue_Logo_1770042263409.png";
+import businessBlueprintIcon from "@assets/1-Master_business_blueprint_icon_1770041450074.png";
 
 const footerLinks = {
   products: [
@@ -14,11 +18,6 @@ const footerLinks = {
     { label: "API Keys", href: "/dashboard/api-keys" },
     { label: "Webhooks", href: "/dashboard/webhooks" },
     { label: "Status", href: "/" },
-  ],
-  platforms: [
-    { label: "SwipesBlue.com", href: "/", external: false },
-    { label: "HostsBlue.com", href: "https://hostsblue.com", external: true },
-    { label: "BusinessBlueprint.io", href: "https://businessblueprint.io", external: true },
   ],
   support: [
     { label: "Help Center", href: "/" },
@@ -80,34 +79,81 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Platforms */}
+          {/* Platforms - Triad Blue Ecosystem */}
           <div className="border-l border-gray-200 pl-8">
             <h4 className="font-semibold text-sm text-gray-900 mb-4">
               Platforms
             </h4>
             <ul className="space-y-3">
-              {footerLinks.platforms.map((link) => (
-                <li key={link.label}>
-                  {link.external ? (
-                    <a 
-                      href={link.href} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="text-gray-500 hover:text-gray-900 transition-colors text-sm inline-flex items-center gap-1"
-                      data-testid={`link-footer-platform-${link.label.toLowerCase().replace(/\./g, '-')}`}
-                    >
-                      {link.label}
-                      <ExternalLink className="h-3 w-3" />
-                    </a>
-                  ) : (
-                    <Link href={link.href} data-testid={`link-footer-platform-${link.label.toLowerCase().replace(/\./g, '-')}`}>
-                      <span className="text-gray-500 hover:text-gray-900 transition-colors text-sm">
-                        {link.label}
-                      </span>
-                    </Link>
-                  )}
-                </li>
-              ))}
+              {/* Triad Blue - Parent Company */}
+              <li>
+                <a 
+                  href="https://triadblue.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group"
+                  data-testid="link-footer-platform-triadblue-com"
+                >
+                  <img src={triadBlueIcon} alt="" className="h-5 w-auto" />
+                  <span className="flex items-baseline">
+                    <span className="font-archivo-semi-expanded font-bold lowercase" style={{ color: "#1844A6", fontSize: "13px" }}>triad</span>
+                    <span className="font-archivo-narrow font-bold lowercase" style={{ color: "#1844A6", fontSize: "13px" }}>blue</span>
+                    <span className="font-archivo font-bold lowercase" style={{ color: "#10B981", fontSize: "13px" }}>.com</span>
+                  </span>
+                  <ExternalLink className="h-3 w-3 text-gray-400" />
+                </a>
+              </li>
+              {/* SwipesBlue */}
+              <li>
+                <Link 
+                  href="/"
+                  className="inline-flex items-center gap-2 group"
+                  data-testid="link-footer-platform-swipesblue-com"
+                >
+                  <img src={swipesBlueIcon} alt="" className="h-5 w-auto" />
+                  <span className="flex items-baseline">
+                    <span className="font-archivo-semi-expanded font-bold lowercase" style={{ color: "#374151", fontSize: "13px" }}>swipes</span>
+                    <span className="font-archivo-narrow font-bold lowercase" style={{ color: "#0000FF", fontSize: "13px" }}>blue</span>
+                    <span className="font-archivo font-bold lowercase" style={{ color: "#10B981", fontSize: "13px" }}>.com</span>
+                  </span>
+                </Link>
+              </li>
+              {/* HostsBlue */}
+              <li>
+                <a 
+                  href="https://hostsblue.com" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group"
+                  data-testid="link-footer-platform-hostsblue-com"
+                >
+                  <img src={hostsBlueIcon} alt="" className="h-5 w-auto" />
+                  <span className="flex items-baseline">
+                    <span className="font-archivo-semi-expanded font-bold lowercase" style={{ color: "#008060", fontSize: "13px" }}>hosts</span>
+                    <span className="font-archivo-narrow font-bold lowercase" style={{ color: "#0000FF", fontSize: "13px" }}>blue</span>
+                    <span className="font-archivo font-bold lowercase" style={{ color: "#10B981", fontSize: "13px" }}>.com</span>
+                  </span>
+                  <ExternalLink className="h-3 w-3 text-gray-400" />
+                </a>
+              </li>
+              {/* BusinessBlueprint */}
+              <li>
+                <a 
+                  href="https://businessblueprint.io" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 group"
+                  data-testid="link-footer-platform-businessblueprint-io"
+                >
+                  <img src={businessBlueprintIcon} alt="" className="h-5 w-auto" />
+                  <span className="flex items-baseline">
+                    <span className="font-archivo-semi-expanded font-bold lowercase" style={{ color: "#F97316", fontSize: "13px" }}>business</span>
+                    <span className="font-archivo-narrow font-bold lowercase" style={{ color: "#0000FF", fontSize: "13px" }}>blueprint</span>
+                    <span className="font-archivo font-bold lowercase" style={{ color: "#10B981", fontSize: "13px" }}>.io</span>
+                  </span>
+                  <ExternalLink className="h-3 w-3 text-gray-400" />
+                </a>
+              </li>
             </ul>
           </div>
 
