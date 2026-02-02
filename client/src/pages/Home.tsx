@@ -287,8 +287,98 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Competitor Comparison Table */}
+      <section className="py-20 md:py-28" data-testid="section-competitor-comparison">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
+              Compare and save
+            </h2>
+            <p className="mt-4 text-lg text-swipes-gray">
+              See how SwipesBlue stacks up against the competition on a $100 sale
+            </p>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse" data-testid="table-competitor-comparison">
+              <thead>
+                <tr className="border-b-2 border-gray-200">
+                  <th className="text-left py-4 px-4 font-semibold text-swipes-black">Provider</th>
+                  <th className="text-left py-4 px-4 font-semibold text-swipes-black">Rate</th>
+                  <th className="text-right py-4 px-4 font-semibold text-swipes-black">Fee</th>
+                  <th className="text-right py-4 px-4 font-semibold text-swipes-black">You Keep</th>
+                </tr>
+              </thead>
+              <tbody>
+                {/* SwipesBlue - highlighted row */}
+                <tr className="bg-swipes-blue-deep/5 border-b border-gray-100" data-testid="row-swipesblue">
+                  <td className="py-4 px-4">
+                    <span className="font-bold text-swipes-blue-deep">SwipesBlue</span>
+                  </td>
+                  <td className="py-4 px-4">
+                    <span className="font-semibold text-swipes-blue-deep">2.70% + $0.30</span>
+                  </td>
+                  <td className="text-right py-4 px-4">
+                    <span className="font-bold text-swipes-blue-deep">$3.00</span>
+                  </td>
+                  <td className="text-right py-4 px-4">
+                    <span className="font-bold text-swipes-trusted-green">$97.00</span>
+                  </td>
+                </tr>
+                {/* Stripe */}
+                <tr className="border-b border-gray-100" data-testid="row-stripe">
+                  <td className="py-4 px-4 text-swipes-gray">Stripe</td>
+                  <td className="py-4 px-4 text-swipes-gray">2.90% + $0.30</td>
+                  <td className="text-right py-4 px-4 text-swipes-gray">$3.20</td>
+                  <td className="text-right py-4 px-4">
+                    <span className="text-swipes-gray">$96.80</span>
+                    <span className="ml-2 text-xs text-swipes-muted-red">(Save $0.20)</span>
+                  </td>
+                </tr>
+                {/* PayPal */}
+                <tr className="border-b border-gray-100" data-testid="row-paypal">
+                  <td className="py-4 px-4 text-swipes-gray">PayPal</td>
+                  <td className="py-4 px-4 text-swipes-gray">2.99% + $0.49</td>
+                  <td className="text-right py-4 px-4 text-swipes-gray">$3.48</td>
+                  <td className="text-right py-4 px-4">
+                    <span className="text-swipes-gray">$96.52</span>
+                    <span className="ml-2 text-xs text-swipes-muted-red">(Save $0.48)</span>
+                  </td>
+                </tr>
+                {/* Square */}
+                <tr className="border-b border-gray-100" data-testid="row-square">
+                  <td className="py-4 px-4 text-swipes-gray">Square</td>
+                  <td className="py-4 px-4 text-swipes-gray">2.90% + $0.30</td>
+                  <td className="text-right py-4 px-4 text-swipes-gray">$3.20</td>
+                  <td className="text-right py-4 px-4">
+                    <span className="text-swipes-gray">$96.80</span>
+                    <span className="ml-2 text-xs text-swipes-muted-red">(Save $0.20)</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-8 text-center">
+            <p className="text-sm text-swipes-gray mb-4">
+              WooCommerce is free until it isn't. Less fees. More revenue.
+            </p>
+            <Link href="/pricing">
+              <Button className="group bg-swipes-blue-deep text-white">
+                <span className="flex items-center">
+                  See Full Pricing
+                  <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </span>
+                </span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Developer Preview */}
-      <section className="py-20 md:py-28">
+      <section className="py-20 md:py-28 bg-swipes-gray-light">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
