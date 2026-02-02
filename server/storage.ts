@@ -26,6 +26,8 @@ import {
   type InsertWebhookDelivery,
   type RatesActive,
   type InsertRatesActive,
+  type RatesStaged,
+  type InsertRatesStaged,
   type CostsBaseline,
   type InsertCostsBaseline,
   type RatesAuditLog,
@@ -45,6 +47,7 @@ import {
   webhookEndpoints,
   webhookDeliveries,
   ratesActive,
+  ratesStaged,
   costsBaseline,
   ratesAuditLog,
   addOnProducts,
@@ -152,6 +155,15 @@ export interface IStorage {
   createRatesActive(rate: InsertRatesActive): Promise<RatesActive>;
   updateRatesActive(id: string, rate: Partial<InsertRatesActive>): Promise<RatesActive | undefined>;
   deleteRatesActive(id: string): Promise<boolean>;
+
+  // Rates Staged operations
+  getRatesStaged(id: string): Promise<RatesStaged | undefined>;
+  getAllRatesStaged(): Promise<RatesStaged[]>;
+  createRatesStaged(rate: InsertRatesStaged): Promise<RatesStaged>;
+  updateRatesStaged(id: string, rate: Partial<InsertRatesStaged>): Promise<RatesStaged | undefined>;
+  deleteRatesStaged(id: string): Promise<boolean>;
+  clearRatesStaged(): Promise<boolean>;
+  activateStagedRates(): Promise<RatesActive[]>;
 
   // Costs Baseline operations
   getCostsBaseline(id: string): Promise<CostsBaseline | undefined>;
@@ -703,6 +715,78 @@ export class DbStorage implements IStorage {
   async deleteRatesActive(id: string): Promise<boolean> {
     const result = await db.delete(ratesActive).where(eq(ratesActive.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Rates Staged operations
+  async getRatesStaged(id: string): Promise<RatesStaged | undefined> {
+    const result = await db.select().from(ratesStaged).where(eq(ratesStaged.id, id));
+    return result[0];
+  }
+
+  async getAllRatesStaged(): Promise<RatesStaged[]> {
+    return await db.select().from(ratesStaged).orderBy(ratesStaged.displayOrder);
+  }
+
+  async createRatesStaged(rate: InsertRatesStaged): Promise<RatesStaged> {
+    const result = await db.insert(ratesStaged).values(rate).returning();
+    return result[0];
+  }
+
+  async updateRatesStaged(id: string, rate: Partial<InsertRatesStaged>): Promise<RatesStaged | undefined> {
+    const result = await db
+      .update(ratesStaged)
+      .set({ ...rate, updatedAt: new Date() })
+      .where(eq(ratesStaged.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteRatesStaged(id: string): Promise<boolean> {
+    const result = await db.delete(ratesStaged).where(eq(ratesStaged.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async clearRatesStaged(): Promise<boolean> {
+    await db.delete(ratesStaged);
+    return true;
+  }
+
+  async activateStagedRates(): Promise<RatesActive[]> {
+    const stagedRates = await this.getAllRatesStaged();
+    const activatedRates: RatesActive[] = [];
+
+    for (const staged of stagedRates) {
+      const existingRate = await this.getRatesByTierName(staged.tierName);
+      
+      if (existingRate) {
+        const updated = await this.updateRatesActive(existingRate.id, {
+          monthlyFee: staged.monthlyFee,
+          transactionPercent: staged.transactionPercent,
+          transactionFlat: staged.transactionFlat,
+          description: staged.description,
+          features: staged.features as string[] | null,
+          isActive: staged.isActive,
+          displayOrder: staged.displayOrder,
+        });
+        if (updated) activatedRates.push(updated);
+      } else {
+        const created = await this.createRatesActive({
+          tierName: staged.tierName,
+          tierType: staged.tierType,
+          monthlyFee: staged.monthlyFee,
+          transactionPercent: staged.transactionPercent,
+          transactionFlat: staged.transactionFlat,
+          description: staged.description,
+          features: staged.features as string[] | null,
+          isActive: staged.isActive,
+          displayOrder: staged.displayOrder,
+        });
+        activatedRates.push(created);
+      }
+    }
+
+    await this.clearRatesStaged();
+    return activatedRates;
   }
 
   // Costs Baseline operations

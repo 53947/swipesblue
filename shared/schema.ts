@@ -501,8 +501,9 @@ export const addOnProducts = pgTable("add_on_products", {
   name: text("name").notNull(),
   slug: text("slug").notNull().unique(),
   description: text("description"),
-  monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }).notNull(),
-  yearlyPrice: decimal("yearly_price", { precision: 10, scale: 2 }),
+  monthlyPrice: decimal("monthly_price", { precision: 10, scale: 2 }), // Deprecated - keeping for backward compatibility
+  yearlyPrice: decimal("yearly_price", { precision: 10, scale: 2 }), // Legacy field - use annualPrice
+  annualPrice: decimal("annual_price", { precision: 10, scale: 2 }), // Primary price (annual subscription)
   features: json("features"), // Array of feature strings
   requiredTier: text("required_tier"), // Minimum tier required (null = any tier)
   category: text("category").notNull().default("general"), // 'marketing' | 'analytics' | 'security' | 'integration' | 'general'
@@ -521,3 +522,540 @@ export const insertAddOnProductSchema = createInsertSchema(addOnProducts).omit({
 
 export type InsertAddOnProduct = z.infer<typeof insertAddOnProductSchema>;
 export type AddOnProduct = typeof addOnProducts.$inferSelect;
+
+// Conversations table for AI chat
+export const conversations = pgTable("conversations", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertConversationSchema = createInsertSchema(conversations).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+
+// Messages table for AI chat
+export const messages = pgTable("messages", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  conversationId: varchar("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  role: text("role").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Message = typeof messages.$inferSelect;
+
+// ========================================
+// Part 9: Customer Portal Tables
+// ========================================
+
+export const customerAccounts = pgTable("customer_accounts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  email: text("email").notNull(),
+  passwordHash: text("password_hash").notNull(),
+  name: text("name"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastLogin: timestamp("last_login"),
+});
+
+export const insertCustomerAccountSchema = createInsertSchema(customerAccounts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCustomerAccount = z.infer<typeof insertCustomerAccountSchema>;
+export type CustomerAccount = typeof customerAccounts.$inferSelect;
+
+export const customerPaymentMethods = pgTable("customer_payment_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull(),
+  cardLastFour: text("card_last_four"),
+  cardBrand: text("card_brand"),
+  token: text("token"),
+  isDefault: boolean("is_default").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCustomerPaymentMethodSchema = createInsertSchema(customerPaymentMethods).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCustomerPaymentMethod = z.infer<typeof insertCustomerPaymentMethodSchema>;
+export type CustomerPaymentMethod = typeof customerPaymentMethods.$inferSelect;
+
+export const customerSupportTickets = pgTable("customer_support_tickets", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull(),
+  merchantId: varchar("merchant_id").notNull(),
+  subject: text("subject").notNull(),
+  message: text("message").notNull(),
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerSupportTicketSchema = createInsertSchema(customerSupportTickets).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerSupportTicket = z.infer<typeof insertCustomerSupportTicketSchema>;
+export type CustomerSupportTicket = typeof customerSupportTickets.$inferSelect;
+
+// ========================================
+// Part 9: Security Suite Tables
+// ========================================
+
+export const securitySettings = pgTable("security_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull().unique(),
+  velocityEnabled: boolean("velocity_enabled").default(false),
+  velocityCardLimit: integer("velocity_card_limit"),
+  velocityIpLimit: integer("velocity_ip_limit"),
+  velocityWindowMinutes: integer("velocity_window_minutes"),
+  geoBlockingEnabled: boolean("geo_blocking_enabled").default(false),
+  blockedCountries: json("blocked_countries"),
+  deviceFingerprintEnabled: boolean("device_fingerprint_enabled").default(false),
+  threedsEnabled: boolean("threeds_enabled").default(false),
+  threedsThresholdAmount: decimal("threeds_threshold_amount", { precision: 10, scale: 2 }),
+  fraudScoreEnabled: boolean("fraud_score_enabled").default(false),
+  fraudScoreDeclineThreshold: integer("fraud_score_decline_threshold"),
+  fraudScoreReviewThreshold: integer("fraud_score_review_threshold"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertSecuritySettingsSchema = createInsertSchema(securitySettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertSecuritySettings = z.infer<typeof insertSecuritySettingsSchema>;
+export type SecuritySettings = typeof securitySettings.$inferSelect;
+
+export const fraudScores = pgTable("fraud_scores", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  transactionId: varchar("transaction_id").notNull(),
+  score: integer("score").notNull(),
+  riskFactors: json("risk_factors"),
+  decision: text("decision").notNull(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertFraudScoreSchema = createInsertSchema(fraudScores).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertFraudScore = z.infer<typeof insertFraudScoreSchema>;
+export type FraudScore = typeof fraudScores.$inferSelect;
+
+export const deviceFingerprints = pgTable("device_fingerprints", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  fingerprintHash: text("fingerprint_hash").notNull(),
+  merchantId: varchar("merchant_id").notNull(),
+  isBlocked: boolean("is_blocked").default(false),
+  transactionCount: integer("transaction_count").default(0),
+  firstSeen: timestamp("first_seen").notNull().defaultNow(),
+  lastSeen: timestamp("last_seen").notNull().defaultNow(),
+});
+
+export const insertDeviceFingerprintSchema = createInsertSchema(deviceFingerprints).omit({
+  id: true,
+  firstSeen: true,
+  lastSeen: true,
+});
+export type InsertDeviceFingerprint = z.infer<typeof insertDeviceFingerprintSchema>;
+export type DeviceFingerprint = typeof deviceFingerprints.$inferSelect;
+
+export const chargebackAlerts = pgTable("chargeback_alerts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  transactionId: varchar("transaction_id").notNull(),
+  alertType: text("alert_type").notNull(),
+  alertSource: text("alert_source"),
+  amount: decimal("amount", { precision: 10, scale: 2 }),
+  actionTaken: text("action_taken"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertChargebackAlertSchema = createInsertSchema(chargebackAlerts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertChargebackAlert = z.infer<typeof insertChargebackAlertSchema>;
+export type ChargebackAlert = typeof chargebackAlerts.$inferSelect;
+
+// ========================================
+// Part 9: Checkout Optimizer Tables
+// ========================================
+
+export const checkoutSettings = pgTable("checkout_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull().unique(),
+  oneClickEnabled: boolean("one_click_enabled").default(false),
+  expressCheckoutEnabled: boolean("express_checkout_enabled").default(false),
+  applePayEnabled: boolean("apple_pay_enabled").default(false),
+  googlePayEnabled: boolean("google_pay_enabled").default(false),
+  addressAutocompleteEnabled: boolean("address_autocomplete_enabled").default(false),
+  smartValidationEnabled: boolean("smart_validation_enabled").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCheckoutSettingsSchema = createInsertSchema(checkoutSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCheckoutSettings = z.infer<typeof insertCheckoutSettingsSchema>;
+export type CheckoutSettings = typeof checkoutSettings.$inferSelect;
+
+export const abTests = pgTable("ab_tests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  testName: text("test_name").notNull(),
+  variantAConfig: json("variant_a_config"),
+  variantBConfig: json("variant_b_config"),
+  startDate: timestamp("start_date"),
+  endDate: timestamp("end_date"),
+  status: text("status").notNull().default("draft"),
+  winner: text("winner"),
+});
+
+export const insertAbTestSchema = createInsertSchema(abTests).omit({
+  id: true,
+});
+export type InsertAbTest = z.infer<typeof insertAbTestSchema>;
+export type AbTest = typeof abTests.$inferSelect;
+
+export const abTestResults = pgTable("ab_test_results", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  testId: varchar("test_id").notNull(),
+  variant: text("variant").notNull(),
+  sessions: integer("sessions").default(0),
+  conversions: integer("conversions").default(0),
+  conversionRate: decimal("conversion_rate", { precision: 5, scale: 4 }),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertAbTestResultSchema = createInsertSchema(abTestResults).omit({
+  id: true,
+  updatedAt: true,
+});
+export type InsertAbTestResult = z.infer<typeof insertAbTestResultSchema>;
+export type AbTestResult = typeof abTestResults.$inferSelect;
+
+export const checkoutAnalytics = pgTable("checkout_analytics", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  date: timestamp("date").notNull(),
+  cartViews: integer("cart_views").default(0),
+  checkoutStarts: integer("checkout_starts").default(0),
+  paymentAttempts: integer("payment_attempts").default(0),
+  completions: integer("completions").default(0),
+  avgTimeToCheckout: integer("avg_time_to_checkout"),
+  deviceType: text("device_type"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCheckoutAnalyticsSchema = createInsertSchema(checkoutAnalytics).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCheckoutAnalytics = z.infer<typeof insertCheckoutAnalyticsSchema>;
+export type CheckoutAnalytics = typeof checkoutAnalytics.$inferSelect;
+
+// ========================================
+// Part 9: Shopping Cart Pro Tables
+// ========================================
+
+export const savedCarts = pgTable("saved_carts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id"),
+  merchantId: varchar("merchant_id").notNull(),
+  cartData: json("cart_data").notNull(),
+  shareToken: text("share_token").unique(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const insertSavedCartSchema = createInsertSchema(savedCarts).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertSavedCart = z.infer<typeof insertSavedCartSchema>;
+export type SavedCart = typeof savedCarts.$inferSelect;
+
+export const cartRecommendations = pgTable("cart_recommendations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  productId: varchar("product_id").notNull(),
+  recommendedProductId: varchar("recommended_product_id").notNull(),
+  recommendationType: text("recommendation_type").notNull(),
+  priority: integer("priority").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCartRecommendationSchema = createInsertSchema(cartRecommendations).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCartRecommendation = z.infer<typeof insertCartRecommendationSchema>;
+export type CartRecommendation = typeof cartRecommendations.$inferSelect;
+
+export const cartNotes = pgTable("cart_notes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  cartId: varchar("cart_id").notNull(),
+  noteText: text("note_text"),
+  isGiftMessage: boolean("is_gift_message").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertCartNoteSchema = createInsertSchema(cartNotes).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertCartNote = z.infer<typeof insertCartNoteSchema>;
+export type CartNote = typeof cartNotes.$inferSelect;
+
+export const inventoryReservations = pgTable("inventory_reservations", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  productId: varchar("product_id").notNull(),
+  cartId: varchar("cart_id").notNull(),
+  quantity: integer("quantity").notNull(),
+  reservedAt: timestamp("reserved_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at").notNull(),
+  status: text("status").notNull().default("active"),
+});
+
+export const insertInventoryReservationSchema = createInsertSchema(inventoryReservations).omit({
+  id: true,
+  reservedAt: true,
+});
+export type InsertInventoryReservation = z.infer<typeof insertInventoryReservationSchema>;
+export type InventoryReservation = typeof inventoryReservations.$inferSelect;
+
+// ========================================
+// Part 9: Analytics Tables
+// ========================================
+
+export const analyticsDaily = pgTable("analytics_daily", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  date: timestamp("date").notNull(),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  transactionCount: integer("transaction_count").default(0),
+  successCount: integer("success_count").default(0),
+  failedCount: integer("failed_count").default(0),
+  avgOrderValue: decimal("avg_order_value", { precision: 10, scale: 2 }),
+  newCustomers: integer("new_customers").default(0),
+  returningCustomers: integer("returning_customers").default(0),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertAnalyticsDailySchema = createInsertSchema(analyticsDaily).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertAnalyticsDaily = z.infer<typeof insertAnalyticsDailySchema>;
+export type AnalyticsDaily = typeof analyticsDaily.$inferSelect;
+
+export const analyticsProducts = pgTable("analytics_products", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  productId: varchar("product_id").notNull(),
+  date: timestamp("date").notNull(),
+  unitsSold: integer("units_sold").default(0),
+  revenue: decimal("revenue", { precision: 10, scale: 2 }),
+  views: integer("views").default(0),
+  addToCartCount: integer("add_to_cart_count").default(0),
+});
+
+export const insertAnalyticsProductsSchema = createInsertSchema(analyticsProducts).omit({
+  id: true,
+});
+export type InsertAnalyticsProducts = z.infer<typeof insertAnalyticsProductsSchema>;
+export type AnalyticsProducts = typeof analyticsProducts.$inferSelect;
+
+export const customerLtv = pgTable("customer_ltv", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull(),
+  merchantId: varchar("merchant_id").notNull(),
+  totalSpent: decimal("total_spent", { precision: 10, scale: 2 }),
+  orderCount: integer("order_count").default(0),
+  firstOrderDate: timestamp("first_order_date"),
+  lastOrderDate: timestamp("last_order_date"),
+  avgOrderValue: decimal("avg_order_value", { precision: 10, scale: 2 }),
+  calculatedAt: timestamp("calculated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerLtvSchema = createInsertSchema(customerLtv).omit({
+  id: true,
+  calculatedAt: true,
+});
+export type InsertCustomerLtv = z.infer<typeof insertCustomerLtvSchema>;
+export type CustomerLtv = typeof customerLtv.$inferSelect;
+
+export const scheduledReports = pgTable("scheduled_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  reportType: text("report_type").notNull(),
+  recipients: json("recipients"),
+  frequency: text("frequency").notNull(),
+  lastSent: timestamp("last_sent"),
+  nextSend: timestamp("next_send"),
+  config: json("config"),
+  isActive: boolean("is_active").default(true),
+});
+
+export const insertScheduledReportSchema = createInsertSchema(scheduledReports).omit({
+  id: true,
+});
+export type InsertScheduledReport = z.infer<typeof insertScheduledReportSchema>;
+export type ScheduledReport = typeof scheduledReports.$inferSelect;
+
+// ========================================
+// Part 9: Branding Tables
+// ========================================
+
+export const brandSettings = pgTable("brand_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull().unique(),
+  logoUrl: text("logo_url"),
+  faviconUrl: text("favicon_url"),
+  primaryColor: text("primary_color"),
+  secondaryColor: text("secondary_color"),
+  backgroundColor: text("background_color"),
+  textColor: text("text_color"),
+  fontFamily: text("font_family"),
+  customFontUrl: text("custom_font_url"),
+  removeSwipesblueBranding: boolean("remove_swipesblue_branding").default(false),
+  customDomain: text("custom_domain"),
+  customDomainVerified: boolean("custom_domain_verified").default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertBrandSettingsSchema = createInsertSchema(brandSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertBrandSettings = z.infer<typeof insertBrandSettingsSchema>;
+export type BrandSettings = typeof brandSettings.$inferSelect;
+
+export const emailTemplates = pgTable("email_templates", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  templateType: text("template_type").notNull(),
+  subject: text("subject"),
+  bodyHtml: text("body_html"),
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertEmailTemplateSchema = createInsertSchema(emailTemplates).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertEmailTemplate = z.infer<typeof insertEmailTemplateSchema>;
+export type EmailTemplate = typeof emailTemplates.$inferSelect;
+
+export const receiptSettings = pgTable("receipt_settings", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull().unique(),
+  showLogo: boolean("show_logo").default(true),
+  headerText: text("header_text"),
+  footerText: text("footer_text"),
+  termsText: text("terms_text"),
+  customFields: json("custom_fields"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertReceiptSettingsSchema = createInsertSchema(receiptSettings).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertReceiptSettings = z.infer<typeof insertReceiptSettingsSchema>;
+export type ReceiptSettings = typeof receiptSettings.$inferSelect;
+
+// ========================================
+// Part 9: Subscription Tables
+// ========================================
+
+export const merchantSubscriptions = pgTable("merchant_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  tier: text("tier").notNull(),
+  status: text("status").notNull().default("active"),
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const insertMerchantSubscriptionSchema = createInsertSchema(merchantSubscriptions).omit({
+  id: true,
+  startedAt: true,
+});
+export type InsertMerchantSubscription = z.infer<typeof insertMerchantSubscriptionSchema>;
+export type MerchantSubscription = typeof merchantSubscriptions.$inferSelect;
+
+export const addonSubscriptions = pgTable("addon_subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  addonId: varchar("addon_id").notNull(),
+  status: text("status").notNull().default("active"),
+  startedAt: timestamp("started_at").notNull().defaultNow(),
+  expiresAt: timestamp("expires_at"),
+});
+
+export const insertAddonSubscriptionSchema = createInsertSchema(addonSubscriptions).omit({
+  id: true,
+  startedAt: true,
+});
+export type InsertAddonSubscription = z.infer<typeof insertAddonSubscriptionSchema>;
+export type AddonSubscription = typeof addonSubscriptions.$inferSelect;
+
+// ========================================
+// Part 9: API Logs Table
+// ========================================
+
+export const apiLogs = pgTable("api_logs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id"),
+  apiKeyId: varchar("api_key_id"),
+  endpoint: text("endpoint"),
+  method: text("method"),
+  requestBody: json("request_body"),
+  responseCode: integer("response_code"),
+  responseTimeMs: integer("response_time_ms"),
+  ipAddress: text("ip_address"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertApiLogSchema = createInsertSchema(apiLogs).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertApiLog = z.infer<typeof insertApiLogSchema>;
+export type ApiLog = typeof apiLogs.$inferSelect;

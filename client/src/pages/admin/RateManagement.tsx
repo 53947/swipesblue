@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
@@ -12,7 +12,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Pencil, Trash2, DollarSign, Percent, History, Calculator } from "lucide-react";
+import { 
+  Plus, Pencil, Trash2, DollarSign, Percent, History, Calculator, 
+  Save, Search, Upload, CheckCircle, BarChart3, AlertCircle, 
+  CheckCircle2, XCircle, ArrowRight
+} from "lucide-react";
 
 interface Rate {
   id: string;
@@ -27,6 +31,18 @@ interface Rate {
   displayOrder: number;
   createdAt: string;
   updatedAt: string;
+}
+
+interface DraftRate {
+  tierName: string;
+  tierType: string;
+  monthlyFee: string;
+  transactionPercent: string;
+  transactionFlat: string;
+  description: string | null;
+  features: string[] | null;
+  isActive: boolean;
+  displayOrder: number;
 }
 
 interface CostBaseline {
@@ -53,13 +69,64 @@ interface AuditLog {
   createdAt: string;
 }
 
+interface ResearchReport {
+  timestamp: string;
+  baseCosts: {
+    interchangePlus: string;
+    perTransaction: string;
+    targetMargin: string;
+    minimumRateNeeded: string;
+  };
+  tierAnalysis: Array<{
+    tierName: string;
+    tierType: string;
+    yourRate: string;
+    yourCost: string;
+    margin: string;
+    targetMargin: string;
+    meetsTarget: boolean;
+    status: "green" | "yellow" | "red";
+    competitors: Array<{
+      provider: string;
+      rate: string;
+      fee: string;
+      savings: string;
+      isLower: boolean;
+    }>;
+  }>;
+  summary: {
+    allMeetTarget: boolean;
+    allCompetitive: boolean;
+    readyToUpload: boolean;
+    message: string;
+  };
+}
+
+interface CompareData {
+  active: Rate[];
+  staged: Rate[];
+  costs: CostBaseline[];
+  competitors: Record<string, { percent: number; flat: number }>;
+  timestamp: string;
+}
+
 export default function RateManagement() {
   const { toast } = useToast();
   const [editingRate, setEditingRate] = useState<Rate | null>(null);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [draftRates, setDraftRates] = useState<DraftRate[]>([]);
+  const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
+  const [researchReport, setResearchReport] = useState<ResearchReport | null>(null);
+  const [isResearching, setIsResearching] = useState(false);
+  const [showCompareDialog, setShowCompareDialog] = useState(false);
+  const [showActivateConfirm, setShowActivateConfirm] = useState(false);
 
   const { data: rates = [], isLoading: ratesLoading } = useQuery<Rate[]>({
     queryKey: ["/api/admin/rates"],
+  });
+
+  const { data: stagedRates = [] } = useQuery<Rate[]>({
+    queryKey: ["/api/admin/rates/staged"],
   });
 
   const { data: costs = [], isLoading: costsLoading } = useQuery<CostBaseline[]>({
@@ -69,6 +136,40 @@ export default function RateManagement() {
   const { data: auditLogs = [] } = useQuery<AuditLog[]>({
     queryKey: ["/api/admin/rates/audit"],
   });
+
+  const { data: compareData } = useQuery<CompareData>({
+    queryKey: ["/api/admin/rates/compare"],
+    enabled: showCompareDialog,
+  });
+
+  useEffect(() => {
+    const savedDraft = localStorage.getItem("swipesblue_rate_draft");
+    const savedTimestamp = localStorage.getItem("swipesblue_rate_draft_timestamp");
+    if (savedDraft) {
+      try {
+        setDraftRates(JSON.parse(savedDraft));
+        setDraftSavedAt(savedTimestamp);
+      } catch (e) {
+        console.error("Failed to load draft rates:", e);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    if (rates.length > 0 && draftRates.length === 0) {
+      setDraftRates(rates.map(r => ({
+        tierName: r.tierName,
+        tierType: r.tierType,
+        monthlyFee: r.monthlyFee,
+        transactionPercent: r.transactionPercent,
+        transactionFlat: r.transactionFlat,
+        description: r.description,
+        features: r.features,
+        isActive: r.isActive,
+        displayOrder: r.displayOrder,
+      })));
+    }
+  }, [rates]);
 
   const createRateMutation = useMutation({
     mutationFn: async (data: Partial<Rate>) => {
@@ -114,8 +215,84 @@ export default function RateManagement() {
     },
   });
 
+  const uploadStagedMutation = useMutation({
+    mutationFn: async (rates: DraftRate[]) => {
+      return apiRequest("POST", "/api/admin/rates/staged/bulk", { rates });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/rates/staged"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/rates/audit"] });
+      toast({ title: "Rates staged successfully", description: `Staged at ${new Date().toLocaleTimeString()}` });
+    },
+    onError: () => {
+      toast({ title: "Failed to stage rates", variant: "destructive" });
+    },
+  });
+
+  const activateMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/admin/rates/staged/activate");
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/rates"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/rates/staged"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/rates/audit"] });
+      toast({ title: "Rates activated!", description: `Live at ${new Date().toLocaleTimeString()}` });
+      setShowActivateConfirm(false);
+    },
+    onError: () => {
+      toast({ title: "Failed to activate rates", variant: "destructive" });
+    },
+  });
+
+  const handleSaveDraft = () => {
+    const timestamp = new Date().toISOString();
+    localStorage.setItem("swipesblue_rate_draft", JSON.stringify(draftRates));
+    localStorage.setItem("swipesblue_rate_draft_timestamp", timestamp);
+    setDraftSavedAt(timestamp);
+    toast({ title: "Draft saved", description: `Saved at ${new Date(timestamp).toLocaleTimeString()}` });
+  };
+
+  const handleResearch = async () => {
+    setIsResearching(true);
+    try {
+      const response = await fetch("/api/admin/rates/research", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ draftRates }),
+        credentials: "include",
+      });
+      if (!response.ok) throw new Error("Research failed");
+      const report = await response.json();
+      setResearchReport(report);
+      toast({ title: "Research complete", description: report.summary.message });
+    } catch (error) {
+      toast({ title: "Research failed", variant: "destructive" });
+    } finally {
+      setIsResearching(false);
+    }
+  };
+
+  const handleUpload = () => {
+    uploadStagedMutation.mutate(draftRates);
+  };
+
+  const handleActivate = () => {
+    activateMutation.mutate();
+  };
+
+  const updateDraftRate = (index: number, field: keyof DraftRate, value: string | boolean | number | null) => {
+    setDraftRates(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
+  };
+
   const ecommerceRates = rates.filter(r => r.tierType === "ecommerce");
   const developerRates = rates.filter(r => r.tierType === "developer");
+  const ecommerceDrafts = draftRates.filter(r => r.tierType === "ecommerce");
+  const developerDrafts = draftRates.filter(r => r.tierType === "developer");
 
   const RateForm = ({ rate, onSubmit, onCancel, isNew = false }: {
     rate?: Rate | null;
@@ -127,7 +304,7 @@ export default function RateManagement() {
       tierName: rate?.tierName || "",
       tierType: rate?.tierType || "ecommerce",
       monthlyFee: rate?.monthlyFee || "0",
-      transactionPercent: rate?.transactionPercent || "2.9",
+      transactionPercent: rate?.transactionPercent || "2.70",
       transactionFlat: rate?.transactionFlat || "0.30",
       description: rate?.description || "",
       features: rate?.features?.join("\n") || "",
@@ -412,6 +589,325 @@ export default function RateManagement() {
         </Dialog>
       </div>
 
+      {/* 5-Button Workflow Panel */}
+      <Card className="border-swipes-blue-deep/20 bg-gradient-to-r from-swipes-blue-deep/5 to-transparent">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-lg flex items-center gap-2">
+            <Calculator className="h-5 w-5 text-swipes-blue-deep" />
+            Rate Workflow
+          </CardTitle>
+          <CardDescription>
+            Save Draft → Research → Upload → Activate → Compare
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-3 items-center">
+            {/* Button 1: Save Draft */}
+            <Button
+              variant="outline"
+              onClick={handleSaveDraft}
+              className="group"
+              data-testid="button-save-draft"
+            >
+              <Save className="h-4 w-4 mr-2" />
+              Save Draft
+              <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </span>
+            </Button>
+
+            {/* Button 2: Research */}
+            <Button
+              variant="outline"
+              onClick={handleResearch}
+              disabled={isResearching || draftRates.length === 0}
+              className="group"
+              data-testid="button-research"
+            >
+              <Search className="h-4 w-4 mr-2" />
+              {isResearching ? "Researching..." : "Research"}
+              <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </span>
+            </Button>
+
+            {/* Button 3: Upload */}
+            <Button
+              variant="outline"
+              onClick={handleUpload}
+              disabled={uploadStagedMutation.isPending || draftRates.length === 0}
+              className="group"
+              data-testid="button-upload"
+            >
+              <Upload className="h-4 w-4 mr-2" />
+              {uploadStagedMutation.isPending ? "Uploading..." : "Upload"}
+              <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </span>
+            </Button>
+
+            {/* Button 4: Activate */}
+            <Dialog open={showActivateConfirm} onOpenChange={setShowActivateConfirm}>
+              <DialogTrigger asChild>
+                <Button
+                  className="bg-swipes-trusted-green hover:bg-swipes-trusted-green/90 group"
+                  disabled={stagedRates.length === 0}
+                  data-testid="button-activate"
+                >
+                  <CheckCircle className="h-4 w-4 mr-2" />
+                  Activate
+                  <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Activate Staged Rates?</DialogTitle>
+                  <DialogDescription>
+                    This will make {stagedRates.length} staged rates LIVE on the website. 
+                    All pricing pages will immediately reflect the new rates.
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <Button variant="outline">Cancel</Button>
+                  </DialogClose>
+                  <Button 
+                    onClick={handleActivate}
+                    disabled={activateMutation.isPending}
+                    className="bg-swipes-trusted-green hover:bg-swipes-trusted-green/90"
+                    data-testid="button-confirm-activate"
+                  >
+                    {activateMutation.isPending ? "Activating..." : "Yes, Activate Now"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* Button 5: Compare */}
+            <Dialog open={showCompareDialog} onOpenChange={setShowCompareDialog}>
+              <DialogTrigger asChild>
+                <Button variant="outline" className="group" data-testid="button-compare">
+                  <BarChart3 className="h-4 w-4 mr-2" />
+                  Compare
+                  <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                    <ArrowRight className="h-4 w-4 ml-2" />
+                  </span>
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Rate Comparison</DialogTitle>
+                  <DialogDescription>
+                    Compare Active, Staged, Draft and Competitor Rates
+                  </DialogDescription>
+                </DialogHeader>
+                {compareData && (
+                  <div className="space-y-6">
+                    <div className="grid grid-cols-3 gap-4">
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-swipes-trusted-green" />
+                            Active Rates ({compareData.active.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-2">
+                          {compareData.active.map(r => (
+                            <div key={r.id} className="flex justify-between">
+                              <span>{r.tierName}</span>
+                              <span className="font-mono">{r.transactionPercent}% + ${r.transactionFlat}</span>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-swipes-gold" />
+                            Staged Rates ({compareData.staged.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-2">
+                          {compareData.staged.length === 0 ? (
+                            <span className="text-swipes-pro-gray">No staged rates</span>
+                          ) : (
+                            compareData.staged.map(r => (
+                              <div key={r.id} className="flex justify-between">
+                                <span>{r.tierName}</span>
+                                <span className="font-mono">{r.transactionPercent}% + ${r.transactionFlat}</span>
+                              </div>
+                            ))
+                          )}
+                        </CardContent>
+                      </Card>
+
+                      <Card>
+                        <CardHeader className="pb-2">
+                          <CardTitle className="text-sm flex items-center gap-2">
+                            <div className="w-3 h-3 rounded-full bg-swipes-blue-deep" />
+                            Draft Rates ({draftRates.length})
+                          </CardTitle>
+                        </CardHeader>
+                        <CardContent className="text-sm space-y-2">
+                          {draftRates.map((r, i) => (
+                            <div key={i} className="flex justify-between">
+                              <span>{r.tierName}</span>
+                              <span className="font-mono">{r.transactionPercent}% + ${r.transactionFlat}</span>
+                            </div>
+                          ))}
+                        </CardContent>
+                      </Card>
+                    </div>
+
+                    <Card>
+                      <CardHeader className="pb-2">
+                        <CardTitle className="text-sm">Competitor Rates (on $100 sale)</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-2">Provider</th>
+                              <th className="text-left py-2">Rate</th>
+                              <th className="text-right py-2">Fee</th>
+                              <th className="text-right py-2">You Keep</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr className="bg-swipes-blue-deep/5">
+                              <td className="py-2 font-bold text-swipes-blue-deep">SwipesBlue</td>
+                              <td className="py-2">2.70% + $0.30</td>
+                              <td className="text-right py-2">$3.00</td>
+                              <td className="text-right py-2 font-bold text-swipes-trusted-green">$97.00</td>
+                            </tr>
+                            <tr>
+                              <td className="py-2 text-swipes-pro-gray">Stripe</td>
+                              <td className="py-2 text-swipes-pro-gray">2.90% + $0.30</td>
+                              <td className="text-right py-2 text-swipes-pro-gray">$3.20</td>
+                              <td className="text-right py-2 text-swipes-pro-gray">$96.80</td>
+                            </tr>
+                            <tr>
+                              <td className="py-2 text-swipes-pro-gray">PayPal</td>
+                              <td className="py-2 text-swipes-pro-gray">2.99% + $0.49</td>
+                              <td className="text-right py-2 text-swipes-pro-gray">$3.48</td>
+                              <td className="text-right py-2 text-swipes-pro-gray">$96.52</td>
+                            </tr>
+                            <tr>
+                              <td className="py-2 text-swipes-pro-gray">Square</td>
+                              <td className="py-2 text-swipes-pro-gray">2.90% + $0.30</td>
+                              <td className="text-right py-2 text-swipes-pro-gray">$3.20</td>
+                              <td className="text-right py-2 text-swipes-pro-gray">$96.80</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
+
+            {/* Status indicators */}
+            <div className="ml-auto flex items-center gap-4 text-xs text-swipes-pro-gray">
+              {draftSavedAt && (
+                <span>Draft saved: {new Date(draftSavedAt).toLocaleTimeString()}</span>
+              )}
+              {stagedRates.length > 0 && (
+                <Badge className="bg-swipes-gold text-black">{stagedRates.length} staged</Badge>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Research Report Display */}
+      {researchReport && (
+        <Card className="border-swipes-blue-deep/20">
+          <CardHeader>
+            <div className="flex items-center justify-between">
+              <CardTitle className="text-lg flex items-center gap-2">
+                <Search className="h-5 w-5 text-swipes-blue-deep" />
+                Rate Research Report
+              </CardTitle>
+              <span className="text-xs text-swipes-pro-gray">
+                Generated: {new Date(researchReport.timestamp).toLocaleString()}
+              </span>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {/* Base Costs */}
+            <div className="p-4 bg-gray-50 rounded-lg">
+              <h4 className="font-medium mb-2">Your Costs</h4>
+              <div className="grid grid-cols-4 gap-4 text-sm">
+                <div>
+                  <span className="text-swipes-pro-gray">Interchange Plus:</span>
+                  <p className="font-mono">{researchReport.baseCosts.interchangePlus}</p>
+                </div>
+                <div>
+                  <span className="text-swipes-pro-gray">Per Transaction:</span>
+                  <p className="font-mono">{researchReport.baseCosts.perTransaction}</p>
+                </div>
+                <div>
+                  <span className="text-swipes-pro-gray">Target Margin:</span>
+                  <p className="font-mono">{researchReport.baseCosts.targetMargin}</p>
+                </div>
+                <div>
+                  <span className="text-swipes-pro-gray">Minimum Rate:</span>
+                  <p className="font-mono">{researchReport.baseCosts.minimumRateNeeded}</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Tier Analysis */}
+            <div className="space-y-3">
+              <h4 className="font-medium">Margin Analysis by Tier</h4>
+              {researchReport.tierAnalysis.map((tier, i) => (
+                <div key={i} className="p-3 border rounded-lg flex items-center gap-4">
+                  <div className="flex-shrink-0">
+                    {tier.status === "green" && <CheckCircle2 className="h-6 w-6 text-swipes-trusted-green" />}
+                    {tier.status === "yellow" && <AlertCircle className="h-6 w-6 text-swipes-gold" />}
+                    {tier.status === "red" && <XCircle className="h-6 w-6 text-swipes-muted-red" />}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium">{tier.tierName}</span>
+                      <Badge variant="secondary" className="text-xs">{tier.tierType}</Badge>
+                    </div>
+                    <div className="text-sm text-swipes-pro-gray">
+                      Rate: {tier.yourRate} | Margin: {tier.margin} | Target: {tier.targetMargin}
+                    </div>
+                  </div>
+                  <div className="text-right text-sm">
+                    {tier.meetsTarget ? (
+                      <span className="text-swipes-trusted-green">Meets Target</span>
+                    ) : (
+                      <span className="text-swipes-muted-red">Below Target</span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary */}
+            <div className={`p-4 rounded-lg ${
+              researchReport.summary.readyToUpload ? "bg-swipes-trusted-green/10" : "bg-swipes-muted-red/10"
+            }`}>
+              <div className="flex items-center gap-2">
+                {researchReport.summary.readyToUpload ? (
+                  <CheckCircle2 className="h-5 w-5 text-swipes-trusted-green" />
+                ) : (
+                  <XCircle className="h-5 w-5 text-swipes-muted-red" />
+                )}
+                <span className="font-medium">{researchReport.summary.message}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Tabs defaultValue="ecommerce" className="w-full">
         <TabsList className="mb-4">
           <TabsTrigger value="ecommerce" className="gap-2" data-testid="tab-ecommerce">
@@ -421,6 +917,10 @@ export default function RateManagement() {
           <TabsTrigger value="developer" className="gap-2" data-testid="tab-developer">
             <Calculator className="h-4 w-4" />
             Developer ({developerRates.length})
+          </TabsTrigger>
+          <TabsTrigger value="draft" className="gap-2" data-testid="tab-draft">
+            <Save className="h-4 w-4" />
+            Draft Editor
           </TabsTrigger>
           <TabsTrigger value="costs" className="gap-2" data-testid="tab-costs">
             <Percent className="h-4 w-4" />
@@ -464,6 +964,105 @@ export default function RateManagement() {
           )}
         </TabsContent>
 
+        <TabsContent value="draft">
+          <Card>
+            <CardHeader>
+              <CardTitle>Draft Rate Editor</CardTitle>
+              <CardDescription>
+                Edit rates locally before uploading to staging. Changes here are saved to your browser only.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {draftRates.length === 0 ? (
+                  <p className="text-swipes-pro-gray text-center py-4">
+                    No draft rates. Active rates will be loaded automatically.
+                  </p>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="border-b">
+                          <th className="text-left py-2 px-2">Tier</th>
+                          <th className="text-left py-2 px-2">Type</th>
+                          <th className="text-left py-2 px-2">Monthly Fee</th>
+                          <th className="text-left py-2 px-2">Transaction %</th>
+                          <th className="text-left py-2 px-2">Flat Fee</th>
+                          <th className="text-left py-2 px-2">Active</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {draftRates.map((draft, index) => (
+                          <tr key={index} className="border-b">
+                            <td className="py-2 px-2">
+                              <Input
+                                value={draft.tierName}
+                                onChange={(e) => updateDraftRate(index, "tierName", e.target.value)}
+                                className="w-24"
+                                data-testid={`draft-tier-name-${index}`}
+                              />
+                            </td>
+                            <td className="py-2 px-2">
+                              <Select
+                                value={draft.tierType}
+                                onValueChange={(v) => updateDraftRate(index, "tierType", v)}
+                              >
+                                <SelectTrigger className="w-28">
+                                  <SelectValue />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  <SelectItem value="ecommerce">E-Commerce</SelectItem>
+                                  <SelectItem value="developer">Developer</SelectItem>
+                                </SelectContent>
+                              </Select>
+                            </td>
+                            <td className="py-2 px-2">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={draft.monthlyFee}
+                                onChange={(e) => updateDraftRate(index, "monthlyFee", e.target.value)}
+                                className="w-20"
+                                data-testid={`draft-monthly-fee-${index}`}
+                              />
+                            </td>
+                            <td className="py-2 px-2">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={draft.transactionPercent}
+                                onChange={(e) => updateDraftRate(index, "transactionPercent", e.target.value)}
+                                className="w-20"
+                                data-testid={`draft-transaction-percent-${index}`}
+                              />
+                            </td>
+                            <td className="py-2 px-2">
+                              <Input
+                                type="number"
+                                step="0.01"
+                                value={draft.transactionFlat}
+                                onChange={(e) => updateDraftRate(index, "transactionFlat", e.target.value)}
+                                className="w-20"
+                                data-testid={`draft-transaction-flat-${index}`}
+                              />
+                            </td>
+                            <td className="py-2 px-2">
+                              <Switch
+                                checked={draft.isActive}
+                                onCheckedChange={(v) => updateDraftRate(index, "isActive", v)}
+                              />
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
         <TabsContent value="costs">
           <Card>
             <CardHeader>
@@ -496,7 +1095,7 @@ export default function RateManagement() {
                           <p className="text-sm">${parseFloat(cost.flatCost).toFixed(2)}</p>
                         )}
                         {cost.targetMarginPercent && (
-                          <p className="text-xs text-swipes-green">
+                          <p className="text-xs text-swipes-trusted-green">
                             Target: {parseFloat(cost.targetMarginPercent).toFixed(2)}% margin
                           </p>
                         )}
@@ -540,6 +1139,9 @@ export default function RateManagement() {
                           Record: {log.recordId.substring(0, 8)}...
                           {log.changedBy && ` by ${log.changedBy}`}
                         </p>
+                        {log.reason && (
+                          <p className="text-xs text-swipes-pro-gray mt-1">{log.reason}</p>
+                        )}
                       </div>
                       <span className="text-xs text-swipes-pro-gray">
                         {new Date(log.createdAt).toLocaleString()}

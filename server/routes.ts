@@ -1876,6 +1876,271 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
+  // Staged Rates API Endpoints (5-Button Workflow)
+  // ========================================
+
+  // Get all staged rates
+  app.get("/api/admin/rates/staged", requireAdmin, async (_req, res) => {
+    try {
+      const stagedRates = await storage.getAllRatesStaged();
+      res.json(stagedRates);
+    } catch (error) {
+      console.error("Error fetching staged rates:", error);
+      res.status(500).json({ error: "Failed to fetch staged rates" });
+    }
+  });
+
+  // Upload rates to staging (Button 3: UPLOAD)
+  app.post("/api/admin/rates/staged", requireAdmin, async (req, res) => {
+    try {
+      const rateSchema = z.object({
+        tierName: z.string().min(1),
+        tierType: z.string().min(1),
+        monthlyFee: z.string().or(z.number()).transform(v => String(v)),
+        transactionPercent: z.string().or(z.number()).transform(v => String(v)),
+        transactionFlat: z.string().or(z.number()).transform(v => String(v)),
+        description: z.string().optional().nullable(),
+        features: z.array(z.string()).optional().nullable(),
+        isActive: z.boolean().optional().default(true),
+        displayOrder: z.number().optional().default(0),
+        status: z.string().optional().default("pending"),
+        createdBy: z.string().optional().nullable(),
+      });
+
+      const validated = rateSchema.parse(req.body);
+      const stagedRate = await storage.createRatesStaged(validated);
+      
+      await storage.createRatesAuditLog({
+        action: "stage",
+        tableName: "rates_staged",
+        recordId: stagedRate.id,
+        newValues: stagedRate,
+        changedBy: "admin",
+        reason: "Rate staged for review",
+      });
+
+      res.json(stagedRate);
+    } catch (error) {
+      console.error("Error staging rate:", error);
+      res.status(500).json({ error: "Failed to stage rate" });
+    }
+  });
+
+  // Bulk upload rates to staging
+  app.post("/api/admin/rates/staged/bulk", requireAdmin, async (req, res) => {
+    try {
+      const { rates } = req.body;
+      if (!Array.isArray(rates)) {
+        return res.status(400).json({ error: "rates must be an array" });
+      }
+
+      await storage.clearRatesStaged();
+
+      const stagedRates = [];
+      for (const rate of rates) {
+        const stagedRate = await storage.createRatesStaged({
+          tierName: rate.tierName,
+          tierType: rate.tierType,
+          monthlyFee: String(rate.monthlyFee),
+          transactionPercent: String(rate.transactionPercent),
+          transactionFlat: String(rate.transactionFlat),
+          description: rate.description || null,
+          features: rate.features || null,
+          isActive: rate.isActive ?? true,
+          displayOrder: rate.displayOrder ?? 0,
+          status: "pending",
+          createdBy: "admin",
+        });
+        stagedRates.push(stagedRate);
+      }
+
+      await storage.createRatesAuditLog({
+        action: "bulk_stage",
+        tableName: "rates_staged",
+        recordId: "bulk",
+        newValues: { count: stagedRates.length },
+        changedBy: "admin",
+        reason: "Bulk rates staged for review",
+      });
+
+      res.json({ success: true, staged: stagedRates.length, rates: stagedRates });
+    } catch (error) {
+      console.error("Error bulk staging rates:", error);
+      res.status(500).json({ error: "Failed to bulk stage rates" });
+    }
+  });
+
+  // Activate staged rates (Button 4: ACTIVATE)
+  app.post("/api/admin/rates/staged/activate", requireAdmin, async (req, res) => {
+    try {
+      const stagedRates = await storage.getAllRatesStaged();
+      if (stagedRates.length === 0) {
+        return res.status(400).json({ error: "No staged rates to activate" });
+      }
+
+      const previousActiveRates = await storage.getAllRatesActive();
+      const activatedRates = await storage.activateStagedRates();
+
+      await storage.createRatesAuditLog({
+        action: "activate",
+        tableName: "rates_active",
+        recordId: "bulk_activation",
+        previousValues: { rates: previousActiveRates },
+        newValues: { rates: activatedRates },
+        changedBy: "admin",
+        reason: "Staged rates activated and made live",
+      });
+
+      res.json({ 
+        success: true, 
+        activated: activatedRates.length,
+        rates: activatedRates,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error activating staged rates:", error);
+      res.status(500).json({ error: "Failed to activate staged rates" });
+    }
+  });
+
+  // Clear staged rates
+  app.delete("/api/admin/rates/staged", requireAdmin, async (_req, res) => {
+    try {
+      await storage.clearRatesStaged();
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error clearing staged rates:", error);
+      res.status(500).json({ error: "Failed to clear staged rates" });
+    }
+  });
+
+  // Research rates with AI (Button 2: RESEARCH)
+  app.post("/api/admin/rates/research", requireAdmin, async (req, res) => {
+    try {
+      const { draftRates } = req.body;
+      if (!Array.isArray(draftRates)) {
+        return res.status(400).json({ error: "draftRates must be an array" });
+      }
+
+      const costs = await storage.getAllCostsBaseline();
+      const interchangeCost = costs.find(c => c.name === 'interchange_plus');
+      const perTransactionCost = costs.find(c => c.name === 'per_transaction');
+      
+      const baseCostPercent = interchangeCost?.percentCost ? parseFloat(interchangeCost.percentCost) : 2.20;
+      const baseCostFlat = perTransactionCost?.flatCost ? parseFloat(perTransactionCost.flatCost) : 0.30;
+      const targetMargin = interchangeCost?.targetMarginPercent ? parseFloat(interchangeCost.targetMarginPercent) : 0.50;
+
+      const competitors = {
+        stripe: { name: "Stripe", percent: 2.90, flat: 0.30 },
+        paypal: { name: "PayPal", percent: 2.99, flat: 0.49 },
+        square: { name: "Square", percent: 2.90, flat: 0.30 },
+      };
+
+      const analysis = draftRates.map(rate => {
+        const ratePercent = parseFloat(rate.transactionPercent);
+        const rateFlat = parseFloat(rate.transactionFlat);
+        const margin = ratePercent - baseCostPercent;
+        const meetsTarget = margin >= targetMargin;
+
+        const competitorComparison = Object.entries(competitors).map(([key, comp]) => {
+          const testAmount = 100;
+          const ourFee = (testAmount * ratePercent / 100) + rateFlat;
+          const theirFee = (testAmount * comp.percent / 100) + comp.flat;
+          const savings = theirFee - ourFee;
+          return {
+            provider: comp.name,
+            rate: `${comp.percent}% + $${comp.flat.toFixed(2)}`,
+            fee: theirFee.toFixed(2),
+            savings: savings.toFixed(2),
+            isLower: ourFee < theirFee,
+          };
+        });
+
+        let status: "green" | "yellow" | "red" = "green";
+        if (!meetsTarget) {
+          status = "red";
+        } else if (competitorComparison.some(c => !c.isLower)) {
+          status = "yellow";
+        }
+
+        return {
+          tierName: rate.tierName,
+          tierType: rate.tierType,
+          yourRate: `${ratePercent.toFixed(2)}% + $${rateFlat.toFixed(2)}`,
+          yourCost: `${baseCostPercent.toFixed(2)}% + $${baseCostFlat.toFixed(2)}`,
+          margin: `${margin.toFixed(2)}%`,
+          targetMargin: `${targetMargin.toFixed(2)}%`,
+          meetsTarget,
+          status,
+          competitors: competitorComparison,
+        };
+      });
+
+      const allMeetTarget = analysis.every(a => a.meetsTarget);
+      const allCompetitive = analysis.every(a => a.status !== "yellow");
+
+      const timestamp = new Date().toISOString();
+      const report = {
+        timestamp,
+        baseCosts: {
+          interchangePlus: `${baseCostPercent.toFixed(2)}%`,
+          perTransaction: `$${baseCostFlat.toFixed(2)}`,
+          targetMargin: `${targetMargin.toFixed(2)}%`,
+          minimumRateNeeded: `${(baseCostPercent + targetMargin).toFixed(2)}% + $${baseCostFlat.toFixed(2)}`,
+        },
+        tierAnalysis: analysis,
+        competitorRates: {
+          swipesBlue: "2.70% + $0.30",
+          stripe: "2.90% + $0.30",
+          paypal: "2.99% + $0.49",
+          square: "2.90% + $0.30",
+        },
+        summary: {
+          allMeetTarget,
+          allCompetitive,
+          readyToUpload: allMeetTarget,
+          message: allMeetTarget 
+            ? (allCompetitive 
+              ? "All tiers meet target margin and are competitive. Ready to upload."
+              : "All tiers meet target margin but some are higher than competitors. Ready to upload.")
+            : "Some tiers do not meet target margin. Please adjust before uploading.",
+        },
+      };
+
+      res.json(report);
+    } catch (error) {
+      console.error("Error researching rates:", error);
+      res.status(500).json({ error: "Failed to research rates" });
+    }
+  });
+
+  // Compare rates (Button 5: COMPARE)
+  app.get("/api/admin/rates/compare", requireAdmin, async (_req, res) => {
+    try {
+      const activeRates = await storage.getAllRatesActive();
+      const stagedRates = await storage.getAllRatesStaged();
+      const costs = await storage.getAllCostsBaseline();
+
+      const competitors = {
+        stripe: { percent: 2.90, flat: 0.30 },
+        paypal: { percent: 2.99, flat: 0.49 },
+        square: { percent: 2.90, flat: 0.30 },
+      };
+
+      res.json({
+        active: activeRates,
+        staged: stagedRates,
+        costs,
+        competitors,
+        timestamp: new Date().toISOString(),
+      });
+    } catch (error) {
+      console.error("Error comparing rates:", error);
+      res.status(500).json({ error: "Failed to compare rates" });
+    }
+  });
+
+  // ========================================
   // Add-On Products API Endpoints
   // ========================================
 
