@@ -12,9 +12,15 @@ import {
   Key,
   Link2,
   ExternalLink,
-  ArrowRight
+  ArrowRight,
+  Users,
+  Layers,
+  Zap,
+  Lock,
+  Code
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -27,20 +33,29 @@ const mainNavItems = [
   { name: "Transactions", href: "/dashboard/transactions", icon: CreditCard },
 ];
 
-const proNavItems = [
-  { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: Mail, badge: "PRO" },
-  { name: "Brand Studio", href: "/dashboard/brand-studio", icon: Palette, badge: "PRO" },
+const ecommerceNavItems = [
+  { name: "Shopping Cart", href: "/cart", icon: ShoppingCart, badge: "FREE" },
+  { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: Mail, badge: "PRO", locked: true },
+  { name: "Brand Studio", href: "/dashboard/brand-studio", icon: Palette, badge: "PRO", locked: true },
 ];
 
-const toolsNavItems = [
-  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3 },
-  { name: "Security", href: "/dashboard/security", icon: Shield },
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
+const addOnNavItems = [
+  { name: "Customer Portal", href: "/dashboard/customer-portal", icon: Users, slug: "customer-portal", active: false },
+  { name: "Security Suite", href: "/dashboard/security", icon: Shield, slug: "security-suite", active: false },
+  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3, slug: "advanced-analytics", active: false },
+  { name: "Checkout Optimizer", href: "/dashboard/checkout-optimizer", icon: Zap, slug: "checkout-optimizer", active: false },
+  { name: "Cart Pro", href: "/dashboard/cart-settings", icon: ShoppingCart, slug: "shopping-cart-pro", active: false },
+  { name: "Multi-Gateway", href: "/dashboard/gateways", icon: Layers, slug: "multi-gateway", active: false },
+  { name: "API Access", href: "/dashboard/api-keys", icon: Code, slug: "premium-api", active: false },
 ];
 
 const developerNavItems = [
   { name: "API Keys", href: "/dashboard/api-keys", icon: Key },
   { name: "Webhooks", href: "/dashboard/webhooks", icon: Link2 },
+];
+
+const settingsNavItems = [
+  { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 
 const platformLinks = [
@@ -52,26 +67,72 @@ const platformLinks = [
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [location] = useLocation();
 
-  const NavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; badge?: string } }) => {
+  const NavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; badge?: string; locked?: boolean } }) => {
     const isActive = location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href));
     const Icon = item.icon;
     
     return (
       <Link href={item.href}>
         <div
-          className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer ${
+          className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer hover-elevate ${
             isActive 
               ? "bg-swipes-blue-deep text-white" 
-              : "text-swipes-pro-gray hover:bg-gray-100"
+              : "text-swipes-pro-gray"
           }`}
           data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
         >
           <Icon className="h-4 w-4" />
           <span className="flex-1">{item.name}</span>
           {item.badge && (
-            <span className="text-xs px-2 py-0.5 rounded-full bg-swipes-blue-deep text-white">
+            <Badge 
+              className={`text-xs no-default-hover-elevate ${
+                item.badge === "FREE" 
+                  ? "bg-swipes-trusted-green text-white" 
+                  : "bg-swipes-blue-deep text-white"
+              }`}
+              data-testid={`badge-${item.name.toLowerCase().replace(/\s+/g, '-')}-${item.badge.toLowerCase()}`}
+            >
               {item.badge}
-            </span>
+            </Badge>
+          )}
+          {item.locked && (
+            <Lock className="h-3 w-3" />
+          )}
+        </div>
+      </Link>
+    );
+  };
+
+  const AddOnNavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; slug: string; active: boolean } }) => {
+    const isActive = location === item.href || location.startsWith(item.href);
+    const Icon = item.icon;
+    const isSubscribed = item.active;
+    
+    const linkHref = isSubscribed ? item.href : `/products/${item.slug}`;
+    
+    return (
+      <Link href={linkHref}>
+        <div
+          className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer hover-elevate ${
+            isActive 
+              ? "bg-swipes-blue-deep text-white" 
+              : "text-swipes-pro-gray"
+          }`}
+          data-testid={`nav-addon-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
+        >
+          <Icon className="h-4 w-4" />
+          <span className="flex-1">{item.name}</span>
+          {isSubscribed ? (
+            <Badge className="text-xs bg-swipes-trusted-green text-white no-default-hover-elevate" data-testid={`badge-addon-${item.slug}-active`}>
+              ACTIVE
+            </Badge>
+          ) : (
+            <>
+              <Badge className="text-xs bg-gray-200 text-gray-600 no-default-hover-elevate" data-testid={`badge-addon-${item.slug}-upgrade`}>
+                UPGRADE
+              </Badge>
+              <Lock className="h-3 w-3" />
+            </>
           )}
         </div>
       </Link>
@@ -82,7 +143,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     <div className="flex min-h-[calc(100vh-64px)]">
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
-        <div className="flex-1 py-6 px-4 space-y-6 overflow-y-auto">
+        <div className="flex-1 py-6 px-4 space-y-4 overflow-y-auto">
           {/* Main Navigation */}
           <nav className="space-y-1">
             {mainNavItems.map((item) => (
@@ -90,19 +151,35 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             ))}
           </nav>
 
-          {/* Pro Features */}
-          <div className="space-y-1">
-            {proNavItems.map((item) => (
-              <NavLink key={item.name} item={item} />
-            ))}
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* E-Commerce Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+              E-Commerce
+            </h4>
+            <nav className="space-y-1">
+              {ecommerceNavItems.map((item) => (
+                <NavLink key={item.name} item={item} />
+              ))}
+            </nav>
           </div>
 
-          {/* Tools */}
-          <nav className="space-y-1">
-            {toolsNavItems.map((item) => (
-              <NavLink key={item.name} item={item} />
-            ))}
-          </nav>
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* Add-ons Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+              Add-Ons
+            </h4>
+            <nav className="space-y-1">
+              {addOnNavItems.map((item) => (
+                <AddOnNavLink key={item.name} item={item} />
+              ))}
+            </nav>
+          </div>
 
           {/* Divider */}
           <div className="border-t border-gray-200" />
@@ -114,6 +191,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </h4>
             <nav className="space-y-1">
               {developerNavItems.map((item) => (
+                <NavLink key={item.name} item={item} />
+              ))}
+            </nav>
+          </div>
+
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* Settings Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+              Settings
+            </h4>
+            <nav className="space-y-1">
+              {settingsNavItems.map((item) => (
                 <NavLink key={item.name} item={item} />
               ))}
             </nav>
@@ -135,7 +227,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray hover:bg-gray-100 rounded-[7px] transition-colors"
+                    className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray rounded-[7px] transition-colors hover-elevate"
                     data-testid={`nav-platform-${link.name.toLowerCase().replace(/\./g, '-')}`}
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -144,7 +236,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 ) : (
                   <Link key={link.name} href={link.href}>
                     <div
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray hover:bg-gray-100 rounded-[7px] transition-colors cursor-pointer"
+                      className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray rounded-[7px] transition-colors cursor-pointer hover-elevate"
                       data-testid={`nav-platform-${link.name.toLowerCase().replace(/\./g, '-')}`}
                     >
                       <ExternalLink className="h-4 w-4" />

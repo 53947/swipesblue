@@ -122,6 +122,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add-on Products endpoints
+  app.get("/api/add-ons", async (_req, res) => {
+    try {
+      const addOns = await storage.getActiveAddOnProducts();
+      res.json(addOns);
+    } catch (error) {
+      console.error("Error fetching add-on products:", error);
+      res.status(500).json({ message: "Failed to fetch add-on products" });
+    }
+  });
+
+  app.get("/api/add-ons/:slug", async (req, res) => {
+    try {
+      const addOn = await storage.getAddOnProductBySlug(req.params.slug);
+      if (!addOn) {
+        return res.status(404).json({ message: "Add-on product not found" });
+      }
+      res.json(addOn);
+    } catch (error) {
+      console.error("Error fetching add-on product:", error);
+      res.status(500).json({ message: "Failed to fetch add-on product" });
+    }
+  });
+
   // Cart endpoints
   app.get("/api/cart", async (req, res) => {
     try {

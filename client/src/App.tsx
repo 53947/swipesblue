@@ -26,6 +26,9 @@ import ApiKeys from "@/pages/admin/ApiKeys";
 import Webhooks from "@/pages/admin/Webhooks";
 import RateManagement from "@/pages/admin/RateManagement";
 import NotFound from "@/pages/not-found";
+import ProductDetail from "@/pages/ProductDetail";
+import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
+import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
 
@@ -57,6 +60,9 @@ function Router() {
       
       {/* Public Product Demo Pages */}
       <Route path="/products" component={Products} />
+      <Route path="/products/:slug" component={ProductDetail} />
+      <Route path="/subscribe/:slug" component={SubscriptionCheckout} />
+      <Route path="/subscription/success" component={SubscriptionSuccess} />
       <Route path="/cart" component={ShoppingCart} />
       <Route path="/shoppingcart" component={ShoppingCart} />
       <Route path="/checkout" component={Checkout} />
