@@ -232,9 +232,13 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link href="/shoppingcart">
-                  <Button className="w-full bg-swipes-blue-deep text-white">
-                    Start processing
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button className="w-full group bg-swipes-blue-deep text-white">
+                    <span className="flex items-center justify-center">
+                      Start processing
+                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </span>
+                    </span>
                   </Button>
                 </Link>
               </CardContent>
@@ -259,9 +263,13 @@ export default function Home() {
                   ))}
                 </ul>
                 <Link href="/pricing">
-                  <Button variant="outline" className="w-full border-swipes-blue-deep text-swipes-blue-deep">
-                    View plans
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button variant="outline" className="w-full group border-swipes-blue-deep text-swipes-blue-deep">
+                    <span className="flex items-center justify-center">
+                      View plans
+                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </span>
+                    </span>
                   </Button>
                 </Link>
               </CardContent>
@@ -293,9 +301,13 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/dashboard">
-                  <Button className="bg-swipes-blue-deep text-white">
-                    Read the docs
-                    <ArrowRight className="ml-2 h-4 w-4" />
+                  <Button className="group bg-swipes-blue-deep text-white">
+                    <span className="flex items-center">
+                      Read the docs
+                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                        <ArrowRight className="h-4 w-4 ml-2" />
+                      </span>
+                    </span>
                   </Button>
                 </Link>
                 <Link href="/dashboard/api-keys">
@@ -356,21 +368,26 @@ export default function Home() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 md:py-28 bg-gradient-to-r from-swipes-blue-deep to-swipes-teal">
+      <section className="py-20 md:py-28 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
             Ready to get started?
           </h2>
-          <p className="text-lg text-gray-300 mb-8 max-w-xl mx-auto">
+          <p className="text-lg text-swipes-gray mb-8 max-w-xl mx-auto">
             Create your account in minutes and start accepting payments today.
           </p>
           <Link href="/shoppingcart">
             <Button 
               size="lg" 
-              className="bg-swipes-blue-deep text-white shadow-lg"
+              className="group bg-swipes-blue-deep text-white"
               data-testid="button-cta-get-started"
             >
-              Get Started Free
+              <span className="flex items-center">
+                Get Started Free
+                <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </span>
+              </span>
             </Button>
           </Link>
         </div>
