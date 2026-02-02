@@ -1,4 +1,4 @@
-import { Switch, Route, useLocation } from "wouter";
+import { Switch, Route, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -19,11 +19,32 @@ import Pricing from "@/pages/Pricing";
 import Demo from "@/pages/Demo";
 import Developers from "@/pages/Developers";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
+import AdminLogin from "@/pages/admin/AdminLogin";
 import Merchants from "@/pages/admin/Merchants";
 import AdminTransactions from "@/pages/admin/AdminTransactions";
 import ApiKeys from "@/pages/admin/ApiKeys";
 import Webhooks from "@/pages/admin/Webhooks";
 import NotFound from "@/pages/not-found";
+import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
+import { ReactNode } from "react";
+
+function ProtectedAdminRoute({ children }: { children: ReactNode }) {
+  const { isAuthenticated, isLoading } = useAdminAuth();
+  
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F6F9FC] flex items-center justify-center">
+        <div className="text-swipes-pro-gray">Loading...</div>
+      </div>
+    );
+  }
+  
+  if (!isAuthenticated) {
+    return <Redirect to="/admin/login" />;
+  }
+  
+  return <>{children}</>;
+}
 
 function Router() {
   return (
@@ -145,55 +166,70 @@ function Router() {
         )}
       </Route>
 
-      {/* Admin Routes */}
+      {/* Admin Login (public) */}
+      <Route path="/admin/login" component={AdminLogin} />
+
+      {/* Protected Admin Routes */}
       <Route path="/admin">
         {() => (
-          <AdminLayout>
-            <AdminDashboard />
-          </AdminLayout>
+          <ProtectedAdminRoute>
+            <AdminLayout>
+              <AdminDashboard />
+            </AdminLayout>
+          </ProtectedAdminRoute>
         )}
       </Route>
       <Route path="/admin/merchants">
         {() => (
-          <AdminLayout>
-            <Merchants />
-          </AdminLayout>
+          <ProtectedAdminRoute>
+            <AdminLayout>
+              <Merchants />
+            </AdminLayout>
+          </ProtectedAdminRoute>
         )}
       </Route>
       <Route path="/admin/transactions">
         {() => (
-          <AdminLayout>
-            <AdminTransactions />
-          </AdminLayout>
+          <ProtectedAdminRoute>
+            <AdminLayout>
+              <AdminTransactions />
+            </AdminLayout>
+          </ProtectedAdminRoute>
         )}
       </Route>
       <Route path="/admin/rates">
         {() => (
-          <AdminLayout>
-            <div className="space-y-6">
-              <div>
-                <h1 className="text-2xl font-bold text-swipes-black mb-2">Rate Management</h1>
-                <p className="text-swipes-pro-gray">Configure transaction rates and fees.</p>
+          <ProtectedAdminRoute>
+            <AdminLayout>
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl font-bold text-swipes-black mb-2">Rate Management</h1>
+                  <p className="text-swipes-pro-gray">Configure transaction rates and fees.</p>
+                </div>
+                <div className="p-6 bg-white rounded-[7px] border border-gray-200">
+                  <p className="text-swipes-pro-gray">Rate Management Worksheet coming soon with DeepSeek AI integration.</p>
+                </div>
               </div>
-              <div className="p-6 bg-white rounded-[7px] border border-gray-200">
-                <p className="text-swipes-pro-gray">Rate Management Worksheet coming soon with DeepSeek AI integration.</p>
-              </div>
-            </div>
-          </AdminLayout>
+            </AdminLayout>
+          </ProtectedAdminRoute>
         )}
       </Route>
       <Route path="/admin/api-keys">
         {() => (
-          <AdminLayout>
-            <ApiKeys />
-          </AdminLayout>
+          <ProtectedAdminRoute>
+            <AdminLayout>
+              <ApiKeys />
+            </AdminLayout>
+          </ProtectedAdminRoute>
         )}
       </Route>
       <Route path="/admin/webhooks">
         {() => (
-          <AdminLayout>
-            <Webhooks />
-          </AdminLayout>
+          <ProtectedAdminRoute>
+            <AdminLayout>
+              <Webhooks />
+            </AdminLayout>
+          </ProtectedAdminRoute>
         )}
       </Route>
 
@@ -224,8 +260,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <AppLayout />
-        <Toaster />
+        <AdminAuthProvider>
+          <AppLayout />
+          <Toaster />
+        </AdminAuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );

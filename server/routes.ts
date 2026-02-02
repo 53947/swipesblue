@@ -1341,13 +1341,58 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
+  // Admin Authentication
+  // ========================================
+  
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme123";
+
+  // Admin login
+  app.post("/api/admin/auth/login", (req, res) => {
+    const { username, password } = req.body;
+    
+    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+      (req.session as any).isAdmin = true;
+      res.json({ success: true, message: "Login successful" });
+    } else {
+      res.status(401).json({ success: false, message: "Invalid credentials" });
+    }
+  });
+
+  // Admin logout
+  app.post("/api/admin/auth/logout", (req, res) => {
+    (req.session as any).isAdmin = false;
+    req.session.destroy((err) => {
+      if (err) {
+        res.status(500).json({ success: false, message: "Logout failed" });
+      } else {
+        res.json({ success: true, message: "Logged out" });
+      }
+    });
+  });
+
+  // Check admin auth status
+  app.get("/api/admin/auth/check", (req, res) => {
+    const isAdmin = (req.session as any)?.isAdmin === true;
+    res.json({ authenticated: isAdmin });
+  });
+
+  // Middleware to protect admin routes
+  function requireAdmin(req: any, res: any, next: any) {
+    if ((req.session as any)?.isAdmin === true) {
+      next();
+    } else {
+      res.status(401).json({ error: "Unauthorized", message: "Admin authentication required" });
+    }
+  }
+
+  // ========================================
   // Admin API Endpoints
   // ========================================
   // These endpoints provide admin functionality for the SwipesBlue admin dashboard
-  // TODO: Add proper admin authentication
 
   // Get dashboard metrics
-  app.get("/api/admin/metrics", async (_req, res) => {
+  app.get("/api/admin/metrics", requireAdmin, async (_req, res) => {
     try {
       // Get all transactions
       const allTransactions = await storage.getAllPartnerPaymentTransactions();
@@ -1417,7 +1462,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get recent transactions for dashboard
-  app.get("/api/admin/transactions/recent", async (_req, res) => {
+  app.get("/api/admin/transactions/recent", requireAdmin, async (_req, res) => {
     try {
       const allTransactions = await storage.getAllPartnerPaymentTransactions();
 
@@ -1434,7 +1479,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get payment volume data (last 30 days)
-  app.get("/api/admin/volume", async (_req, res) => {
+  app.get("/api/admin/volume", requireAdmin, async (_req, res) => {
     try {
       const allTransactions = await storage.getAllPartnerPaymentTransactions();
 
@@ -1475,7 +1520,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all transactions (admin view - no platform filter)
-  app.get("/api/admin/transactions", async (_req, res) => {
+  app.get("/api/admin/transactions", requireAdmin, async (_req, res) => {
     try {
       const allTransactions = await storage.getAllPartnerPaymentTransactions();
 
@@ -1492,7 +1537,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get all webhooks (admin view - all platforms)
-  app.get("/api/admin/webhooks", async (_req, res) => {
+  app.get("/api/admin/webhooks", requireAdmin, async (_req, res) => {
     try {
       const allWebhooks = await storage.getAllWebhookEndpoints();
       res.json(allWebhooks);
@@ -1503,7 +1548,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Register webhook (admin)
-  app.post("/api/admin/webhooks/register", async (req, res) => {
+  app.post("/api/admin/webhooks/register", requireAdmin, async (req, res) => {
     try {
       const registerSchema = z.object({
         platform: z.string(),
@@ -1553,7 +1598,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Test webhook (admin)
-  app.post("/api/admin/webhooks/:id/test", async (req, res) => {
+  app.post("/api/admin/webhooks/:id/test", requireAdmin, async (req, res) => {
     try {
       const endpoint = await storage.getWebhookEndpoint(req.params.id);
 
@@ -1589,7 +1634,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Get webhook deliveries (admin)
-  app.get("/api/admin/webhooks/:id/deliveries", async (req, res) => {
+  app.get("/api/admin/webhooks/:id/deliveries", requireAdmin, async (req, res) => {
     try {
       const deliveries = await storage.getWebhookDeliveriesByEndpoint(req.params.id);
 
@@ -1606,7 +1651,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Delete webhook (admin)
-  app.delete("/api/admin/webhooks/:id", async (req, res) => {
+  app.delete("/api/admin/webhooks/:id", requireAdmin, async (req, res) => {
     try {
       const endpoint = await storage.getWebhookEndpoint(req.params.id);
 

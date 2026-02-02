@@ -9,11 +9,13 @@ import {
   X,
   ArrowLeft,
   ExternalLink,
-  Calculator
+  Calculator,
+  LogOut
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useAdminAuth } from "@/contexts/AdminAuthContext";
 
 const navigation = [
   { name: "Dashboard", href: "/admin", icon: LayoutDashboard },
@@ -37,6 +39,13 @@ interface AdminLayoutProps {
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useAdminAuth();
+  const [, setLocationNav] = useLocation();
+
+  const handleLogout = async () => {
+    await logout();
+    setLocationNav("/admin/login");
+  };
 
   return (
     <div className="min-h-screen bg-gray-50" data-testid="admin-layout">
@@ -149,7 +158,17 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200">
+        <div className="p-4 border-t border-gray-200 space-y-3">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full justify-start gap-2 text-swipes-pro-gray border-gray-200"
+            onClick={handleLogout}
+            data-testid="button-admin-logout"
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
           <div className="text-xs text-swipes-pro-gray space-y-1">
             <div>SwipesBlue Admin</div>
             <div>Version 1.0.0</div>
