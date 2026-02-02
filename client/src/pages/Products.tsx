@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Search, ShoppingCart as ShoppingCartIcon } from "lucide-react";
+import { Search, ArrowRight } from "lucide-react";
 import type { Product } from "@shared/schema";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -131,35 +131,54 @@ export default function Products() {
               <CardHeader>
                 <div className="flex justify-between items-start gap-2 mb-2">
                   <CardTitle className="text-lg">{product.name}</CardTitle>
-                  {product.category && (
-                    <Badge variant="secondary" className="no-default-hover-elevate" data-testid={`badge-category-${product.id}`}>
-                      {product.category}
-                    </Badge>
-                  )}
+                  <div className="flex gap-1">
+                    {/* FREE/PAID Badge based on price */}
+                    {parseFloat(product.price) === 0 ? (
+                      <Badge className="bg-swipes-trusted-green text-white no-default-hover-elevate" data-testid={`badge-free-${product.id}`}>
+                        FREE
+                      </Badge>
+                    ) : (
+                      <Badge className="bg-swipes-blue-deep text-white no-default-hover-elevate" data-testid={`badge-paid-${product.id}`}>
+                        PAID
+                      </Badge>
+                    )}
+                    {product.category && (
+                      <Badge variant="secondary" className="no-default-hover-elevate" data-testid={`badge-category-${product.id}`}>
+                        {product.category}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="flex-1">
                 <p className="text-sm text-muted-foreground mb-4">{product.description}</p>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl font-bold text-swipes-blue-deep" data-testid={`price-${product.id}`}>
-                    ${parseFloat(product.price).toFixed(2)}
-                  </span>
-                  {product.stock !== undefined && product.stock > 0 && (
-                    <span className="text-sm text-muted-foreground" data-testid={`stock-${product.id}`}>
-                      {product.stock} in stock
+                <div className="flex items-baseline">
+                  {parseFloat(product.price) === 0 ? (
+                    <span className="text-2xl font-bold text-swipes-trusted-green" data-testid={`price-${product.id}`}>
+                      Free
                     </span>
+                  ) : (
+                    <>
+                      <span className="text-2xl font-bold text-swipes-blue-deep" data-testid={`price-${product.id}`}>
+                        ${parseFloat(product.price).toFixed(2)}
+                      </span>
+                      <span className="text-sm text-muted-foreground ml-1">/year</span>
+                    </>
                   )}
                 </div>
               </CardContent>
               <CardFooter>
                 <Button
-                  className="w-full bg-swipes-blue-deep text-white"
+                  className="w-full bg-swipes-blue-deep text-white group"
                   onClick={() => handleAddToCart(product.id)}
-                  disabled={product.stock === 0}
-                  data-testid={`button-add-to-cart-${product.id}`}
+                  data-testid={`button-subscribe-${product.id}`}
                 >
-                  <ShoppingCartIcon className="h-4 w-4 mr-2" />
-                  {product.stock === 0 ? "Out of Stock" : "Add to Cart"}
+                  <span className="flex items-center">
+                    {parseFloat(product.price) === 0 ? "Get Started" : "Subscribe"}
+                    <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
+                      <ArrowRight className="h-4 w-4 ml-2" />
+                    </span>
+                  </span>
                 </Button>
               </CardFooter>
             </Card>
