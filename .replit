@@ -47,3 +47,7 @@ integrations = ["javascript_database:1.0.0", "javascript_object_storage:1.0.0", 
 [userenv.development]
 ADMIN_USERNAME = "admin"
 ADMIN_PASSWORD = "SwipesBlue2026!"
+
+[userenv.production]
+ADMIN_USERNAME = "admin"
+ADMIN_PASSWORD = "SwipesBlue2026!"
