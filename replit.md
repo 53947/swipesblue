@@ -148,9 +148,40 @@ For developers integrating SwipesBlue payments into their own platforms.
 - Typography: Archivo font family for branding, Inter for UI
 
 ## Recent Changes
+- 2026-02-02: Added product pages and subscription flow
+  - Products page (/products) with search, filters, and add-on product cards
+  - Product detail pages (/products/:slug) with FREE/PAID tier pricing, features, FAQ
+  - Subscription checkout page (/subscribe/:slug) with order summary and payment forms
+  - Subscription success page (/subscription/success) with confirmation
+  - Updated dashboard sidebar with E-Commerce, Add-Ons, Developer, Settings sections
+  - Add-on badges show ACTIVE/UPGRADE status with lock icons for locked features
 - 2026-02-01: Complete redesign with new color palette and product structure
 - 2025-12-30: Added comprehensive data-testid attributes across all admin UI pages
 - 2025-10-24: Initial branding setup
+
+## Add-On Products
+
+| Product | Slug | Annual Price |
+|---------|------|--------------|
+| Customer Portal Access | customer-portal | $179.99 |
+| Multi-Gateway Support | multi-gateway | $449.99 |
+| Security Suite | security-suite | $399.99 |
+| Checkout Optimizer | checkout-optimizer | $249.99 |
+| Shopping Cart Pro | shopping-cart-pro | $349.99 |
+| Advanced Analytics | advanced-analytics | $199.99 |
+| Custom Branding | custom-branding | $149.99 |
+| Premium API Integration | premium-api | $299.99 |
+
+## Key Routes
+
+| Route | Description |
+|-------|-------------|
+| /products | Add-on products listing with search and filters |
+| /products/:slug | Product detail page with pricing tiers |
+| /subscribe/:slug | Subscription checkout page (supports ?plan=free or ?plan=paid) |
+| /subscription/success | Subscription confirmation page |
+| /dashboard | Main admin dashboard |
+| /pricing | Pricing page |
 
 ## Cross-Platform Integration
 **Platforms in the Triad Blue Ecosystem:**
