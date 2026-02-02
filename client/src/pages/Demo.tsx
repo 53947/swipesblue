@@ -142,8 +142,8 @@ export default function Demo() {
               
               <div className="bg-white rounded-card p-6 border border-gray-200">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-8 h-8 bg-green-500/10 rounded flex items-center justify-center">
-                    <span className="text-green-600 font-bold text-sm">S</span>
+                  <div className="w-8 h-8 bg-swipes-trusted-green/10 rounded flex items-center justify-center">
+                    <span className="text-swipes-trusted-green font-bold text-sm">S</span>
                   </div>
                   <span className="font-medium text-swipes-black">Shopify</span>
                 </div>

@@ -123,15 +123,15 @@ export default function Home() {
             <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 text-gray-400">
               <span className="text-sm font-medium tracking-wide">Trusted by growing businesses</span>
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-green-600" />
+                <Shield className="h-4 w-4 text-swipes-trusted-green" />
                 <span className="text-sm text-gray-600">PCI Compliant</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-amber-500" />
+                <Zap className="h-4 w-4 text-swipes-gold" />
                 <span className="text-sm text-gray-600">Real-time</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-indigo-500" />
+                <Clock className="h-4 w-4 text-swipes-blue-deep" />
                 <span className="text-sm text-gray-600">24/7 Support</span>
               </div>
             </div>
