@@ -13,21 +13,10 @@ export default function Logo({
   showIcon = false,
   showUrl = false
 }: LogoProps) {
-  // Font sizes for different variants (spec says 24px for header)
-  const fontSizes = {
-    small: "18px",
-    default: "24px",
-    large: "36px"
-  };
-  
-  const iconSizes = {
-    small: "h-6 w-auto",
-    default: "h-[30px] w-auto",
-    large: "h-12 w-auto"
-  };
-
-  const fontSize = fontSizes[variant];
-  const iconSize = iconSizes[variant];
+  // Logo text is always 30px per brand spec
+  // Icon extends 15% above and 15% below text (30px * 1.3 = 39px)
+  const fontSize = "30px";
+  const iconSize = "h-[39px] w-auto";
   
   // Text shadow effects: black shadow (1px offset) + white glow (100px blur at 10% opacity)
   const swipesTextShadow = `
