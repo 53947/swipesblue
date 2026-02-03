@@ -1368,6 +1368,157 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Admin Authentication
   // ========================================
   
+  // ========================================
+  // Merchant Auth Endpoints
+  // ========================================
+  // These endpoints handle merchant/user authentication with database persistence
+  
+  // Password hashing utilities
+  const hashPassword = async (password: string): Promise<string> => {
+    const crypto = await import("crypto");
+    const salt = crypto.randomBytes(16).toString("hex");
+    const hash = crypto.scryptSync(password, salt, 64).toString("hex");
+    return `${salt}:${hash}`;
+  };
+  
+  const verifyPassword = async (password: string, storedHash: string): Promise<boolean> => {
+    const crypto = await import("crypto");
+    const [salt, hash] = storedHash.split(":");
+    if (!salt || !hash) return false;
+    const verifyHash = crypto.scryptSync(password, salt, 64).toString("hex");
+    return hash === verifyHash;
+  };
+  
+  // Merchant login - validates against database with hashed passwords
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      // Validate request body with zod
+      const { loginMerchantSchema } = await import("@shared/schema");
+      const parseResult = loginMerchantSchema.safeParse(req.body);
+      
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid input", 
+          errors: parseResult.error.flatten().fieldErrors 
+        });
+      }
+      
+      const { email, password } = parseResult.data;
+      
+      // Look up merchant in database
+      const merchant = await storage.getMerchantAccountByEmail(email);
+      
+      if (!merchant) {
+        return res.status(401).json({ success: false, message: "Invalid email or password" });
+      }
+      
+      // Verify password
+      const isValid = await verifyPassword(password, merchant.passwordHash);
+      if (!isValid) {
+        return res.status(401).json({ success: false, message: "Invalid email or password" });
+      }
+      
+      // Check account status
+      if (merchant.status !== "active") {
+        return res.status(403).json({ success: false, message: "Account is not active" });
+      }
+      
+      // Update last login time
+      await storage.updateMerchantAccountLastLogin(merchant.id);
+      
+      // Set session
+      (req.session as any).merchantId = merchant.id;
+      (req.session as any).merchantEmail = merchant.email;
+      (req.session as any).merchantName = merchant.fullName;
+      (req.session as any).businessName = merchant.businessName;
+      (req.session as any).merchantTier = merchant.tier;
+      (req.session as any).isMerchant = true;
+      
+      res.json({ success: true, message: "Login successful" });
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(500).json({ message: "Login failed" });
+    }
+  });
+  
+  // Merchant register - creates account with hashed password
+  app.post("/api/auth/register", async (req, res) => {
+    try {
+      // Validate request body with zod
+      const { registerMerchantSchema } = await import("@shared/schema");
+      const parseResult = registerMerchantSchema.safeParse(req.body);
+      
+      if (!parseResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid input", 
+          errors: parseResult.error.flatten().fieldErrors 
+        });
+      }
+      
+      const { email, password, businessName, fullName } = parseResult.data;
+      
+      // Check if email already exists
+      const existingAccount = await storage.getMerchantAccountByEmail(email);
+      if (existingAccount) {
+        return res.status(400).json({ message: "An account with this email already exists" });
+      }
+      
+      // Hash password
+      const passwordHash = await hashPassword(password);
+      
+      // Create merchant account
+      const merchant = await storage.createMerchantAccount({
+        email,
+        passwordHash,
+        businessName,
+        fullName,
+        tier: "FREE",
+        status: "active",
+      });
+      
+      // Set session (auto-login after registration)
+      (req.session as any).merchantId = merchant.id;
+      (req.session as any).merchantEmail = merchant.email;
+      (req.session as any).merchantName = merchant.fullName;
+      (req.session as any).businessName = merchant.businessName;
+      (req.session as any).merchantTier = merchant.tier;
+      (req.session as any).isMerchant = true;
+      
+      res.json({ success: true, message: "Registration successful" });
+    } catch (error) {
+      console.error("Registration error:", error);
+      res.status(500).json({ message: "Registration failed" });
+    }
+  });
+  
+  // Merchant logout
+  app.post("/api/auth/logout", (req, res) => {
+    (req.session as any).isMerchant = false;
+    req.session.destroy((err) => {
+      if (err) {
+        res.status(500).json({ success: false, message: "Logout failed" });
+      } else {
+        res.json({ success: true, message: "Logged out" });
+      }
+    });
+  });
+  
+  // Check merchant auth status
+  app.get("/api/auth/check", (req, res) => {
+    const isMerchant = (req.session as any)?.isMerchant === true;
+    res.json({ 
+      authenticated: isMerchant,
+      merchantId: (req.session as any)?.merchantId || null,
+      email: (req.session as any)?.merchantEmail || null,
+      name: (req.session as any)?.merchantName || null,
+      businessName: (req.session as any)?.businessName || null,
+      tier: (req.session as any)?.merchantTier || null,
+    });
+  });
+
+  // ========================================
+  // Admin Auth Endpoints  
+  // ========================================
   const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme123";
 

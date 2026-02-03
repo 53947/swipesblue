@@ -34,6 +34,8 @@ import {
   type InsertRatesAuditLog,
   type AddOnProduct,
   type InsertAddOnProduct,
+  type MerchantAccount,
+  type InsertMerchantAccount,
   users,
   products,
   cartItems,
@@ -51,6 +53,7 @@ import {
   costsBaseline,
   ratesAuditLog,
   addOnProducts,
+  merchantAccounts,
 } from "@shared/schema";
 import { eq, and, desc, like, or, lte } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -60,6 +63,11 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  
+  // Merchant Account operations
+  getMerchantAccountByEmail(email: string): Promise<MerchantAccount | undefined>;
+  createMerchantAccount(account: InsertMerchantAccount): Promise<MerchantAccount>;
+  updateMerchantAccountLastLogin(id: string): Promise<MerchantAccount | undefined>;
 
   // Product operations
   getProduct(id: string): Promise<Product | undefined>;
@@ -199,6 +207,26 @@ export class DbStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
+  }
+
+  // Merchant Account operations
+  async getMerchantAccountByEmail(email: string): Promise<MerchantAccount | undefined> {
+    const result = await db.select().from(merchantAccounts).where(eq(merchantAccounts.email, email));
+    return result[0];
+  }
+
+  async createMerchantAccount(account: InsertMerchantAccount): Promise<MerchantAccount> {
+    const result = await db.insert(merchantAccounts).values(account).returning();
+    return result[0];
+  }
+
+  async updateMerchantAccountLastLogin(id: string): Promise<MerchantAccount | undefined> {
+    const result = await db
+      .update(merchantAccounts)
+      .set({ lastLoginAt: new Date() })
+      .where(eq(merchantAccounts.id, id))
+      .returning();
     return result[0];
   }
 

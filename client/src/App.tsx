@@ -18,6 +18,8 @@ import BrandStudio from "@/pages/BrandStudio";
 import Pricing from "@/pages/Pricing";
 import Demo from "@/pages/Demo";
 import Developers from "@/pages/Developers";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
 import AdminDashboard from "@/pages/admin/AdminDashboard";
 import AdminLogin from "@/pages/admin/AdminLogin";
 import Merchants from "@/pages/admin/Merchants";
@@ -57,6 +59,8 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/demo" component={Demo} />
       <Route path="/developers" component={Developers} />
+      <Route path="/login" component={Login} />
+      <Route path="/register" component={Register} />
       
       {/* Public Product Demo Pages */}
       <Route path="/products" component={Products} />
@@ -241,6 +245,16 @@ function AppLayout() {
   const [location] = useLocation();
   const isAdminRoute = location.startsWith("/admin");
   const isDashboardRoute = location.startsWith("/dashboard");
+  const isAuthPage = location === "/login" || location === "/register";
+  
+  // Auth pages have their own layout
+  if (isAuthPage) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Router />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-[#F6F9FC]">

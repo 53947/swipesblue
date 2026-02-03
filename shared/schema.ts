@@ -36,6 +36,44 @@ export const insertUserSchema = createInsertSchema(users).pick({
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 
+// Merchant Accounts table - for merchant/business authentication
+export const merchantAccounts = pgTable("merchant_accounts", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  email: text("email").notNull().unique(),
+  passwordHash: text("password_hash").notNull(),
+  businessName: text("business_name").notNull(),
+  fullName: text("full_name").notNull(),
+  tier: text("tier").notNull().default("FREE"), // 'FREE' | 'Starter' | 'Pro' | 'Enterprise'
+  status: text("status").notNull().default("active"), // 'active' | 'suspended' | 'pending'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  lastLoginAt: timestamp("last_login_at"),
+});
+
+export const insertMerchantAccountSchema = createInsertSchema(merchantAccounts).omit({
+  id: true,
+  createdAt: true,
+  lastLoginAt: true,
+});
+
+export const registerMerchantSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  businessName: z.string().min(1, "Business name is required"),
+  fullName: z.string().min(1, "Full name is required"),
+});
+
+export const loginMerchantSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export type InsertMerchantAccount = z.infer<typeof insertMerchantAccountSchema>;
+export type MerchantAccount = typeof merchantAccounts.$inferSelect;
+export type RegisterMerchantInput = z.infer<typeof registerMerchantSchema>;
+export type LoginMerchantInput = z.infer<typeof loginMerchantSchema>;
+
 // Products table
 export const products = pgTable("products", {
   id: varchar("id")

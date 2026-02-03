@@ -1,138 +1,249 @@
-import { CreditCard, Code, LayoutDashboard, ShoppingCart, ArrowRight, Check, Shield, Zap, Clock } from "lucide-react";
+import { 
+  CreditCard, 
+  Code, 
+  LayoutDashboard, 
+  ShoppingCart, 
+  ArrowRight, 
+  Check, 
+  Shield, 
+  Zap, 
+  Users,
+  Lock,
+  RefreshCw,
+  FileText,
+  Receipt,
+  Link as LinkIcon,
+  BarChart3
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import heroImage from "@assets/stand_out_in_a_crowd3_1769891865100.png";
 
 const stats = [
   { value: "$2.4M+", label: "Processed" },
   { value: "99.99%", label: "Uptime" },
-  { value: "500+", label: "Businesses" },
-  { value: "<2 sec", label: "Avg Response" },
+  { value: "500+", label: "Merchants" },
+  { value: "<100ms", label: "Response Time" },
 ];
 
-const features = [
+const bentoFeatures = [
   {
     icon: CreditCard,
-    title: "Payment Processing",
-    description: "Accept all major cards online and in-person. Competitive rates with no hidden fees.",
+    title: "Virtual Terminal",
+    description: "Process cards in your browser. No hardware required. Accept payments from anywhere.",
+    link: "/demo",
+    linkText: "Try Virtual Terminal",
+    size: "large",
+  },
+  {
+    icon: Users,
+    title: "Customer Vault",
+    description: "Securely store customer payment methods for faster repeat purchases.",
     link: "/demo",
     linkText: "Learn more",
-    color: "#1844A6",
+    size: "small",
   },
   {
-    icon: Code,
-    title: "Developer API",
-    description: "RESTful API with clear docs. Integrate in minutes, not days.",
-    link: "/dashboard/api-keys",
-    linkText: "View docs",
-    color: "#064A6C",
+    icon: FileText,
+    title: "Invoicing",
+    description: "Send professional invoices with one-click payment links.",
+    link: "/demo",
+    linkText: "Learn more",
+    size: "small",
   },
   {
-    icon: LayoutDashboard,
-    title: "Merchant Dashboard",
-    description: "Real-time transaction monitoring. See every payment as it happens.",
-    link: "/dashboard",
-    linkText: "See dashboard",
-    color: "#10B981",
+    icon: RefreshCw,
+    title: "Recurring Billing",
+    description: "Automate subscriptions, memberships, and payment plans with flexible scheduling.",
+    link: "/demo",
+    linkText: "Learn more",
+    size: "large",
   },
   {
-    icon: ShoppingCart,
-    title: "E-commerce Tools",
-    description: "Cart, checkout, and subscription management for your online store.",
-    link: "/products",
-    linkText: "Explore tools",
-    color: "#064A6C",
+    icon: LinkIcon,
+    title: "Payment Links",
+    description: "Create shareable payment links in seconds. No website needed.",
+    link: "/demo",
+    linkText: "Learn more",
+    size: "small",
+  },
+  {
+    icon: Lock,
+    title: "Fraud Prevention",
+    description: "Real-time fraud detection with customizable rules and velocity checks.",
+    link: "/demo",
+    linkText: "Learn more",
+    size: "small",
   },
 ];
 
-const demos = [
-  { icon: ShoppingCart, label: "Cart", href: "/shoppingcart" },
-  { icon: CreditCard, label: "Checkout", href: "/checkout" },
-  { icon: LayoutDashboard, label: "Orders", href: "/orders" },
+const pricingTiers = [
+  {
+    name: "FREE",
+    price: "$0",
+    period: "forever",
+    description: "Start selling with zero monthly fees",
+    features: [
+      "Up to 25 products",
+      "Basic checkout",
+      "Order management",
+      "Email receipts",
+    ],
+    cta: "Start Free",
+    href: "/shoppingcart",
+    highlight: false,
+  },
+  {
+    name: "Starter",
+    price: "$29",
+    period: "/month",
+    description: "For growing businesses",
+    features: [
+      "Unlimited products",
+      "Abandoned cart recovery",
+      "Discount codes",
+      "Basic analytics",
+    ],
+    cta: "Get Started",
+    href: "/pricing",
+    highlight: false,
+  },
+  {
+    name: "Pro",
+    price: "$79",
+    period: "/month",
+    description: "For established businesses",
+    features: [
+      "Everything in Starter",
+      "Brand Studio (white-label)",
+      "Advanced analytics",
+      "Priority support",
+    ],
+    cta: "Get Started",
+    href: "/pricing",
+    highlight: true,
+    badge: "POPULAR",
+  },
+  {
+    name: "Enterprise",
+    price: "$299",
+    period: "/month",
+    description: "For high-volume merchants",
+    features: [
+      "Everything in Pro",
+      "Multi-store support",
+      "API access & webhooks",
+      "Dedicated account manager",
+    ],
+    cta: "Contact Sales",
+    href: "/pricing",
+    highlight: false,
+  },
+];
+
+const competitors = [
+  { name: "SwipesBlue", rate: "2.70% + $0.30", fee: "$3.00", keep: "$97.00", isBest: true },
+  { name: "Stripe", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
+  { name: "PayPal", rate: "2.99% + $0.49", fee: "$3.48", keep: "$96.52", savings: "$0.48" },
+  { name: "Square", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
+];
+
+const testimonials = [
+  {
+    quote: "SwipesBlue cut our payment processing fees by 20%. The virtual terminal is exactly what we needed.",
+    author: "Sarah Chen",
+    role: "Owner, Bloom Floral Studio",
+  },
+  {
+    quote: "The API integration took less than a day. Their documentation is clear and their support is responsive.",
+    author: "Marcus Johnson",
+    role: "Lead Developer, TechStart",
+  },
+  {
+    quote: "We process over $50K monthly through SwipesBlue. Reliable, fast, and the fees are unbeatable.",
+    author: "Elena Rodriguez",
+    role: "CEO, FreshBite Catering",
+  },
 ];
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section with marching colored rods image */}
-      <section className="relative overflow-hidden bg-white min-h-[600px]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 md:py-28 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-            {/* Left side - Content */}
-            <div className="space-y-6 text-left">
-              <p className="text-sm font-medium text-gray-500 tracking-wide">
-                Payments processed on SwipesBlue: <span className="text-swipes-blue-deep font-semibold">$2.4M+</span>
-              </p>
-              
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-gray-900 leading-tight">
-                Built for businesses to grow
-              </h1>
-              
-              <p className="text-lg md:text-xl font-medium text-swipes-blue-deep">
-                Less fees. More revenue.
-              </p>
-              
-              <p className="text-base md:text-lg text-gray-600 leading-relaxed">
-                Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-start gap-4 pt-2">
-                <Link href="/shoppingcart">
-                  <Button 
-                    size="lg" 
-                    className="group bg-swipes-blue-deep text-white shadow-md font-medium"
-                    data-testid="button-hero-get-started"
-                  >
-                    <span className="flex items-center">
-                      Get Started
-                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </span>
-                    </span>
-                  </Button>
-                </Link>
-                <Link href="/dashboard">
-                  <Button 
-                    size="lg" 
-                    variant="outline" 
-                    className="border-gray-300 text-gray-700 font-medium"
-                    data-testid="button-hero-documentation"
-                  >
-                    View Documentation
-                  </Button>
-                </Link>
-              </div>
+      {/* Hero Section */}
+      <section className="relative pt-16 pb-24 md:pt-24 md:pb-32" data-testid="section-hero">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Eyebrow */}
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-swipes-blue-deep/5 rounded-[7px] mb-6">
+              <span className="w-2 h-2 bg-swipes-trusted-green rounded-[7px] animate-pulse" />
+              <span className="text-sm font-medium text-swipes-blue-deep">
+                Now processing $2.4M+ in transactions
+              </span>
             </div>
-            
-            {/* Right side - Stand Out Hero Image */}
-            <div className="hidden lg:block">
-              <img 
-                src={heroImage}
-                alt="Stand out in a crowd - colorful bars with dollar sign"
-                className="w-full h-auto max-h-[500px] object-contain"
-                data-testid="img-hero-visual"
-              />
+
+            {/* Main headline */}
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight mb-6">
+              Payment infrastructure for
+              <span className="block text-swipes-blue-deep">ambitious businesses</span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Accept payments, manage subscriptions, and grow your business with SwipesBlue. 
+              Lower fees, real-time analytics, and tools that scale with you.
+            </p>
+
+            {/* Rate highlight */}
+            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gray-50 rounded-[7px] border border-gray-200 mb-10">
+              <span className="text-2xl md:text-3xl font-bold text-swipes-blue-deep">2.70% + $0.30</span>
+              <span className="text-gray-500">per transaction • No hidden fees</span>
+            </div>
+
+            {/* CTAs */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <Link href="/shoppingcart" data-testid="link-hero-get-started">
+                <Button 
+                  size="lg" 
+                  className="bg-swipes-blue-deep text-white rounded-[7px]"
+                  data-testid="button-hero-get-started"
+                >
+                  Start Accepting Payments
+                </Button>
+              </Link>
+              <Link href="/developers" data-testid="link-hero-view-api-docs">
+                <Button 
+                  size="lg" 
+                  variant="outline" 
+                  className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]"
+                  data-testid="button-hero-contact-sales"
+                >
+                  View API Docs
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
 
-        {/* Company logos bar */}
-        <div className="border-t border-gray-100 bg-white/80 backdrop-blur-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-            <div className="flex flex-wrap items-center justify-center gap-8 md:gap-12 text-gray-400">
-              <span className="text-sm font-medium tracking-wide">Trusted by growing businesses</span>
+        {/* Trust bar */}
+        <div className="mt-16 border-t border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-gray-500">
               <div className="flex items-center gap-2">
-                <Shield className="h-4 w-4 text-swipes-trusted-green" />
-                <span className="text-sm text-gray-600">PCI Compliant</span>
+                <Shield className="h-5 w-5 text-swipes-trusted-green" />
+                <span className="text-sm font-medium">PCI DSS Level 1</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-4 w-4 text-swipes-gold" />
-                <span className="text-sm text-gray-600">Real-time</span>
+                <Lock className="h-5 w-5 text-swipes-blue-deep" />
+                <span className="text-sm font-medium">256-bit Encryption</span>
               </div>
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-swipes-blue-deep" />
-                <span className="text-sm text-gray-600">24/7 Support</span>
+                <Zap className="h-5 w-5 text-swipes-gold" />
+                <span className="text-sm font-medium">99.99% Uptime</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-swipes-teal" />
+                <span className="text-sm font-medium">500+ Active Merchants</span>
               </div>
             </div>
           </div>
@@ -140,15 +251,15 @@ export default function Home() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-swipes-gray-light border-y border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <section className="bg-gray-50 border-y border-gray-200 py-12" data-testid="section-stats">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center">
+              <div key={index} className="text-center" data-testid={`stat-${stat.label.toLowerCase()}`}>
                 <div className="text-3xl md:text-4xl font-bold text-swipes-blue-deep">
                   {stat.value}
                 </div>
-                <div className="text-sm text-swipes-gray mt-1">
+                <div className="text-sm text-gray-500 mt-1 font-medium">
                   {stat.label}
                 </div>
               </div>
@@ -157,41 +268,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
-      <section className="py-20 md:py-28">
+      {/* Bento Grid Features */}
+      <section className="py-20 md:py-28" data-testid="section-features">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Everything you need to accept payments
             </h2>
-            <p className="mt-4 text-lg text-swipes-gray max-w-2xl mx-auto">
-              Modular tools that work together seamlessly. Start small and scale as you grow.
+            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+              From virtual terminals to recurring billing, SwipesBlue provides complete payment infrastructure.
             </p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            {features.map((feature) => {
+          {/* Bento Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {bentoFeatures.map((feature, index) => {
               const Icon = feature.icon;
+              const isLarge = feature.size === "large";
               return (
                 <Card 
                   key={feature.title}
-                  className="border border-gray-200 rounded-card shadow-card-subtle hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5"
+                  className={`border border-gray-200 rounded-[7px] ${
+                    isLarge ? "lg:col-span-2" : ""
+                  }`}
+                  data-testid={`feature-card-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <CardContent className="p-8">
-                    <div 
-                      className="w-12 h-12 rounded-lg flex items-center justify-center mb-6"
-                      style={{ backgroundColor: `${feature.color}15` }}
-                    >
-                      <Icon className="h-6 w-6" style={{ color: feature.color }} />
+                  <CardContent className="p-6 md:p-8 flex flex-col h-full">
+                    <div className="w-12 h-12 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center mb-4">
+                      <Icon className="h-6 w-6 text-swipes-blue-deep" />
                     </div>
-                    <h3 className="text-xl font-semibold text-swipes-black mb-3">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
                       {feature.title}
                     </h3>
-                    <p className="text-swipes-gray mb-6 leading-relaxed">
+                    <p className="text-gray-600 mb-4 flex-1">
                       {feature.description}
                     </p>
-                    <Link href={feature.link}>
-                      <span className="inline-flex items-center text-swipes-blue-deep font-medium hover:underline">
+                    <Link href={feature.link} data-testid={`link-feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                      <span className="inline-flex items-center text-swipes-blue-deep font-medium underline">
                         {feature.linkText}
                         <ArrowRight className="ml-1 h-4 w-4" />
                       </span>
@@ -204,218 +317,186 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Preview */}
-      <section className="py-20 md:py-28 bg-swipes-gray-light">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
-              Simple, transparent pricing
-            </h2>
-          </div>
-
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            <Card className="border border-gray-200 rounded-card bg-white">
-              <CardContent className="p-8 text-center">
-                <div className="text-sm font-semibold text-swipes-gray uppercase tracking-wider mb-4">
-                  Transaction
-                </div>
-                <div className="mb-6">
-                  <span className="text-4xl font-bold text-swipes-blue-deep">2.70% + $0.30</span>
-                  <div className="text-sm text-swipes-gray mt-1">per transaction</div>
-                </div>
-                <ul className="space-y-3 text-left mb-8">
-                  {["No monthly fees", "No setup fees", "No hidden costs"].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-swipes-gray">
-                      <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/shoppingcart">
-                  <Button className="w-full group bg-swipes-blue-deep text-white">
-                    <span className="flex items-center justify-center">
-                      Start processing
-                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </span>
-                    </span>
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-gray-200 rounded-card bg-white">
-              <CardContent className="p-8 text-center">
-                <div className="text-sm font-semibold text-swipes-gray uppercase tracking-wider mb-4">
-                  E-commerce Suite
-                </div>
-                <div className="mb-6">
-                  <span className="text-sm text-swipes-gray">Starting at</span>
-                  <div className="text-4xl font-bold text-swipes-blue-deep">FREE</div>
-                  <div className="text-sm text-swipes-gray mt-1">+ paid tiers from $29/mo</div>
-                </div>
-                <ul className="space-y-3 text-left mb-8">
-                  {["Shopping cart", "Checkout system", "Subscription billing"].map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-swipes-gray">
-                      <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/pricing">
-                  <Button variant="outline" className="w-full group border-swipes-blue-deep text-swipes-blue-deep">
-                    <span className="flex items-center justify-center">
-                      View plans
-                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </span>
-                    </span>
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="text-center mt-8">
-            <Link href="/pricing">
-              <span className="text-swipes-blue-deep font-medium hover:underline inline-flex items-center">
-                See full pricing details
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </span>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-      {/* Competitor Comparison Table */}
-      <section className="py-20 md:py-28" data-testid="section-competitor-comparison">
+      {/* Comparison Table */}
+      <section className="py-20 md:py-28 bg-gray-50" data-testid="section-comparison">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
-              Compare and save
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Keep more of what you earn
             </h2>
-            <p className="mt-4 text-lg text-swipes-gray">
-              See how SwipesBlue stacks up against the competition on a $100 sale
+            <p className="text-lg text-gray-600">
+              Compare processing fees on a $100 sale. Less fees. More revenue.
             </p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse" data-testid="table-competitor-comparison">
+          <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden shadow-sm">
+            <table className="w-full" data-testid="table-comparison">
               <thead>
-                <tr className="border-b-2 border-gray-200">
-                  <th className="text-left py-4 px-4 font-semibold text-swipes-black">Provider</th>
-                  <th className="text-left py-4 px-4 font-semibold text-swipes-black">Rate</th>
-                  <th className="text-right py-4 px-4 font-semibold text-swipes-black">Fee</th>
-                  <th className="text-right py-4 px-4 font-semibold text-swipes-black">You Keep</th>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="text-left py-4 px-6 font-semibold text-gray-900">Provider</th>
+                  <th className="text-left py-4 px-6 font-semibold text-gray-900">Rate</th>
+                  <th className="text-right py-4 px-6 font-semibold text-gray-900">Fee</th>
+                  <th className="text-right py-4 px-6 font-semibold text-gray-900">You Keep</th>
                 </tr>
               </thead>
               <tbody>
-                {/* SwipesBlue - highlighted row */}
-                <tr className="bg-swipes-blue-deep/5 border-b border-gray-100" data-testid="row-swipesblue">
-                  <td className="py-4 px-4">
-                    <span className="font-bold text-swipes-blue-deep">SwipesBlue</span>
-                  </td>
-                  <td className="py-4 px-4">
-                    <span className="font-semibold text-swipes-blue-deep">2.70% + $0.30</span>
-                  </td>
-                  <td className="text-right py-4 px-4">
-                    <span className="font-bold text-swipes-blue-deep">$3.00</span>
-                  </td>
-                  <td className="text-right py-4 px-4">
-                    <span className="font-bold text-swipes-trusted-green">$97.00</span>
-                  </td>
-                </tr>
-                {/* Stripe */}
-                <tr className="border-b border-gray-100" data-testid="row-stripe">
-                  <td className="py-4 px-4 text-swipes-gray">Stripe</td>
-                  <td className="py-4 px-4 text-swipes-gray">2.90% + $0.30</td>
-                  <td className="text-right py-4 px-4 text-swipes-gray">$3.20</td>
-                  <td className="text-right py-4 px-4">
-                    <span className="text-swipes-gray">$96.80</span>
-                    <span className="ml-2 text-xs text-swipes-muted-red">(Save $0.20)</span>
-                  </td>
-                </tr>
-                {/* PayPal */}
-                <tr className="border-b border-gray-100" data-testid="row-paypal">
-                  <td className="py-4 px-4 text-swipes-gray">PayPal</td>
-                  <td className="py-4 px-4 text-swipes-gray">2.99% + $0.49</td>
-                  <td className="text-right py-4 px-4 text-swipes-gray">$3.48</td>
-                  <td className="text-right py-4 px-4">
-                    <span className="text-swipes-gray">$96.52</span>
-                    <span className="ml-2 text-xs text-swipes-muted-red">(Save $0.48)</span>
-                  </td>
-                </tr>
-                {/* Square */}
-                <tr className="border-b border-gray-100" data-testid="row-square">
-                  <td className="py-4 px-4 text-swipes-gray">Square</td>
-                  <td className="py-4 px-4 text-swipes-gray">2.90% + $0.30</td>
-                  <td className="text-right py-4 px-4 text-swipes-gray">$3.20</td>
-                  <td className="text-right py-4 px-4">
-                    <span className="text-swipes-gray">$96.80</span>
-                    <span className="ml-2 text-xs text-swipes-muted-red">(Save $0.20)</span>
-                  </td>
-                </tr>
+                {competitors.map((competitor) => (
+                  <tr 
+                    key={competitor.name}
+                    className={`border-b border-gray-100 ${competitor.isBest ? "bg-swipes-blue-deep/5" : ""}`}
+                    data-testid={`row-${competitor.name.toLowerCase()}`}
+                  >
+                    <td className="py-4 px-6">
+                      <span className={competitor.isBest ? "font-bold text-swipes-blue-deep" : "text-gray-600"}>
+                        {competitor.name}
+                      </span>
+                    </td>
+                    <td className="py-4 px-6">
+                      <span className={competitor.isBest ? "font-semibold text-swipes-blue-deep" : "text-gray-600"}>
+                        {competitor.rate}
+                      </span>
+                    </td>
+                    <td className="text-right py-4 px-6">
+                      <span className={competitor.isBest ? "font-bold text-swipes-blue-deep" : "text-gray-600"}>
+                        {competitor.fee}
+                      </span>
+                    </td>
+                    <td className="text-right py-4 px-6">
+                      <span className={competitor.isBest ? "font-bold text-swipes-trusted-green" : "text-gray-600"}>
+                        {competitor.keep}
+                      </span>
+                      {competitor.savings && (
+                        <span className="ml-2 text-xs text-swipes-trusted-green">
+                          (Save {competitor.savings})
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div className="mt-8 text-center">
-            <p className="text-sm text-swipes-gray mb-4">
-              WooCommerce is free until it isn't. Less fees. More revenue.
-            </p>
-            <Link href="/pricing">
-              <Button className="group bg-swipes-blue-deep text-white">
-                <span className="flex items-center">
-                  See Full Pricing
-                  <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
-                    <ArrowRight className="h-4 w-4 ml-2" />
-                  </span>
-                </span>
+          <div className="text-center mt-8">
+            <Link href="/pricing" data-testid="link-see-full-pricing">
+              <Button className="bg-swipes-blue-deep text-white rounded-[7px]" data-testid="button-see-full-pricing">
+                See Full Pricing
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
+      {/* Pricing Preview */}
+      <section className="py-20 md:py-28" data-testid="section-pricing">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Simple, transparent pricing
+            </h2>
+            <p className="text-lg text-gray-600">
+              Start free, scale as you grow. Plus <span className="font-semibold text-swipes-blue-deep">2.70% + $0.30</span> per transaction on all tiers.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {pricingTiers.map((tier) => (
+              <Card 
+                key={tier.name}
+                className={`rounded-[7px] relative ${
+                  tier.highlight 
+                    ? "border-2 border-swipes-blue-deep shadow-lg" 
+                    : "border border-gray-200"
+                }`}
+                data-testid={`pricing-tier-${tier.name.toLowerCase()}`}
+              >
+                {tier.badge && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <Badge className="bg-swipes-gold text-black font-semibold px-3">
+                      {tier.badge}
+                    </Badge>
+                  </div>
+                )}
+                <CardContent className="p-6 pt-8">
+                  <div className="text-center mb-6">
+                    <h3 className="text-lg font-bold text-gray-900 mb-2">{tier.name}</h3>
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
+                      <span className="text-gray-500">{tier.period}</span>
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">{tier.description}</p>
+                  </div>
+                  
+                  <ul className="space-y-3 mb-6">
+                    {tier.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check className="h-5 w-5 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-gray-600">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <Link href={tier.href} data-testid={`link-pricing-${tier.name.toLowerCase()}`}>
+                    <Button 
+                      className={`w-full rounded-[7px] ${
+                        tier.highlight 
+                          ? "bg-swipes-blue-deep text-white" 
+                          : "bg-white border-2 border-swipes-teal text-swipes-teal"
+                      }`}
+                      data-testid={`button-pricing-${tier.name.toLowerCase()}`}
+                    >
+                      {tier.cta}
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Developer Preview */}
-      <section className="py-20 md:py-28 bg-swipes-gray-light">
+      <section className="py-20 md:py-28 bg-gray-900 text-white" data-testid="section-developer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
-                Start accepting payments in minutes
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-[7px] mb-6">
+                <Code className="h-4 w-4" />
+                <span className="text-sm font-medium">Developer API</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                Built for developers
               </h2>
-              <p className="text-lg text-swipes-gray mb-8 leading-relaxed">
-                Our RESTful API is designed for developers who want to integrate fast without the complexity. 
-                Clear documentation, predictable responses, and sandbox testing.
+              <p className="text-lg text-gray-400 mb-8 leading-relaxed">
+                Clean RESTful APIs, comprehensive documentation, and sandbox testing. 
+                Integrate SwipesBlue payments into your platform in minutes.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/dashboard">
-                  <Button className="group bg-swipes-blue-deep text-white">
-                    <span className="flex items-center">
-                      Read the docs
-                      <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
-                        <ArrowRight className="h-4 w-4 ml-2" />
-                      </span>
-                    </span>
+                <Link href="/developers" data-testid="link-developer-read-docs">
+                  <Button className="bg-white text-gray-900 rounded-[7px]" data-testid="button-developer-read-docs">
+                    Read the docs
                   </Button>
                 </Link>
-                <Link href="/dashboard/api-keys">
-                  <Button variant="outline" className="border-swipes-blue-deep text-swipes-blue-deep">
+                <Link href="/dashboard/api-keys" data-testid="link-developer-api-keys">
+                  <Button variant="outline" className="border-white/30 text-white rounded-[7px]" data-testid="button-developer-api-keys">
                     Get API keys
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="bg-swipes-black rounded-card p-6 overflow-x-auto">
+            <div className="bg-gray-800 rounded-[7px] p-6 overflow-x-auto">
               <pre className="text-sm font-mono">
                 <code className="text-gray-300">
 {`curl https://api.swipesblue.com/v1/payments \\
   -H "Authorization: Bearer sk_live_..." \\
-  -d amount=2000 \\
-  -d currency=usd \\
-  -d description="Payment for order #1234"`}
+  -H "Content-Type: application/json" \\
+  -d '{
+    "amount": 2000,
+    "currency": "usd",
+    "customer": "cus_xyz123",
+    "description": "Order #1234"
+  }'`}
                 </code>
               </pre>
             </div>
@@ -423,66 +504,68 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Demo Section */}
-      <section className="py-20 md:py-28 bg-swipes-gray-light">
+      {/* Testimonials */}
+      <section className="py-20 md:py-28" data-testid="section-testimonials">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-swipes-black">
-              See it in action
+          <div className="text-center mb-16">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Trusted by growing businesses
             </h2>
-            <p className="mt-4 text-lg text-swipes-gray">
-              Experience SwipesBlue-powered commerce with our live demos.
+            <p className="text-lg text-gray-600">
+              See why merchants choose SwipesBlue for their payment processing.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 md:gap-6 max-w-lg mx-auto">
-            {demos.map((demo) => {
-              const Icon = demo.icon;
-              return (
-                <Link key={demo.label} href={demo.href}>
-                  <Card className="border border-gray-200 rounded-card bg-white hover:shadow-card-hover transition-all duration-200 hover:-translate-y-0.5 cursor-pointer">
-                    <CardContent className="p-6 text-center">
-                      <Icon className="h-8 w-8 mx-auto mb-3 text-swipes-blue-deep" />
-                      <div className="font-medium text-swipes-black mb-2">{demo.label}</div>
-                      <span className="text-sm text-swipes-blue-deep inline-flex items-center">
-                        Try
-                        <ArrowRight className="ml-1 h-3 w-3" />
-                      </span>
-                    </CardContent>
-                  </Card>
-                </Link>
-              );
-            })}
+          <div className="grid md:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="border border-gray-200 rounded-[7px]" data-testid={`testimonial-${index}`}>
+                <CardContent className="p-6">
+                  <p className="text-gray-600 mb-6 italic">
+                    "{testimonial.quote}"
+                  </p>
+                  <div>
+                    <p className="font-semibold text-gray-900">{testimonial.author}</p>
+                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 md:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-swipes-black mb-6">
-            Ready to get started?
+      {/* Final CTA */}
+      <section className="py-20 md:py-28 bg-swipes-blue-deep" data-testid="section-cta">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+            Ready to start accepting payments?
           </h2>
-          <p className="text-lg text-swipes-gray mb-8 max-w-xl mx-auto">
-            Create your account in minutes and start accepting payments today.
+          <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
+            Create your account in minutes. Start processing payments today with transparent pricing and no hidden fees.
           </p>
-          <Link href="/shoppingcart">
-            <Button 
-              size="lg" 
-              className="group bg-swipes-blue-deep text-white"
-              data-testid="button-cta-get-started"
-            >
-              <span className="flex items-center">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <Link href="/shoppingcart" data-testid="link-cta-get-started">
+              <Button 
+                size="lg" 
+                className="bg-white text-swipes-blue-deep rounded-[7px]"
+                data-testid="button-cta-get-started"
+              >
                 Get Started Free
-                <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
-                  <ArrowRight className="h-4 w-4 ml-2" />
-                </span>
-              </span>
-            </Button>
-          </Link>
+              </Button>
+            </Link>
+            <Link href="/pricing" data-testid="link-cta-view-pricing">
+              <Button 
+                size="lg" 
+                variant="outline" 
+                className="border-2 border-white/30 text-white rounded-[7px]"
+                data-testid="button-cta-view-pricing"
+              >
+                View Pricing
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
-
     </div>
   );
 }
