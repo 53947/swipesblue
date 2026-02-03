@@ -21,9 +21,9 @@ export default function Logo({
   };
   
   const iconSizes = {
-    small: "h-8 w-auto",
-    default: "h-12 w-auto",
-    large: "h-14 w-auto"
+    small: "h-6 w-auto",
+    default: "h-[30px] w-auto",
+    large: "h-12 w-auto"
   };
 
   const fontSize = fontSizes[variant];
