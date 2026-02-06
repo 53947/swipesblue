@@ -141,7 +141,7 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
       },
       {
         title: "Company",
-        subtitle: "Learn about SwipesBlue",
+        subtitle: "Learn about swipesblue",
         items: [
           { icon: Globe, label: "About Us", description: "Our mission and story", href: "/" },
           { icon: FileText, label: "Blog", description: "News and updates", href: "/" },
