@@ -52,40 +52,29 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
   products: {
     columns: [
       {
-        title: "Accept Payments",
-        subtitle: "In-person and online payment solutions",
+        title: "E-Commerce Suite",
+        subtitle: "Complete online selling platform",
         items: [
-          { icon: CreditCard, label: "Virtual Terminal", description: "Process cards in your browser", href: "/dashboard/virtual-terminal" },
-          { icon: ShoppingCart, label: "Online Checkout", description: "Secure hosted checkout pages", href: "/checkout" },
-          { icon: LinkIcon, label: "Payment Links", description: "Shareable payment URLs", href: "/dashboard/payment-links" },
-          { icon: Receipt, label: "Invoicing", description: "Send professional invoices", href: "/dashboard/invoicing" },
+          { icon: ShoppingCart, label: "E-Commerce Suite", description: "Full commerce platform overview", href: "/products/ecommerce" },
+          { icon: Package, label: "Shopping Cart", description: "Product catalog & storefront", href: "/products/cart" },
+          { icon: CreditCard, label: "Online Checkout", description: "Secure hosted checkout pages", href: "/products/checkout" },
         ],
-        ctaLabel: "View all payment features",
-        ctaHref: "/demo"
+        ctaLabel: "Explore the suite",
+        ctaHref: "/products/ecommerce"
       },
       {
-        title: "Manage Business",
-        subtitle: "Tools to run your business",
+        title: "Payment Tools",
+        subtitle: "Accept and manage payments",
         items: [
-          { icon: Users, label: "Customer Vault", description: "Store payment methods securely", href: "/dashboard/customer-vault" },
-          { icon: RefreshCw, label: "Recurring Billing", description: "Subscriptions & payment plans", href: "/dashboard/recurring-billing" },
-          { icon: Package, label: "Product Catalog", description: "Manage products & inventory", href: "/products", badge: "FREE" },
-          { icon: Palette, label: "Brand Studio", description: "White-label your checkout", href: "/brand-studio", badge: "PRO" },
+          { icon: Terminal, label: "Virtual Terminal", description: "Process cards in your browser", href: "/products/terminal" },
+          { icon: LinkIcon, label: "Payment Links", description: "Shareable payment URLs", href: "/products/payment-links" },
+          { icon: Receipt, label: "Invoicing", description: "Send professional invoices", href: "/products/invoicing" },
+          { icon: RefreshCw, label: "Recurring Billing", description: "Subscriptions & payment plans", href: "/products/billing" },
+          { icon: Users, label: "Customer Vault", description: "Store payment methods securely", href: "/products/customers" },
+          { icon: Lock, label: "Fraud Prevention", description: "Real-time fraud detection", href: "/products/fraud" },
         ],
-        ctaLabel: "Explore business tools",
-        ctaHref: "/products"
-      },
-      {
-        title: "Protect & Analyze",
-        subtitle: "Security and insights",
-        items: [
-          { icon: Lock, label: "Fraud Prevention", description: "Real-time fraud detection", href: "/dashboard/fraud-prevention" },
-          { icon: BarChart3, label: "Analytics", description: "Revenue & performance insights", href: "/dashboard/analytics" },
-          { icon: Shield, label: "Security Suite", description: "PCI compliance & encryption", href: "/demo" },
-          { icon: Activity, label: "Dispute Management", description: "Handle chargebacks efficiently", href: "/dashboard/dispute-management" },
-        ],
-        ctaLabel: "View security features",
-        ctaHref: "/demo"
+        ctaLabel: "View all products",
+        ctaHref: "/products/ecommerce"
       }
     ]
   },
@@ -412,7 +401,7 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden py-4 border-t border-gray-100 bg-white shadow-lg">
           <nav className="flex flex-col gap-1 px-4">
-            <Link href="/demo" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-products">
+            <Link href="/products/ecommerce" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-products">
               <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">Products</span>
             </Link>
             <Link href="/developers" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-developers">

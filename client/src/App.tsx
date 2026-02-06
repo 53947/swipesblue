@@ -51,6 +51,15 @@ import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import CookiePolicy from "@/pages/legal/CookiePolicy";
 import AcceptableUsePolicy from "@/pages/legal/AcceptableUsePolicy";
 import About from "@/pages/About";
+import EcommerceSuite from "@/pages/products/EcommerceSuite";
+import ShoppingCartProduct from "@/pages/products/ShoppingCartProduct";
+import CheckoutProduct from "@/pages/products/CheckoutProduct";
+import VirtualTerminalProduct from "@/pages/products/VirtualTerminalProduct";
+import PaymentLinksProduct from "@/pages/products/PaymentLinksProduct";
+import InvoicingProduct from "@/pages/products/InvoicingProduct";
+import RecurringBillingProduct from "@/pages/products/RecurringBillingProduct";
+import CustomerVaultProduct from "@/pages/products/CustomerVaultProduct";
+import FraudPreventionProduct from "@/pages/products/FraudPreventionProduct";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
 
@@ -83,7 +92,18 @@ function Router() {
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       
-      {/* Public Product Demo Pages */}
+      {/* Public Product Marketing Pages */}
+      <Route path="/products/ecommerce" component={EcommerceSuite} />
+      <Route path="/products/cart" component={ShoppingCartProduct} />
+      <Route path="/products/checkout" component={CheckoutProduct} />
+      <Route path="/products/terminal" component={VirtualTerminalProduct} />
+      <Route path="/products/payment-links" component={PaymentLinksProduct} />
+      <Route path="/products/invoicing" component={InvoicingProduct} />
+      <Route path="/products/billing" component={RecurringBillingProduct} />
+      <Route path="/products/customers" component={CustomerVaultProduct} />
+      <Route path="/products/fraud" component={FraudPreventionProduct} />
+
+      {/* Product catalog and detail pages */}
       <Route path="/products" component={Products} />
       <Route path="/products/:slug" component={ProductDetail} />
       <Route path="/subscribe/:slug" component={SubscriptionCheckout} />

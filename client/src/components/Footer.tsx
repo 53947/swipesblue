@@ -4,13 +4,14 @@ const footerSections = {
   products: {
     title: "Products",
     links: [
-      { label: "Virtual Terminal", href: "/dashboard/virtual-terminal" },
-      { label: "Online Checkout", href: "/checkout" },
-      { label: "Payment Links", href: "/dashboard/payment-links" },
-      { label: "Invoicing", href: "/dashboard/invoicing" },
-      { label: "Recurring Billing", href: "/dashboard/recurring-billing" },
-      { label: "Customer Vault", href: "/dashboard/customer-vault" },
-      { label: "Fraud Prevention", href: "/dashboard/fraud-prevention" },
+      { label: "E-Commerce Suite", href: "/products/ecommerce" },
+      { label: "Virtual Terminal", href: "/products/terminal" },
+      { label: "Online Checkout", href: "/products/checkout" },
+      { label: "Payment Links", href: "/products/payment-links" },
+      { label: "Invoicing", href: "/products/invoicing" },
+      { label: "Recurring Billing", href: "/products/billing" },
+      { label: "Customer Vault", href: "/products/customers" },
+      { label: "Fraud Prevention", href: "/products/fraud" },
     ],
   },
   developers: {
