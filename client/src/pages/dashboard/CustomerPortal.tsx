@@ -122,7 +122,7 @@ export default function CustomerPortal() {
   const [features, setFeatures] = useState(initialFeatures);
   const [brandColor, setBrandColor] = useState("#1844A6");
   const [welcomeMessage, setWelcomeMessage] = useState("Welcome to your account portal. Manage your payments, invoices, and subscriptions.");
-  const [footerText, setFooterText] = useState("Powered by SwipesBlue — Secure payment processing");
+  const [footerText, setFooterText] = useState("Powered by swipesblue — Secure payment processing");
   const [customDomain, setCustomDomain] = useState("");
   const [activityFilter, setActivityFilter] = useState("all");
   const [activitySearch, setActivitySearch] = useState("");

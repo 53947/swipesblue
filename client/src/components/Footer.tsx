@@ -21,17 +21,14 @@ const footerSections = {
       { label: "API Keys", href: "/dashboard/api-keys" },
       { label: "Webhooks", href: "/dashboard/webhooks" },
       { label: "SDKs & Libraries", href: "/developers" },
-      { label: "System Status", href: "/" },
     ],
   },
   company: {
     title: "Company",
     links: [
-      { label: "About", href: "/" },
+      { label: "About", href: "/about" },
       { label: "Pricing", href: "/pricing" },
-      { label: "Blog", href: "/" },
-      { label: "Careers", href: "/" },
-      { label: "Contact Sales", href: "/" },
+      { label: "Contact Sales", href: "mailto:sales@swipesblue.com" },
     ],
   },
   resources: {
@@ -40,10 +37,7 @@ const footerSections = {
       { label: "Help Center", href: "/" },
       { label: "Security", href: "/dashboard/security" },
       { label: "Compliance", href: "/dashboard/security" },
-      { label: "Privacy Policy", href: "/privacy" },
-      { label: "Terms of Service", href: "/terms" },
-      { label: "Cookie Policy", href: "/cookies" },
-      { label: "Acceptable Use", href: "/acceptable-use" },
+      { label: "System Status", href: "/" },
     ],
   },
 };
@@ -55,12 +49,14 @@ const ecosystemPlatforms = [
     isInternal: true,
     descriptor: "payments",
     renderBrand: () => (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
-        <div className="w-4 h-4 rounded-full bg-[#374151]" />
-        <span style={{ color: '#374151' }}>swipes</span>
-        <span style={{ color: '#0000FF' }}>blue</span>
-        <span style={{ color: '#374151' }}>.com</span>
-      </span>
+      <div className="flex items-center gap-2">
+        <img src="/images/logos/swipesblue-icon.png" alt="" className="h-5 w-5" />
+        <span className="text-sm font-semibold">
+          <span style={{ color: '#374151' }}>swipes</span>
+          <span style={{ color: '#0000FF' }}>blue</span>
+          <span style={{ color: '#374151' }}>.com</span>
+        </span>
+      </div>
     ),
   },
   {
@@ -69,12 +65,14 @@ const ecosystemPlatforms = [
     isInternal: false,
     descriptor: "hosting",
     renderBrand: () => (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
-        <div className="w-4 h-4 rounded-full bg-[#008060]" />
-        <span style={{ color: '#008060' }}>hosts</span>
-        <span style={{ color: '#0000FF' }}>blue</span>
-        <span style={{ color: '#008060' }}>.com</span>
-      </span>
+      <div className="flex items-center gap-2">
+        <img src="/images/logos/hostsblue-icon.png" alt="" className="h-5 w-5" />
+        <span className="text-sm font-semibold">
+          <span style={{ color: '#008060' }}>hosts</span>
+          <span style={{ color: '#0000FF' }}>blue</span>
+          <span style={{ color: '#008060' }}>.com</span>
+        </span>
+      </div>
     ),
   },
   {
@@ -83,12 +81,14 @@ const ecosystemPlatforms = [
     isInternal: false,
     descriptor: "websites",
     renderBrand: () => (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
-        <div className="w-4 h-4 rounded-full bg-[#FF6B00]" />
-        <span style={{ color: '#FF6B00' }}>business</span>
-        <span style={{ color: '#0000FF' }}>blueprint</span>
-        <span style={{ color: '#FF6B00' }}>.io</span>
-      </span>
+      <div className="flex items-center gap-2">
+        <img src="/images/logos/businessblueprint-icon.png" alt="" className="h-5 w-5" />
+        <span className="text-sm font-semibold">
+          <span style={{ color: '#FF6B00' }}>business</span>
+          <span style={{ color: '#0000FF' }}>blueprint</span>
+          <span style={{ color: '#FF6B00' }}>.io</span>
+        </span>
+      </div>
     ),
   },
   {
@@ -97,12 +97,14 @@ const ecosystemPlatforms = [
     isInternal: false,
     descriptor: "assessments",
     renderBrand: () => (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
-        <div className="w-4 h-4 rounded-full bg-[#A00028]" />
-        <span style={{ color: '#A00028' }}>scans</span>
-        <span style={{ color: '#0000FF' }}>blue</span>
-        <span style={{ color: '#A00028' }}>.com</span>
-      </span>
+      <div className="flex items-center gap-2">
+        <img src="/images/logos/scansblue-icon.png" alt="" className="h-5 w-5" />
+        <span className="text-sm font-semibold">
+          <span style={{ color: '#A00028' }}>scans</span>
+          <span style={{ color: '#0000FF' }}>blue</span>
+          <span style={{ color: '#A00028' }}>.com</span>
+        </span>
+      </div>
     ),
   },
   {
@@ -111,12 +113,14 @@ const ecosystemPlatforms = [
     isInternal: false,
     descriptor: "parent company",
     renderBrand: () => (
-      <span className="inline-flex items-center gap-1.5 text-sm font-semibold">
-        <span style={{ color: '#1844A6' }}>triad</span>
-        <div className="w-4 h-4 rounded-full bg-[#1844A6]" />
-        <span style={{ color: '#1844A6' }}>blue</span>
-        <span style={{ color: '#1844A6' }}>.com</span>
-      </span>
+      <div className="flex items-center gap-1">
+        <span className="text-sm font-semibold" style={{ color: '#1844A6' }}>triad</span>
+        <img src="/images/logos/triadblue-icon.png" alt="" className="h-5 w-5" />
+        <span className="text-sm font-semibold">
+          <span style={{ color: '#1844A6' }}>blue</span>
+          <span style={{ color: '#1844A6' }}>.com</span>
+        </span>
+      </div>
     ),
   },
 ];
@@ -135,13 +139,23 @@ export default function Footer() {
               <ul>
                 {section.links.map((link) => (
                   <li key={link.label}>
-                    <Link
-                      href={link.href}
-                      className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
-                      data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                    >
-                      {link.label}
-                    </Link>
+                    {link.href.startsWith("mailto:") ? (
+                      <a
+                        href={link.href}
+                        className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                        data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {link.label}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                        data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                      >
+                        {link.label}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -158,7 +172,7 @@ export default function Footer() {
           </p>
           <div className="flex flex-wrap justify-center gap-10">
             {ecosystemPlatforms.map((platform) => (
-              <div key={platform.name} className="flex flex-col items-center">
+              <div key={platform.name} className="flex flex-col items-center gap-2">
                 {platform.isInternal ? (
                   <Link href={platform.href} data-testid={`link-footer-platform-${platform.name}`}>
                     {platform.renderBrand()}
@@ -173,7 +187,7 @@ export default function Footer() {
                     {platform.renderBrand()}
                   </a>
                 )}
-                <span className="text-xs text-gray-400 text-center mt-1">
+                <span className="text-xs text-gray-400">
                   {platform.descriptor}
                 </span>
               </div>
@@ -203,6 +217,10 @@ export default function Footer() {
             <span>·</span>
             <Link href="/acceptable-use" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-acceptable-use">
               acceptable use
+            </Link>
+            <span>·</span>
+            <Link href="/admin/login" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-admin-login">
+              admin login
             </Link>
           </div>
         </div>

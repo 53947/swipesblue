@@ -778,7 +778,7 @@ export default function RateManagement() {
                           </thead>
                           <tbody>
                             <tr className="bg-swipes-blue-deep/5">
-                              <td className="py-2 font-bold text-swipes-blue-deep">SwipesBlue</td>
+                              <td className="py-2 font-bold text-swipes-blue-deep">swipesblue</td>
                               <td className="py-2">2.70% + $0.30</td>
                               <td className="text-right py-2">$3.00</td>
                               <td className="text-right py-2 font-bold text-swipes-trusted-green">$97.00</td>

@@ -1097,3 +1097,85 @@ export const insertApiLogSchema = createInsertSchema(apiLogs).omit({
 });
 export type InsertApiLog = z.infer<typeof insertApiLogSchema>;
 export type ApiLog = typeof apiLogs.$inferSelect;
+
+// ========================================
+// Customer Vault Tables (triadblue-aligned)
+// ========================================
+
+export const customerVault = pgTable("customer_vault", {
+  // === SYSTEM IDENTIFIERS ===
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  triadblueId: varchar("triadblue_id").default(sql`gen_random_uuid()`).unique(),
+  sourcePlatform: text("source_platform").notNull().default("swipesblue"),
+  merchantId: varchar("merchant_id"),
+
+  // === SHARED CONTACT FIELDS (identical to businessblueprint /relationships) ===
+  firstName: text("first_name").notNull(),
+  lastName: text("last_name").notNull(),
+  email: text("email").notNull(),
+  phone: text("phone"),
+  company: text("company"),
+  jobTitle: text("job_title"),
+  website: text("website"),
+
+  // === SHARED ADDRESS FIELDS ===
+  billingAddress: text("billing_address"),
+  billingCity: text("billing_city"),
+  billingState: text("billing_state"),
+  billingZip: text("billing_zip"),
+  billingCountry: text("billing_country").default("US"),
+  shippingAddress: text("shipping_address"),
+  shippingCity: text("shipping_city"),
+  shippingState: text("shipping_state"),
+  shippingZip: text("shipping_zip"),
+  shippingCountry: text("shipping_country").default("US"),
+
+  // === SHARED METADATA ===
+  tags: json("tags").$type<string[]>().default([]),
+  notes: text("notes"),
+  metadata: json("metadata"),
+
+  // === SWIPESBLUE-SPECIFIC FIELDS ===
+  customerId: text("customer_id").unique(),
+  lifetimeValue: integer("lifetime_value").default(0),
+  transactionCount: integer("transaction_count").default(0),
+  lastTransactionAt: timestamp("last_transaction_at"),
+  riskScore: text("risk_score"),
+  status: text("status").notNull().default("active"),
+
+  // === TIMESTAMPS ===
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertCustomerVaultSchema = createInsertSchema(customerVault).omit({
+  id: true,
+  triadblueId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCustomerVault = z.infer<typeof insertCustomerVaultSchema>;
+export type CustomerVaultRecord = typeof customerVault.$inferSelect;
+
+export const vaultPaymentMethods = pgTable("vault_payment_methods", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  customerId: varchar("customer_id").notNull().references(() => customerVault.id, { onDelete: "cascade" }),
+  type: text("type").notNull(),
+  cardBrand: text("card_brand"),
+  cardLastFour: text("card_last_four"),
+  cardExpMonth: text("card_exp_month"),
+  cardExpYear: text("card_exp_year"),
+  nmiToken: text("nmi_token"),
+  isDefault: boolean("is_default").default(false),
+  nickname: text("nickname"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertVaultPaymentMethodSchema = createInsertSchema(vaultPaymentMethods).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertVaultPaymentMethod = z.infer<typeof insertVaultPaymentMethodSchema>;
+export type VaultPaymentMethod = typeof vaultPaymentMethods.$inferSelect;

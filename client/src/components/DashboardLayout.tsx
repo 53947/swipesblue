@@ -75,9 +75,9 @@ const settingsNavItems = [
 ];
 
 const platformLinks = [
-  { name: "SwipesBlue.com", href: "/" },
-  { name: "HostsBlue.com", href: "https://hostsblue.com", external: true },
-  { name: "BusinessBlueprint.io", href: "https://businessblueprint.io", external: true },
+  { name: "swipesblue.com", href: "/" },
+  { name: "hostsblue.com", href: "https://hostsblue.com", external: true },
+  { name: "businessblueprint.io", href: "https://businessblueprint.io", external: true },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {

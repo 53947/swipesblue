@@ -32,7 +32,6 @@ const bentoFeatures = [
     description: "Process cards in your browser. No hardware required. Accept payments from anywhere.",
     link: "/demo",
     linkText: "Try Virtual Terminal",
-    size: "large",
   },
   {
     icon: Users,
@@ -40,7 +39,6 @@ const bentoFeatures = [
     description: "Securely store customer payment methods for faster repeat purchases.",
     link: "/demo",
     linkText: "Learn more",
-    size: "small",
   },
   {
     icon: FileText,
@@ -48,7 +46,6 @@ const bentoFeatures = [
     description: "Send professional invoices with one-click payment links.",
     link: "/demo",
     linkText: "Learn more",
-    size: "small",
   },
   {
     icon: RefreshCw,
@@ -56,7 +53,6 @@ const bentoFeatures = [
     description: "Automate subscriptions, memberships, and payment plans with flexible scheduling.",
     link: "/demo",
     linkText: "Learn more",
-    size: "large",
   },
   {
     icon: LinkIcon,
@@ -64,7 +60,6 @@ const bentoFeatures = [
     description: "Create shareable payment links in seconds. No website needed.",
     link: "/demo",
     linkText: "Learn more",
-    size: "small",
   },
   {
     icon: Lock,
@@ -72,7 +67,6 @@ const bentoFeatures = [
     description: "Real-time fraud detection with customizable rules and velocity checks.",
     link: "/demo",
     linkText: "Learn more",
-    size: "small",
   },
 ];
 
@@ -141,7 +135,7 @@ const pricingTiers = [
 ];
 
 const competitors = [
-  { name: "SwipesBlue", rate: "2.70% + $0.30", fee: "$3.00", keep: "$97.00", isBest: true },
+  { name: "swipesblue", rate: "2.70% + $0.30", fee: "$3.00", keep: "$97.00", isBest: true },
   { name: "Stripe", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
   { name: "PayPal", rate: "2.99% + $0.49", fee: "$3.48", keep: "$96.52", savings: "$0.48" },
   { name: "Square", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
@@ -196,13 +190,10 @@ export default function Home() {
             {/* Right 40% */}
             <div className="lg:col-span-2 flex flex-col items-center">
               <img
-                src="/marching_colors.png"
-                alt="Stand out from the crowd"
-                className="w-full max-w-md rounded-[7px]"
+                src="/images/less_fees_more_revenue.jpg"
+                alt="Less fees, more revenue"
+                className="w-full max-w-md rounded-[7px] shadow-lg"
               />
-              <p className="text-sm text-swipes-pro-gray italic mt-2">
-                Stand out from the crowd
-              </p>
             </div>
           </div>
         </div>
@@ -258,41 +249,35 @@ export default function Home() {
               Everything you need to accept payments
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              From virtual terminals to recurring billing, SwipesBlue provides complete payment infrastructure.
+              From virtual terminals to recurring billing, swipesblue provides complete payment infrastructure.
             </p>
           </div>
 
-          {/* Bento Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {bentoFeatures.map((feature, index) => {
+          {/* Feature Grid — 3x2 equal cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {bentoFeatures.map((feature) => {
               const Icon = feature.icon;
-              const isLarge = feature.size === "large";
               return (
-                <Card
+                <div
                   key={feature.title}
-                  className={`border border-gray-200 rounded-[7px] ${
-                    isLarge ? "lg:col-span-2" : ""
-                  }`}
+                  className="bg-white border border-gray-200 rounded-[7px] p-8 flex flex-col h-full"
                   data-testid={`feature-card-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
-                  <CardContent className="p-6 md:p-8 flex flex-col h-full">
-                    <div className="w-12 h-12 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center mb-4">
-                      <Icon className="h-6 w-6 text-swipes-blue-deep" />
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 mb-4 flex-1">
-                      {feature.description}
-                    </p>
-                    <Link href={feature.link} data-testid={`link-feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
-                      <span className="inline-flex items-center text-swipes-blue-deep font-medium underline">
-                        {feature.linkText}
-                        <ArrowRight className="ml-1 h-4 w-4" />
-                      </span>
-                    </Link>
-                  </CardContent>
-                </Card>
+                  <div className="w-12 h-12 bg-blue-50 rounded-[7px] flex items-center justify-center mb-6">
+                    <Icon className="h-6 w-6 text-swipes-blue-deep" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                    {feature.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed flex-grow">
+                    {feature.description}
+                  </p>
+                  <Link href={feature.link} data-testid={`link-feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
+                    <span className="text-swipes-blue-deep font-medium text-sm mt-6 inline-flex items-center">
+                      {feature.linkText} <ArrowRight className="ml-1 h-4 w-4" />
+                    </span>
+                  </Link>
+                </div>
               );
             })}
           </div>
@@ -451,7 +436,7 @@ export default function Home() {
               </h2>
               <p className="text-lg text-gray-600 mb-8 leading-relaxed">
                 Clean RESTful APIs, comprehensive documentation, and sandbox testing.
-                Integrate SwipesBlue payments into your platform in minutes.
+                Integrate swipesblue payments into your platform in minutes.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/developers" data-testid="link-developer-read-docs">
@@ -569,9 +554,9 @@ export default function Home() {
       {/* NMI Footnote */}
       <div className="bg-white border-t border-gray-100 py-4 px-8">
         <p className="text-xs text-gray-400 text-center max-w-4xl mx-auto">
-          * Platform statistics reflect NMI's global payment gateway network, on which SwipesBlue is built.
+          * Platform statistics reflect NMI's global payment gateway network, on which swipesblue is built.
           Transaction volume, uptime, and processing figures are sourced from NMI's published platform data.
-          SwipesBlue is an independent platform powered by NMI's payment infrastructure.
+          swipesblue is an independent platform powered by NMI's payment infrastructure.
         </p>
       </div>
     </div>

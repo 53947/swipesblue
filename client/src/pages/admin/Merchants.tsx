@@ -147,9 +147,9 @@ export default function Merchants() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Platforms</SelectItem>
-                <SelectItem value="businessblueprint">BusinessBlueprint</SelectItem>
-                <SelectItem value="hostsblue">HostsBlue</SelectItem>
-                <SelectItem value="swipesblue">SwipesBlue</SelectItem>
+                <SelectItem value="businessblueprint">businessblueprint</SelectItem>
+                <SelectItem value="hostsblue">hostsblue</SelectItem>
+                <SelectItem value="swipesblue">swipesblue</SelectItem>
               </SelectContent>
             </Select>
 

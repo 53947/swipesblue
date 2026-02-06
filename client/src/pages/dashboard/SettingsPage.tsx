@@ -45,7 +45,7 @@ const billingHistory = [
 
 export default function SettingsPage() {
   // General
-  const [companyName, setCompanyName] = useState("SwipesBlue Inc.");
+  const [companyName, setCompanyName] = useState("swipesblue, inc.");
   const [primaryEmail, setPrimaryEmail] = useState("admin@swipesblue.com");
   const [timezone, setTimezone] = useState("america-new-york");
   const [language, setLanguage] = useState("en");
@@ -54,8 +54,8 @@ export default function SettingsPage() {
   const [dateFormat, setDateFormat] = useState("mdy");
 
   // Business Profile
-  const [businessName, setBusinessName] = useState("SwipesBlue Inc.");
-  const [dbaName, setDbaName] = useState("SwipesBlue");
+  const [businessName, setBusinessName] = useState("swipesblue, inc.");
+  const [dbaName, setDbaName] = useState("swipesblue");
   const [businessType, setBusinessType] = useState("llc");
   const [street, setStreet] = useState("123 Commerce St");
   const [city, setCity] = useState("New York");

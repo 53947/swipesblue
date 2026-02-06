@@ -327,9 +327,9 @@ export default function ApiKeys() {
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="businessblueprint">BusinessBlueprint</SelectItem>
-                  <SelectItem value="hostsblue">HostsBlue</SelectItem>
-                  <SelectItem value="swipesblue">SwipesBlue</SelectItem>
+                  <SelectItem value="businessblueprint">businessblueprint</SelectItem>
+                  <SelectItem value="hostsblue">hostsblue</SelectItem>
+                  <SelectItem value="swipesblue">swipesblue</SelectItem>
                   <SelectItem value="internal">Internal</SelectItem>
                 </SelectContent>
               </Select>

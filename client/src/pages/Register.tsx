@@ -55,7 +55,7 @@ export default function Register() {
     onSuccess: () => {
       toast({
         title: "Account created!",
-        description: "Welcome to SwipesBlue. You're ready to start accepting payments.",
+        description: "Welcome to swipesblue. You're ready to start accepting payments.",
       });
       setLocation("/dashboard");
     },

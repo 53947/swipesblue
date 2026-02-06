@@ -142,7 +142,7 @@ const productDetails: Record<string, {
     ],
     faqs: [
       { question: "How much can this improve my conversion rate?", answer: "Customers typically see 15-30% improvement in checkout completion rates." },
-      { question: "Does this work with my existing checkout?", answer: "Yes. These are enhancements that layer on top of your existing SwipesBlue checkout." },
+      { question: "Does this work with my existing checkout?", answer: "Yes. These are enhancements that layer on top of your existing swipesblue checkout." },
       { question: "Can I see which optimizations work best?", answer: "Yes. The conversion funnel shows exactly where customers drop off and which features help." }
     ]
   },
@@ -202,15 +202,15 @@ const productDetails: Record<string, {
       { title: "Funnel Visualization", description: "See exactly where customers drop off in your purchase flow." }
     ],
     faqs: [
-      { question: "How far back can I see data?", answer: "With the paid plan, you can see all historical data since you joined SwipesBlue." },
+      { question: "How far back can I see data?", answer: "With the paid plan, you can see all historical data since you joined swipesblue." },
       { question: "Can I share reports with my team?", answer: "Yes. Schedule reports to be sent to multiple email addresses." },
       { question: "What export formats are available?", answer: "CSV for spreadsheet analysis and PDF for presentations." }
     ]
   },
   "custom-branding": {
     freeFeatures: [
-      "SwipesBlue logo on checkout",
-      '"Powered by SwipesBlue" footer',
+      "swipesblue logo on checkout",
+      '"Powered by swipesblue" footer',
       "Default colors"
     ],
     paidFeatures: [
@@ -219,7 +219,7 @@ const productDetails: Record<string, {
       "Your logo in customer portal",
       "Custom colors (primary, secondary, background)",
       "Custom fonts (Google Fonts or upload your own)",
-      'Remove "Powered by SwipesBlue"',
+      'Remove "Powered by swipesblue"',
       "Custom email templates",
       "Custom receipt design",
       "Custom checkout domain (checkout.yourdomain.com)"

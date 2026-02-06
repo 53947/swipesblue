@@ -37,8 +37,8 @@ const productFeatures: Record<string, { free: string[]; paid: string[] }> = {
     paid: ["Revenue breakdown", "Customer analytics (LTV, AOV)", "Cohort analysis", "Funnel visualization", "Exportable reports", "Scheduled email reports"]
   },
   "custom-branding": {
-    free: ["SwipesBlue logo on checkout", "Default colors"],
-    paid: ["Your logo on checkout", "Custom colors", "Custom fonts", "Remove SwipesBlue branding", "Custom email templates", "Custom checkout domain"]
+    free: ["swipesblue logo on checkout", "Default colors"],
+    paid: ["Your logo on checkout", "Custom colors", "Custom fonts", "Remove swipesblue branding", "Custom email templates", "Custom checkout domain"]
   },
   "premium-api": {
     free: [],

@@ -50,6 +50,7 @@ import TermsOfService from "@/pages/legal/TermsOfService";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import CookiePolicy from "@/pages/legal/CookiePolicy";
 import AcceptableUsePolicy from "@/pages/legal/AcceptableUsePolicy";
+import About from "@/pages/About";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
 
@@ -78,6 +79,7 @@ function Router() {
       <Route path="/pricing" component={Pricing} />
       <Route path="/demo" component={Demo} />
       <Route path="/developers" component={Developers} />
+      <Route path="/about" component={About} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       

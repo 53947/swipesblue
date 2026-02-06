@@ -183,7 +183,7 @@ const faqs = [
   },
   {
     question: "Is my data secure?",
-    answer: "Yes. SwipesBlue is PCI DSS Level 1 compliant with TLS 1.3 encryption on all connections.",
+    answer: "Yes. swipesblue is PCI DSS Level 1 compliant with TLS 1.3 encryption on all connections.",
   },
 ];
 

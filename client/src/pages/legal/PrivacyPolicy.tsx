@@ -86,9 +86,9 @@ export default function PrivacyPolicy() {
             Transaction data is shared with applicable payment networks (Visa, Mastercard, American Express, Discover, JCB) as required to process and settle transactions.
           </p>
 
-          <h3 className="text-lg font-medium text-swipes-black mt-6 mb-3">4.3. TriadBlue Ecosystem:</h3>
+          <h3 className="text-lg font-medium text-swipes-black mt-6 mb-3">4.3. triadblue Ecosystem:</h3>
           <p className="text-swipes-pro-gray text-base leading-relaxed mb-4">
-            swipesblue is part of the TriadBlue ecosystem. We may share limited account information with other TriadBlue platforms (hostsblue.com, businessblueprint.io, scansblue.com) if you use services across multiple platforms, and only as necessary to provide integrated services.
+            swipesblue is part of the triadblue ecosystem. We may share limited account information with other triadblue platforms (hostsblue.com, businessblueprint.io, scansblue.com) if you use services across multiple platforms, and only as necessary to provide integrated services.
           </p>
 
           <h3 className="text-lg font-medium text-swipes-black mt-6 mb-3">4.4. Service Providers:</h3>

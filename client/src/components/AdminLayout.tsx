@@ -27,9 +27,9 @@ const navigation = [
 ];
 
 const platformLinks = [
-  { name: "SwipesBlue.com", href: "/" },
-  { name: "HostsBlue.com", href: "https://hostsblue.com", external: true },
-  { name: "BusinessBlueprint.io", href: "https://businessblueprint.io", external: true },
+  { name: "swipesblue.com", href: "/" },
+  { name: "hostsblue.com", href: "https://hostsblue.com", external: true },
+  { name: "businessblueprint.io", href: "https://businessblueprint.io", external: true },
 ];
 
 interface AdminLayoutProps {
@@ -170,7 +170,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             Sign Out
           </Button>
           <div className="text-xs text-swipes-pro-gray space-y-1">
-            <div>SwipesBlue Admin</div>
+            <div>swipesblue admin</div>
             <div>Version 1.0.0</div>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="ml-3 font-semibold text-swipes-black">SwipesBlue Admin</span>
+          <span className="ml-3 font-semibold text-swipes-black">swipesblue admin</span>
         </div>
 
         <main className="p-6 lg:p-8" data-testid="main-content">

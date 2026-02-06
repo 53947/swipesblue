@@ -192,7 +192,7 @@ export default function Demo() {
             See what you can build
           </h1>
           <p className="text-xl text-gray-300 max-w-2xl mx-auto">
-            Explore our interactive demos to experience the full SwipesBlue platform.
+            Explore our interactive demos to experience the full swipesblue platform.
             All demos are fully functional with test data.
           </p>
         </div>
@@ -206,7 +206,7 @@ export default function Demo() {
               Watch payments flow in real-time
             </h2>
             <p className="text-lg text-swipes-pro-gray max-w-2xl mx-auto">
-              See how SwipesBlue processes payments securely and instantly
+              See how swipesblue processes payments securely and instantly
             </p>
           </div>
           <Card className="border border-gray-200 rounded-[7px] overflow-hidden">
@@ -273,7 +273,7 @@ export default function Demo() {
               </h2>
               <p className="text-lg text-swipes-pro-gray mb-8 leading-relaxed">
                 Our RESTful API works with any technology stack. Whether you're building with 
-                React, Vue, WordPress, or Shopify, SwipesBlue integrates seamlessly.
+                React, Vue, WordPress, or Shopify, swipesblue integrates seamlessly.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/dashboard/api-keys">

@@ -111,8 +111,8 @@ export default function AdminDashboard() {
   });
 
   const platformBreakdown = metrics?.platformBreakdown || [
-    { name: "BusinessBlueprint", value: 156000, color: "#3b82f6" },
-    { name: "HostsBlue", value: 124000, color: "#8b5cf6" },
+    { name: "businessblueprint", value: 156000, color: "#3b82f6" },
+    { name: "hostsblue", value: 124000, color: "#8b5cf6" },
   ];
 
   const merchantStats = metrics?.merchantStats || {
