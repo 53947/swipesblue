@@ -40,6 +40,10 @@ import SecurityDashboard from "@/pages/dashboard/SecurityDashboard";
 import AnalyticsDashboard from "@/pages/dashboard/AnalyticsDashboard";
 import SettingsPage from "@/pages/dashboard/SettingsPage";
 import Reporting from "@/pages/dashboard/Reporting";
+import CheckoutOptimizer from "@/pages/dashboard/CheckoutOptimizer";
+import CartSettings from "@/pages/dashboard/CartSettings";
+import MultiGateway from "@/pages/dashboard/MultiGateway";
+import CustomerPortal from "@/pages/dashboard/CustomerPortal";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -208,6 +212,34 @@ function Router() {
         {() => (
           <DashboardLayout>
             <SettingsPage />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/checkout-optimizer">
+        {() => (
+          <DashboardLayout>
+            <CheckoutOptimizer />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/cart-settings">
+        {() => (
+          <DashboardLayout>
+            <CartSettings />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/gateways">
+        {() => (
+          <DashboardLayout>
+            <MultiGateway />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/customer-portal">
+        {() => (
+          <DashboardLayout>
+            <CustomerPortal />
           </DashboardLayout>
         )}
       </Route>
