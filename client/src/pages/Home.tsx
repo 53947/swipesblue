@@ -1,19 +1,17 @@
-import { 
-  CreditCard, 
-  Code, 
-  LayoutDashboard, 
-  ShoppingCart, 
-  ArrowRight, 
-  Check, 
-  Shield, 
-  Zap, 
+import {
+  CreditCard,
+  Code,
+  ArrowRight,
+  Check,
+  Shield,
+  Zap,
   Users,
   Lock,
   RefreshCw,
   FileText,
-  Receipt,
   Link as LinkIcon,
-  BarChart3
+  Activity,
+  Server
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -21,9 +19,9 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 
 const stats = [
-  { value: "$2.4M+", label: "Processed" },
+  { value: "5.8B+", label: "Transactions Powered Annually" },
   { value: "99.99%", label: "Uptime" },
-  { value: "500+", label: "Merchants" },
+  { value: "200+", label: "Processor Integrations" },
   { value: "<100ms", label: "Response Time" },
 ];
 
@@ -149,78 +147,62 @@ const competitors = [
   { name: "Square", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
 ];
 
-const testimonials = [
-  {
-    quote: "SwipesBlue cut our payment processing fees by 20%. The virtual terminal is exactly what we needed.",
-    author: "Sarah Chen",
-    role: "Owner, Bloom Floral Studio",
-  },
-  {
-    quote: "The API integration took less than a day. Their documentation is clear and their support is responsive.",
-    author: "Marcus Johnson",
-    role: "Lead Developer, TechStart",
-  },
-  {
-    quote: "We process over $50K monthly through SwipesBlue. Reliable, fast, and the fees are unbeatable.",
-    author: "Elena Rodriguez",
-    role: "CEO, FreshBite Catering",
-  },
-];
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
       {/* Hero Section */}
       <section className="relative pt-16 pb-24 md:pt-24 md:pb-32" data-testid="section-hero">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="max-w-4xl mx-auto text-center">
-            {/* Eyebrow */}
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-swipes-blue-deep/5 rounded-[7px] mb-6">
-              <span className="w-2 h-2 bg-swipes-trusted-green rounded-[7px] animate-pulse" />
-              <span className="text-sm font-medium text-swipes-blue-deep">
-                Now processing $2.4M+ in transactions
-              </span>
+          <div className="grid lg:grid-cols-5 gap-12 items-center">
+            {/* Left 60% */}
+            <div className="lg:col-span-3">
+              <h1 className="text-5xl font-bold text-swipes-black leading-tight">
+                Built for businesses to grow
+              </h1>
+              <p className="text-xl font-semibold text-swipes-blue-deep mt-2">
+                Less fees. More revenue.
+              </p>
+              <p className="text-lg text-swipes-pro-gray mt-4 max-w-lg">
+                Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
+              </p>
+
+              <div className="flex flex-col sm:flex-row items-start gap-4 mt-8">
+                <Link href="/register" data-testid="link-hero-get-started">
+                  <Button
+                    size="lg"
+                    className="bg-swipes-blue-deep text-white rounded-[7px] px-6 py-3"
+                    data-testid="button-hero-get-started"
+                  >
+                    Start Accepting Payments
+                  </Button>
+                </Link>
+                <Link href="/developers" data-testid="link-hero-view-api-docs">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    className="border-2 border-swipes-teal text-swipes-teal rounded-[7px] px-6 py-3"
+                    data-testid="button-hero-contact-sales"
+                  >
+                    View API Docs
+                  </Button>
+                </Link>
+              </div>
+
+              <p className="text-sm text-swipes-pro-gray mt-4">
+                2.70% + $0.30 per transaction · No hidden fees
+              </p>
             </div>
 
-            {/* Main headline */}
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-gray-900 leading-tight mb-6">
-              Payment infrastructure for
-              <span className="block text-swipes-blue-deep">ambitious businesses</span>
-            </h1>
-
-            {/* Subheadline */}
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-8 leading-relaxed">
-              Accept payments, manage subscriptions, and grow your business with SwipesBlue. 
-              Lower fees, real-time analytics, and tools that scale with you.
-            </p>
-
-            {/* Rate highlight */}
-            <div className="inline-flex items-center gap-3 px-6 py-3 bg-gray-50 rounded-[7px] border border-gray-200 mb-10">
-              <span className="text-2xl md:text-3xl font-bold text-swipes-blue-deep">2.70% + $0.30</span>
-              <span className="text-gray-500">per transaction • No hidden fees</span>
-            </div>
-
-            {/* CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-              <Link href="/shoppingcart" data-testid="link-hero-get-started">
-                <Button 
-                  size="lg" 
-                  className="bg-swipes-blue-deep text-white rounded-[7px]"
-                  data-testid="button-hero-get-started"
-                >
-                  Start Accepting Payments
-                </Button>
-              </Link>
-              <Link href="/developers" data-testid="link-hero-view-api-docs">
-                <Button 
-                  size="lg" 
-                  variant="outline" 
-                  className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]"
-                  data-testid="button-hero-contact-sales"
-                >
-                  View API Docs
-                </Button>
-              </Link>
+            {/* Right 40% */}
+            <div className="lg:col-span-2 flex flex-col items-center">
+              <img
+                src="/marching_colors.png"
+                alt="Stand out from the crowd"
+                className="w-full max-w-md rounded-[7px]"
+              />
+              <p className="text-sm text-swipes-pro-gray italic mt-2">
+                Stand out from the crowd
+              </p>
             </div>
           </div>
         </div>
@@ -242,8 +224,8 @@ export default function Home() {
                 <span className="text-sm font-medium">99.99% Uptime</span>
               </div>
               <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-swipes-teal" />
-                <span className="text-sm font-medium">500+ Active Merchants</span>
+                <Server className="h-5 w-5 text-swipes-teal" />
+                <span className="text-sm font-medium">Built on NMI Platform</span>
               </div>
             </div>
           </div>
@@ -251,15 +233,15 @@ export default function Home() {
       </section>
 
       {/* Stats Bar */}
-      <section className="bg-gray-50 border-y border-gray-200 py-12" data-testid="section-stats">
+      <section className="bg-[#F6F9FC] border-y border-gray-200 py-12" data-testid="section-stats">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
-              <div key={index} className="text-center" data-testid={`stat-${stat.label.toLowerCase()}`}>
-                <div className="text-3xl md:text-4xl font-bold text-swipes-blue-deep">
+              <div key={index} className="text-center" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                <div className="text-3xl md:text-4xl font-bold text-swipes-black">
                   {stat.value}
                 </div>
-                <div className="text-sm text-gray-500 mt-1 font-medium">
+                <div className="text-sm text-swipes-pro-gray mt-1 font-medium">
                   {stat.label}
                 </div>
               </div>
@@ -286,7 +268,7 @@ export default function Home() {
               const Icon = feature.icon;
               const isLarge = feature.size === "large";
               return (
-                <Card 
+                <Card
                   key={feature.title}
                   className={`border border-gray-200 rounded-[7px] ${
                     isLarge ? "lg:col-span-2" : ""
@@ -341,7 +323,7 @@ export default function Home() {
               </thead>
               <tbody>
                 {competitors.map((competitor) => (
-                  <tr 
+                  <tr
                     key={competitor.name}
                     className={`border-b border-gray-100 ${competitor.isBest ? "bg-swipes-blue-deep/5" : ""}`}
                     data-testid={`row-${competitor.name.toLowerCase()}`}
@@ -401,11 +383,11 @@ export default function Home() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {pricingTiers.map((tier) => (
-              <Card 
+              <Card
                 key={tier.name}
                 className={`rounded-[7px] relative ${
-                  tier.highlight 
-                    ? "border-2 border-swipes-blue-deep shadow-lg" 
+                  tier.highlight
+                    ? "border-2 border-swipes-blue-deep shadow-card-hover"
                     : "border border-gray-200"
                 }`}
                 data-testid={`pricing-tier-${tier.name.toLowerCase()}`}
@@ -426,7 +408,7 @@ export default function Home() {
                     </div>
                     <p className="text-sm text-gray-500 mt-2">{tier.description}</p>
                   </div>
-                  
+
                   <ul className="space-y-3 mb-6">
                     {tier.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2">
@@ -437,10 +419,10 @@ export default function Home() {
                   </ul>
 
                   <Link href={tier.href} data-testid={`link-pricing-${tier.name.toLowerCase()}`}>
-                    <Button 
+                    <Button
                       className={`w-full rounded-[7px] ${
-                        tier.highlight 
-                          ? "bg-swipes-blue-deep text-white" 
+                        tier.highlight
+                          ? "bg-swipes-blue-deep text-white"
                           : "bg-white border-2 border-swipes-teal text-swipes-teal"
                       }`}
                       data-testid={`button-pricing-${tier.name.toLowerCase()}`}
@@ -456,108 +438,125 @@ export default function Home() {
       </section>
 
       {/* Developer Preview */}
-      <section className="py-20 md:py-28 bg-gray-900 text-white" data-testid="section-developer">
+      <section className="py-20 md:py-28 bg-white" data-testid="section-developer">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-[7px] mb-6">
-                <Code className="h-4 w-4" />
-                <span className="text-sm font-medium">Developer API</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-swipes-blue-deep/10 rounded-[7px] mb-6">
+                <Code className="h-4 w-4 text-swipes-blue-deep" />
+                <span className="text-sm font-medium text-swipes-blue-deep">Developer API</span>
               </div>
-              <h2 className="text-3xl md:text-4xl font-bold mb-6">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                 Built for developers
               </h2>
-              <p className="text-lg text-gray-400 mb-8 leading-relaxed">
-                Clean RESTful APIs, comprehensive documentation, and sandbox testing. 
+              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
+                Clean RESTful APIs, comprehensive documentation, and sandbox testing.
                 Integrate SwipesBlue payments into your platform in minutes.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/developers" data-testid="link-developer-read-docs">
-                  <Button className="bg-white text-gray-900 rounded-[7px]" data-testid="button-developer-read-docs">
+                  <Button className="bg-swipes-blue-deep text-white rounded-[7px]" data-testid="button-developer-read-docs">
                     Read the docs
                   </Button>
                 </Link>
                 <Link href="/dashboard/api-keys" data-testid="link-developer-api-keys">
-                  <Button variant="outline" className="border-white/30 text-white rounded-[7px]" data-testid="button-developer-api-keys">
+                  <Button variant="outline" className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]" data-testid="button-developer-api-keys">
                     Get API keys
                   </Button>
                 </Link>
               </div>
             </div>
 
-            <div className="bg-gray-800 rounded-[7px] p-6 overflow-x-auto">
-              <pre className="text-sm font-mono">
-                <code className="text-gray-300">
-{`curl https://api.swipesblue.com/v1/payments \\
-  -H "Authorization: Bearer sk_live_..." \\
+            <div className="bg-[#1a1a2e] rounded-[7px] p-6 overflow-x-auto">
+              <div className="mb-3">
+                <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">Request</span>
+              </div>
+              <pre className="text-sm font-mono text-gray-100">
+                <code>{`curl -X POST https://api.swipesblue.com/v1/payments/process \\
+  -H "Authorization: Bearer sb_live_xxxxxxxxxxxx" \\
   -H "Content-Type: application/json" \\
   -d '{
-    "amount": 2000,
-    "currency": "usd",
-    "customer": "cus_xyz123",
-    "description": "Order #1234"
-  }'`}
-                </code>
+    "merchantId": "your-merchant-id",
+    "amount": 49.99,
+    "currency": "USD",
+    "cardNumber": "4111111111111111",
+    "cardName": "Jane Smith",
+    "expiry": "1228",
+    "cvv": "123",
+    "customerEmail": "jane@example.com",
+    "description": "Order #1042"
+  }'`}</code>
+              </pre>
+              <div className="mt-5 pt-4 border-t border-gray-700">
+                <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">Response</span>
+              </div>
+              <pre className="text-sm font-mono text-gray-100 mt-3">
+                <code>{`{
+  "success": true,
+  "transactionId": "txn_a1b2c3d4e5f6",
+  "gatewayTransactionId": "3847261950",
+  "authCode": "A11234",
+  "amount": 49.99,
+  "currency": "USD",
+  "status": "success",
+  "cardBrand": "visa",
+  "cardLastFour": "1111",
+  "message": "Payment processed successfully"
+}`}</code>
               </pre>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials */}
-      <section className="py-20 md:py-28" data-testid="section-testimonials">
+      {/* Trust Badges */}
+      <section className="py-12 bg-[#F6F9FC]" data-testid="section-trust">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Trusted by growing businesses
-            </h2>
-            <p className="text-lg text-gray-600">
-              See why merchants choose SwipesBlue for their payment processing.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-8">
-            {testimonials.map((testimonial, index) => (
-              <Card key={index} className="border border-gray-200 rounded-[7px]" data-testid={`testimonial-${index}`}>
-                <CardContent className="p-6">
-                  <p className="text-gray-600 mb-6 italic">
-                    "{testimonial.quote}"
-                  </p>
-                  <div>
-                    <p className="font-semibold text-gray-900">{testimonial.author}</p>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
+            <div className="flex items-center gap-3">
+              <Shield className="h-6 w-6 text-swipes-blue-deep" />
+              <span className="text-sm text-swipes-pro-gray font-medium">PCI DSS Level 1 Compliant</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Lock className="h-6 w-6 text-swipes-blue-deep" />
+              <span className="text-sm text-swipes-pro-gray font-medium">256-bit TLS Encryption</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Activity className="h-6 w-6 text-swipes-blue-deep" />
+              <span className="text-sm text-swipes-pro-gray font-medium">99.99% Uptime SLA</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <Server className="h-6 w-6 text-swipes-blue-deep" />
+              <span className="text-sm text-swipes-pro-gray font-medium">Built on NMI's Platform</span>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 md:py-28 bg-swipes-blue-deep" data-testid="section-cta">
+      <section className="py-20 md:py-28 bg-[#F6F9FC]" data-testid="section-cta">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
             Ready to start accepting payments?
           </h2>
-          <p className="text-lg text-white/80 mb-8 max-w-xl mx-auto">
+          <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto">
             Create your account in minutes. Start processing payments today with transparent pricing and no hidden fees.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/shoppingcart" data-testid="link-cta-get-started">
-              <Button 
-                size="lg" 
-                className="bg-white text-swipes-blue-deep rounded-[7px]"
+            <Link href="/register" data-testid="link-cta-get-started">
+              <Button
+                size="lg"
+                className="bg-swipes-blue-deep text-white rounded-[7px]"
                 data-testid="button-cta-get-started"
               >
                 Get Started Free
               </Button>
             </Link>
             <Link href="/pricing" data-testid="link-cta-view-pricing">
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="border-2 border-white/30 text-white rounded-[7px]"
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]"
                 data-testid="button-cta-view-pricing"
               >
                 View Pricing
@@ -566,6 +565,15 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* NMI Footnote */}
+      <div className="bg-white border-t border-gray-100 py-4 px-8">
+        <p className="text-xs text-gray-400 text-center max-w-4xl mx-auto">
+          * Platform statistics reflect NMI's global payment gateway network, on which SwipesBlue is built.
+          Transaction volume, uptime, and processing figures are sourced from NMI's published platform data.
+          SwipesBlue is an independent platform powered by NMI's payment infrastructure.
+        </p>
+      </div>
     </div>
   );
 }

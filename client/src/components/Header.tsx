@@ -207,13 +207,21 @@ export default function Header() {
   };
 
   return (
-    <header 
-      className={`sticky top-0 z-50 bg-white transition-shadow duration-200 ${
-        scrolled ? "shadow-md" : "border-b border-gray-100"
-      }`}
-      data-testid="header"
-      ref={menuRef}
-    >
+    <>
+      {/* Backdrop blur overlay */}
+      {activeMenu && (
+        <div
+          className="fixed inset-0 top-16 bg-black/5 backdrop-blur-sm z-40 transition-all duration-300"
+          onClick={() => setActiveMenu(null)}
+        />
+      )}
+      <header
+        className={`sticky top-0 z-50 bg-white transition-shadow duration-200 ${
+          scrolled ? "shadow-md" : "border-b border-gray-100"
+        }`}
+        data-testid="header"
+        ref={menuRef}
+      >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center flex-shrink-0" data-testid="link-logo-home">
@@ -431,5 +439,6 @@ export default function Header() {
         </div>
       )}
     </header>
+    </>
   );
 }
