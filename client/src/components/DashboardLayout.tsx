@@ -21,7 +21,8 @@ import {
   Receipt,
   RefreshCw,
   Link as LinkIcon,
-  AlertTriangle
+  AlertTriangle,
+  FileText
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -45,6 +46,7 @@ const paymentsNavItems = [
   { name: "Customer Vault", href: "/dashboard/customer-vault", icon: Users },
   { name: "Dispute Management", href: "/dashboard/dispute-management", icon: AlertTriangle },
   { name: "Fraud Prevention", href: "/dashboard/fraud-prevention", icon: Shield },
+  { name: "Reporting", href: "/dashboard/reporting", icon: FileText },
 ];
 
 const ecommerceNavItems = [

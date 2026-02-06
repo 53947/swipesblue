@@ -39,6 +39,7 @@ import DisputeManagement from "@/pages/dashboard/DisputeManagement";
 import SecurityDashboard from "@/pages/dashboard/SecurityDashboard";
 import AnalyticsDashboard from "@/pages/dashboard/AnalyticsDashboard";
 import SettingsPage from "@/pages/dashboard/SettingsPage";
+import Reporting from "@/pages/dashboard/Reporting";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -193,6 +194,13 @@ function Router() {
         {() => (
           <DashboardLayout>
             <SecurityDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/reporting">
+        {() => (
+          <DashboardLayout>
+            <Reporting />
           </DashboardLayout>
         )}
       </Route>
