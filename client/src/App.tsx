@@ -46,6 +46,10 @@ import MultiGateway from "@/pages/dashboard/MultiGateway";
 import CustomerPortal from "@/pages/dashboard/CustomerPortal";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
+import TermsOfService from "@/pages/legal/TermsOfService";
+import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
+import CookiePolicy from "@/pages/legal/CookiePolicy";
+import AcceptableUsePolicy from "@/pages/legal/AcceptableUsePolicy";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
 
@@ -88,6 +92,12 @@ function Router() {
       <Route path="/orders" component={Orders} />
       <Route path="/brand-studio" component={BrandStudio} />
       <Route path="/transactions" component={Transactions} />
+
+      {/* Legal Pages */}
+      <Route path="/terms" component={TermsOfService} />
+      <Route path="/privacy" component={PrivacyPolicy} />
+      <Route path="/cookies" component={CookiePolicy} />
+      <Route path="/acceptable-use" component={AcceptableUsePolicy} />
 
       {/* Dashboard Routes - wrapped in DashboardLayout */}
       <Route path="/dashboard">

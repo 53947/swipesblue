@@ -40,8 +40,10 @@ const footerSections = {
       { label: "Help Center", href: "/" },
       { label: "Security", href: "/dashboard/security" },
       { label: "Compliance", href: "/dashboard/security" },
-      { label: "Privacy Policy", href: "/" },
-      { label: "Terms of Service", href: "/" },
+      { label: "Privacy Policy", href: "/privacy" },
+      { label: "Terms of Service", href: "/terms" },
+      { label: "Cookie Policy", href: "/cookies" },
+      { label: "Acceptable Use", href: "/acceptable-use" },
     ],
   },
 };
@@ -187,16 +189,20 @@ export default function Footer() {
             © 2026 swipesblue, inc. all rights reserved.
           </span>
           <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Link href="/" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-terms">
+            <Link href="/terms" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-terms">
               terms of service
             </Link>
             <span>·</span>
-            <Link href="/" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-privacy">
+            <Link href="/privacy" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-privacy">
               privacy policy
             </Link>
             <span>·</span>
-            <Link href="/" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-cookies">
+            <Link href="/cookies" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-cookies">
               cookie settings
+            </Link>
+            <span>·</span>
+            <Link href="/acceptable-use" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-acceptable-use">
+              acceptable use
             </Link>
           </div>
         </div>
