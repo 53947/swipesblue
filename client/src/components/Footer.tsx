@@ -114,11 +114,11 @@ const ecosystemPlatforms = [
     isInternal: false,
     descriptor: "parent company",
     renderBrand: () => (
-      <div className="flex items-center gap-1">
+      <div className="flex items-center">
         <span className="text-sm font-semibold" style={{ color: '#1844A6' }}>triad</span>
-        <img src="/images/logos/triadblue-icon.png" alt="" className="h-5 w-5" />
+        <img src="/images/logos/triadblue-icon.png" alt="" className="h-4 w-4 mx-[1px] relative top-[0.5px]" />
         <span className="text-sm font-semibold">
-          <span style={{ color: '#1844A6' }}>blue</span>
+          <span style={{ color: '#0000FF' }}>blue</span>
           <span style={{ color: '#1844A6' }}>.com</span>
         </span>
       </div>

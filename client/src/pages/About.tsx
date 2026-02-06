@@ -66,7 +66,7 @@ const ecosystemPlatforms = [
     renderName: () => (
       <span className="text-lg font-semibold">
         <span style={{ color: "#1844A6" }}>triad</span>
-        <span style={{ color: "#1844A6" }}>blue</span>
+        <span style={{ color: "#0000FF" }}>blue</span>
         <span style={{ color: "#1844A6" }}>.com</span>
       </span>
     ),
