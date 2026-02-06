@@ -128,70 +128,124 @@ const ecosystemPlatforms = [
 export default function Footer() {
   return (
     <footer className="bg-white border-t border-gray-200" data-testid="footer">
-      {/* Top Section — 4-Column Link Grid */}
+      {/* Top Section — 4-Column Link Grid with Dividers */}
       <div className="max-w-7xl mx-auto py-16 px-8">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-          {Object.values(footerSections).map((section) => (
-            <div key={section.title}>
-              <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
-                {section.title}
-              </h4>
-              <ul>
-                {section.links.map((link) => (
-                  <li key={link.label}>
-                    {link.href.startsWith("mailto:") ? (
-                      <a
-                        href={link.href}
-                        className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
-                        data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {link.label}
-                      </a>
-                    ) : (
-                      <Link
-                        href={link.href}
-                        className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
-                        data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-                      >
-                        {link.label}
-                      </Link>
-                    )}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Middle Section — TriadBlue Ecosystem Brand Signatures */}
-      <div className="border-t border-gray-200">
-        <div className="max-w-7xl mx-auto py-8 px-8">
-          <p className="text-xs text-swipes-pro-gray uppercase tracking-wider mb-4 text-center">
-            part of the triadblue ecosystem
-          </p>
-          <div className="flex flex-wrap justify-center gap-10">
-            {ecosystemPlatforms.map((platform) => (
-              <div key={platform.name} className="flex flex-col items-center gap-2">
-                {platform.isInternal ? (
-                  <Link href={platform.href} data-testid={`link-footer-platform-${platform.name}`}>
-                    {platform.renderBrand()}
-                  </Link>
-                ) : (
-                  <a
-                    href={platform.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    data-testid={`link-footer-platform-${platform.name}`}
+        <div className="grid grid-cols-2 md:grid-cols-4">
+          {/* Column 1: Products */}
+          <div className="pr-8 border-r border-gray-200">
+            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+              {footerSections.products.title}
+            </h4>
+            <ul>
+              {footerSections.products.links.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                    data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
-                    {platform.renderBrand()}
-                  </a>
-                )}
-                <span className="text-xs text-gray-400">
-                  {platform.descriptor}
-                </span>
-              </div>
-            ))}
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 2: Developers */}
+          <div className="px-8 border-r border-gray-200">
+            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+              {footerSections.developers.title}
+            </h4>
+            <ul>
+              {footerSections.developers.links.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                    data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 3: Company + Resources */}
+          <div className="px-8 border-r border-gray-200">
+            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+              {footerSections.company.title}
+            </h4>
+            <ul>
+              {footerSections.company.links.map((link) => (
+                <li key={link.label}>
+                  {link.href.startsWith("mailto:") ? (
+                    <a
+                      href={link.href}
+                      className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                      data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {link.label}
+                    </a>
+                  ) : (
+                    <Link
+                      href={link.href}
+                      className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                      data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                    >
+                      {link.label}
+                    </Link>
+                  )}
+                </li>
+              ))}
+            </ul>
+
+            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4 mt-6">
+              {footerSections.resources.title}
+            </h4>
+            <ul>
+              {footerSections.resources.links.map((link) => (
+                <li key={link.label}>
+                  <Link
+                    href={link.href}
+                    className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                    data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
+                  >
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Column 4: TriadBlue Ecosystem */}
+          <div className="pl-8">
+            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+              triadblue ecosystem
+            </h4>
+            <div className="flex flex-col gap-4">
+              {ecosystemPlatforms.map((platform) => (
+                <div key={platform.name}>
+                  {platform.isInternal ? (
+                    <Link href={platform.href} data-testid={`link-footer-platform-${platform.name}`}>
+                      {platform.renderBrand()}
+                    </Link>
+                  ) : (
+                    <a
+                      href={platform.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      data-testid={`link-footer-platform-${platform.name}`}
+                    >
+                      {platform.renderBrand()}
+                    </a>
+                  )}
+                  <span className="text-xs text-gray-400 ml-7">
+                    {platform.descriptor}
+                  </span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
