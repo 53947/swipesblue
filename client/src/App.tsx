@@ -36,6 +36,9 @@ import FraudPrevention from "@/pages/dashboard/FraudPrevention";
 import CustomerVault from "@/pages/dashboard/CustomerVault";
 import PaymentLinks from "@/pages/dashboard/PaymentLinks";
 import DisputeManagement from "@/pages/dashboard/DisputeManagement";
+import SecurityDashboard from "@/pages/dashboard/SecurityDashboard";
+import AnalyticsDashboard from "@/pages/dashboard/AnalyticsDashboard";
+import SettingsPage from "@/pages/dashboard/SettingsPage";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -182,39 +185,21 @@ function Router() {
       <Route path="/dashboard/analytics">
         {() => (
           <DashboardLayout>
-            <div className="p-8">
-              <h1 className="text-2xl font-bold text-swipes-black mb-2">Analytics</h1>
-              <p className="text-swipes-pro-gray">View detailed reports and insights about your business.</p>
-              <div className="mt-8 p-6 bg-white rounded-[7px] border border-gray-200">
-                <p className="text-swipes-pro-gray">Analytics dashboard coming soon.</p>
-              </div>
-            </div>
+            <AnalyticsDashboard />
           </DashboardLayout>
         )}
       </Route>
       <Route path="/dashboard/security">
         {() => (
           <DashboardLayout>
-            <div className="p-8">
-              <h1 className="text-2xl font-bold text-swipes-black mb-2">Security</h1>
-              <p className="text-swipes-pro-gray">Manage fraud prevention and security settings.</p>
-              <div className="mt-8 p-6 bg-white rounded-[7px] border border-gray-200">
-                <p className="text-swipes-pro-gray">Security settings coming soon.</p>
-              </div>
-            </div>
+            <SecurityDashboard />
           </DashboardLayout>
         )}
       </Route>
       <Route path="/dashboard/settings">
         {() => (
           <DashboardLayout>
-            <div className="p-8">
-              <h1 className="text-2xl font-bold text-swipes-black mb-2">Settings</h1>
-              <p className="text-swipes-pro-gray">Configure your account and preferences.</p>
-              <div className="mt-8 p-6 bg-white rounded-[7px] border border-gray-200">
-                <p className="text-swipes-pro-gray">Settings coming soon.</p>
-              </div>
-            </div>
+            <SettingsPage />
           </DashboardLayout>
         )}
       </Route>
