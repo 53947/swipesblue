@@ -147,9 +147,9 @@ export default function Home() {
       {/* Hero Section */}
       <section className="relative pt-16 pb-24 md:pt-24 md:pb-32" data-testid="section-hero">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-5 gap-12 items-center">
-            {/* Left 60% */}
-            <div className="lg:col-span-3">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left */}
+            <div>
               <h1 className="text-5xl font-bold text-swipes-black leading-tight">
                 Built for businesses to grow
               </h1>
@@ -187,12 +187,12 @@ export default function Home() {
               </p>
             </div>
 
-            {/* Right 40% */}
-            <div className="lg:col-span-2 flex flex-col items-center">
+            {/* Right */}
+            <div className="flex flex-col items-center">
               <img
                 src="/images/less_fees_more_revenue.jpg"
                 alt="Less fees, more revenue"
-                className="w-full max-w-md rounded-[7px] shadow-lg"
+                className="w-full rounded-[7px] shadow-lg"
               />
             </div>
           </div>
