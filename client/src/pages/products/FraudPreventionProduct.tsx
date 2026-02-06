@@ -1,127 +1,114 @@
-import { Shield, Lock, Activity, Eye, Zap, AlertTriangle } from "lucide-react";
+import { Shield, TrafficCone, Globe, ClipboardList, CreditCard, Monitor, BarChart3 } from "lucide-react";
 import ProductHero from "@/components/products/ProductHero";
+import BeforeAfter from "@/components/products/BeforeAfter";
 import FeatureCards from "@/components/products/FeatureCards";
 import DeepDiveSection from "@/components/products/DeepDiveSection";
-import HowItWorks from "@/components/products/HowItWorks";
+import EcosystemConnect from "@/components/products/EcosystemConnect";
 import ProductCTA from "@/components/products/ProductCTA";
-import { Check } from "lucide-react";
 
 export default function FraudPreventionProduct() {
   return (
     <div className="min-h-screen bg-white">
+      {/* SECTION 1: THE REALITY */}
       <ProductHero
-        badge="Fraud Prevention"
-        title="Stop fraud before it costs you"
-        subtitle="Real-time fraud detection with customizable rules, velocity checks, and machine learning scoring. Protect your revenue without blocking good customers."
+        badge="Security"
+        title="Protect your revenue without turning away good customers."
+        subtitle="Chargebacks cost you twice — you lose the sale AND pay a fee. But overly aggressive fraud blocking means you're declining legitimate customers who would have paid you. swipesblue's fraud prevention gives you real-time controls that stop the bad transactions while letting the good ones through. Configure your rules, and every payment is automatically screened."
         primaryCTA={{ label: "Get Protected", href: "/register" }}
         secondaryCTA={{ label: "View API Docs", href: "/developers" }}
         icon={Shield}
+        mockupLabel="Fraud Rules Dashboard"
       />
 
+      {/* SECTION 2: THE BEFORE & AFTER */}
+      <BeforeAfter
+        title="Fraud protection that actually makes sense"
+        before={[
+          "You get a chargeback notification. You've already shipped the product. The money is gone AND you owe a $15 fee.",
+          "You turned on 'strict' fraud settings. Now legitimate customers are getting declined and calling you, frustrated.",
+          "Someone ran 50 small charges against your gateway in one hour. You didn't notice until the statement.",
+        ]}
+        after={[
+          "AVS and CVV verification catch mismatched billing info before the charge goes through.",
+          "You set the rules that match YOUR business. Strict for high-risk products, relaxed for trusted customers.",
+          "Velocity controls flag when the same card is used too many times in an hour. Card testing stopped cold.",
+        ]}
+      />
+
+      {/* SECTION 3: WHAT YOU GET */}
       <FeatureCards
-        heading="Multi-layered protection"
-        subheading="Combine automated detection with custom rules to block fraud while approving legitimate transactions"
+        heading="What you get"
+        columns={4}
         cards={[
           {
-            icon: Zap,
-            title: "Real-Time Scoring",
-            description: "Every transaction is scored for fraud risk in real time. High-risk transactions are flagged or blocked automatically.",
-          },
-          {
-            icon: Activity,
-            title: "Velocity Checks",
-            description: "Detect rapid-fire transaction attempts from the same card, IP address, or device fingerprint.",
-          },
-          {
-            icon: Eye,
-            title: "Custom Rules Engine",
-            description: "Create your own fraud rules based on amount thresholds, geographic restrictions, card types, and more.",
-          },
-          {
-            icon: Lock,
-            title: "AVS & CVV Verification",
-            description: "Automatically verify billing addresses and CVV codes. Decline mismatches before they become chargebacks.",
-          },
-          {
-            icon: AlertTriangle,
-            title: "Chargeback Alerts",
-            description: "Get notified immediately when a dispute is filed. Respond faster to protect your merchant account.",
-          },
-          {
             icon: Shield,
-            title: "3D Secure Support",
-            description: "Shift liability for fraudulent transactions with 3D Secure authentication. Support for 3DS2 on all major card networks.",
+            title: "AVS + CVV Verification",
+            description: "Automatically verify billing address and card security code on every transaction. Mismatches are flagged or declined based on your rules.",
+          },
+          {
+            icon: TrafficCone,
+            title: "Velocity Controls",
+            description: "Set limits on how many transactions a card, IP address, or customer can run per hour. Stop card testing attacks before they start.",
+          },
+          {
+            icon: Globe,
+            title: "Geographic Controls",
+            description: "Block transactions from high-risk countries or regions. Or whitelist only the countries your customers come from.",
+          },
+          {
+            icon: ClipboardList,
+            title: "Blacklists & Whitelists",
+            description: "Block known bad actors by card number, email, or IP. Whitelist trusted customers so they're never flagged.",
           },
         ]}
+      />
+
+      {/* SECTION 4: SEE IT IN ACTION */}
+      <DeepDiveSection
+        heading="Your rules, your business"
+        description="Every business has different risk tolerance. A high-end retailer needs strict AVS matching. A food truck accepting QR payments doesn't. You configure the rules that make sense for how you sell."
+        imagePosition="left"
+        icon={Shield}
+        mockupLabel="Custom Rule Configuration"
       />
 
       <DeepDiveSection
-        heading="Protect your business, not just your transactions"
-        description="Fraud prevention isn't just about blocking bad transactions — it's about maintaining a healthy merchant account, reducing chargebacks, and keeping your processing rates low."
-        bulletPoints={[
-          "Reduce chargebacks by up to 80% with proactive detection",
-          "Maintain low dispute ratios to protect your merchant account",
-          "Block known fraudulent BINs and card ranges",
-          "Geographic restrictions to limit transactions by country",
-          "Device fingerprinting to identify repeat offenders",
-        ]}
-        icon={Shield}
+        heading="Real-time screening, zero manual review"
+        description="Every transaction runs through your rules automatically. Good transactions process normally. Suspicious ones are declined or flagged for your review. You set it once and the system handles the rest."
+        imagePosition="right"
+        icon={TrafficCone}
+        mockupLabel="Transaction Screening — Live View"
+        bgColor="gray"
       />
 
-      {/* Capabilities list */}
-      <section className="py-20 md:py-28 bg-[#F6F9FC]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#09080E] mb-4">
-              Comprehensive fraud tools
-            </h2>
-            <p className="text-lg text-[#4B5563] max-w-2xl mx-auto">
-              Layer multiple detection methods for maximum protection with minimal false positives.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-            {[
-              "Real-time transaction risk scoring",
-              "AVS (Address Verification Service)",
-              "CVV/CVC verification",
-              "Velocity and frequency limits",
-              "IP geolocation and blocking",
-              "BIN-level card validation",
-              "3D Secure 2.0 authentication",
-              "Custom rule builder with AND/OR logic",
-              "Transaction amount thresholds",
-              "Duplicate transaction detection",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3 p-3">
-                <Check className="h-5 w-5 text-[#1844A6] flex-shrink-0 mt-0.5" />
-                <span className="text-[#4B5563]">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <HowItWorks
-        heading="How it works"
-        steps={[
+      {/* SECTION 5: HOW IT CONNECTS */}
+      <EcosystemConnect
+        products={[
           {
-            title: "Configure your rules",
-            description: "Set up fraud rules, thresholds, and geographic restrictions from the dashboard. Start with our recommended defaults.",
+            icon: CreditCard,
+            name: "Checkout",
+            description: "Fraud rules run on every checkout transaction automatically. Customers don't notice. Bad actors get stopped.",
+            href: "/products/checkout",
           },
           {
-            title: "Transactions are screened",
-            description: "Every payment is checked against your rules and scored for risk in real time, adding less than 50ms to processing.",
+            icon: Monitor,
+            name: "Virtual Terminal",
+            description: "Phone orders are screened too. AVS verification works even when you're keying in the card manually.",
+            href: "/products/terminal",
           },
           {
-            title: "Take action automatically",
-            description: "High-risk transactions are declined, flagged for review, or approved based on your configured actions.",
+            icon: BarChart3,
+            name: "Reporting",
+            description: "See fraud attempts, decline rates, and chargeback trends. Know where your vulnerabilities are.",
+            href: "/products/fraud",
           },
         ]}
       />
 
+      {/* SECTION 7: CTA */}
       <ProductCTA
-        heading="Protect your revenue"
-        description="Set up fraud prevention in minutes. Start blocking fraudulent transactions while approving legitimate customers."
+        heading="Protect your business. Keep your customers."
+        description="Start free. Scale as you grow. No contracts."
         primaryCTA={{ label: "Get Started Free", href: "/register" }}
         secondaryCTA={{ label: "View Pricing", href: "/pricing" }}
       />

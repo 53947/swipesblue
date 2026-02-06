@@ -1,19 +1,33 @@
-import { Check } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
 interface DeepDiveSectionProps {
   heading: string;
   description: string;
-  bulletPoints: string[];
   imagePosition?: "left" | "right";
   icon?: LucideIcon;
+  mockupLabel?: string;
+  bgColor?: "white" | "gray";
 }
 
-export default function DeepDiveSection({ heading, description, bulletPoints, imagePosition = "right", icon: Icon }: DeepDiveSectionProps) {
+export default function DeepDiveSection({ heading, description, imagePosition = "right", icon: Icon, mockupLabel, bgColor = "white" }: DeepDiveSectionProps) {
   const visual = (
     <div className="flex items-center justify-center">
-      <div className="w-full aspect-video bg-[#F6F9FC] rounded-[7px] border border-gray-200 flex items-center justify-center">
-        {Icon && <Icon className="h-16 w-16 text-[#1844A6]/30" />}
+      <div className="w-full rounded-[7px] border border-gray-200 shadow-sm overflow-hidden">
+        <div className="bg-gray-100 border-b border-gray-200 px-3 py-2 flex items-center gap-2">
+          <div className="flex gap-1.5">
+            <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+            <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+            <div className="w-2.5 h-2.5 rounded-full bg-gray-300" />
+          </div>
+        </div>
+        <div className="bg-[#F6F9FC] aspect-[16/10] flex flex-col items-center justify-center p-6">
+          {Icon && <Icon className="h-12 w-12 text-[#1844A6]/25 mb-3" />}
+          {mockupLabel && (
+            <span className="text-xs text-[#1844A6]/40 font-medium text-center">
+              {mockupLabel}
+            </span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -23,22 +37,14 @@ export default function DeepDiveSection({ heading, description, bulletPoints, im
       <h2 className="text-3xl font-bold text-[#09080E] mb-4">
         {heading}
       </h2>
-      <p className="text-lg text-[#4B5563] mb-6 leading-relaxed">
+      <p className="text-lg text-[#4B5563] leading-relaxed">
         {description}
       </p>
-      <ul className="space-y-3">
-        {bulletPoints.map((point) => (
-          <li key={point} className="flex items-start gap-3">
-            <Check className="h-5 w-5 text-[#1844A6] flex-shrink-0 mt-0.5" />
-            <span className="text-[#4B5563]">{point}</span>
-          </li>
-        ))}
-      </ul>
     </div>
   );
 
   return (
-    <section className="py-20 md:py-28 bg-white">
+    <section className={`py-20 md:py-28 ${bgColor === "gray" ? "bg-[#F6F9FC]" : "bg-white"}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {imagePosition === "left" ? (

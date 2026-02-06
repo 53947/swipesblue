@@ -1,126 +1,114 @@
-import { CreditCard, Monitor, Globe, Clock, Shield, Zap } from "lucide-react";
+import { Globe, Zap, Users, Mail, CreditCard, FileText } from "lucide-react";
 import ProductHero from "@/components/products/ProductHero";
+import BeforeAfter from "@/components/products/BeforeAfter";
 import FeatureCards from "@/components/products/FeatureCards";
 import DeepDiveSection from "@/components/products/DeepDiveSection";
-import HowItWorks from "@/components/products/HowItWorks";
+import EcosystemConnect from "@/components/products/EcosystemConnect";
 import ProductCTA from "@/components/products/ProductCTA";
-import { Check } from "lucide-react";
 
 export default function VirtualTerminalProduct() {
   return (
     <div className="min-h-screen bg-white">
+      {/* SECTION 1: THE REALITY */}
       <ProductHero
-        badge="Virtual Terminal"
-        title="Process payments from any browser"
-        subtitle="Accept credit cards, debit cards, and ACH payments without any hardware. Key in transactions from your computer, tablet, or phone — anywhere you have internet."
+        badge="Payment Tools"
+        title="Your customer is on the phone. They want to pay. Let them."
+        subtitle="Not every transaction happens online. A customer calls to place an order. Someone walks in and wants to pay an invoice. A client mails a check and you need to record it. The virtual terminal lets you key in payments from any browser — no card reader, no hardware, no app. Just log in and process."
         primaryCTA={{ label: "Start Processing", href: "/register" }}
         secondaryCTA={{ label: "View API Docs", href: "/developers" }}
         icon={CreditCard}
+        mockupLabel="Virtual Terminal — Payment Form"
       />
 
+      {/* SECTION 2: THE BEFORE & AFTER */}
+      <BeforeAfter
+        title="How payment processing should feel"
+        before={[
+          "Customer wants to pay over the phone. You tell them to go to your website because you can't key in cards.",
+          "You bought a card reader that only works with one app. It's in a drawer somewhere.",
+          "A client mails a check. You deposit it, but there's no record tying it to their account.",
+        ]}
+        after={[
+          "Customer calls, you open the terminal, type in their card, hit charge. Done. Receipt emailed automatically.",
+          "No hardware. No app. Open your browser from any computer, tablet, or phone.",
+          "Record cash and check payments so every dollar is tracked, even the offline ones.",
+        ]}
+      />
+
+      {/* SECTION 3: WHAT YOU GET */}
       <FeatureCards
-        heading="Built for flexibility"
-        subheading="Everything you need to accept payments without a card reader"
+        heading="What you get"
+        columns={4}
         cards={[
           {
-            icon: Monitor,
-            title: "Browser-Based",
-            description: "No software to install, no hardware to buy. Process payments from any modern web browser on any device.",
-          },
-          {
             icon: Globe,
-            title: "Accept Payments Anywhere",
-            description: "Take phone orders, mail orders, or in-person payments. Process cards from wherever your business operates.",
-          },
-          {
-            icon: Clock,
-            title: "Real-Time Processing",
-            description: "Transactions process in under 100ms. Get instant authorization responses and real-time receipt delivery.",
-          },
-          {
-            icon: Shield,
-            title: "PCI-Compliant",
-            description: "All card data is encrypted and tokenized automatically. You never store raw card numbers on your systems.",
+            title: "Any Device, Any Browser",
+            description: "Process payments from your laptop, tablet, or phone. No special hardware. No software to install.",
           },
           {
             icon: Zap,
-            title: "Quick-Charge Mode",
-            description: "Save customer cards on file for repeat transactions. Charge returning customers in two clicks.",
+            title: "Instant Processing",
+            description: "Key in the card, hit charge, get a response in under 3 seconds. Authorize now, capture later if you need to.",
           },
           {
-            icon: CreditCard,
-            title: "Multi-Card Support",
-            description: "Accept Visa, Mastercard, American Express, Discover, and ACH bank transfers — all from one terminal.",
+            icon: Users,
+            title: "Vault Integration",
+            description: "Save the customer's card while you're processing. Next time they call, one click to charge them again.",
+          },
+          {
+            icon: Mail,
+            title: "Automatic Receipts",
+            description: "Customer gets an email receipt the moment the payment processes. You get the transaction logged in your dashboard.",
           },
         ]}
+      />
+
+      {/* SECTION 4: SEE IT IN ACTION */}
+      <DeepDiveSection
+        heading="Phone orders in 30 seconds"
+        description="Customer gives you their card number over the phone. You enter it, add the amount and a description, click charge. They get a receipt. You get paid. Total time: less than a minute."
+        imagePosition="left"
+        icon={CreditCard}
+        mockupLabel="Terminal — Processing a Phone Order"
       />
 
       <DeepDiveSection
-        heading="What you can do"
-        description="The swipesblue virtual terminal gives your team the tools to handle any payment scenario without specialized hardware."
-        bulletPoints={[
-          "Key in card-not-present transactions for phone and mail orders",
-          "Split payments across multiple cards or payment methods",
-          "Issue full or partial refunds directly from the terminal",
-          "Attach custom invoice numbers and order references",
-          "Email receipts automatically after every transaction",
-          "View real-time transaction history with search and filters",
-        ]}
-        icon={CreditCard}
+        heading="Every payment type, one screen"
+        description="Credit cards, debit cards, ACH bank transfers, even cash recording. Split payments. Partial refunds. Authorize and capture later. Everything from one terminal screen."
+        imagePosition="right"
+        icon={Globe}
+        mockupLabel="Terminal — Payment Methods"
+        bgColor="gray"
       />
 
-      {/* What you can do — expanded list */}
-      <section className="py-20 md:py-28 bg-[#F6F9FC]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#09080E] mb-4">
-              Every payment scenario, covered
-            </h2>
-            <p className="text-lg text-[#4B5563] max-w-2xl mx-auto">
-              From one-time charges to recurring payments, the virtual terminal handles it all.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-3xl mx-auto">
-            {[
-              "Process credit and debit card payments",
-              "Accept ACH/eCheck bank transfers",
-              "Charge saved cards from the Customer Vault",
-              "Set up recurring billing schedules",
-              "Issue refunds and void transactions",
-              "Add tax, tips, and surcharges",
-              "Attach notes and custom fields",
-              "Send email and SMS receipts",
-            ].map((item) => (
-              <div key={item} className="flex items-start gap-3 p-3">
-                <Check className="h-5 w-5 text-[#1844A6] flex-shrink-0 mt-0.5" />
-                <span className="text-[#4B5563]">{item}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <HowItWorks
-        heading="How it works"
-        steps={[
+      {/* SECTION 5: HOW IT CONNECTS */}
+      <EcosystemConnect
+        products={[
           {
-            title: "Log in to your dashboard",
-            description: "Access the virtual terminal from any browser. No software downloads or hardware setup required.",
+            icon: Users,
+            name: "Customer Vault",
+            description: "Save payment methods during terminal transactions. Next time, select the customer and charge with one click.",
+            href: "/products/customers",
           },
           {
-            title: "Enter payment details",
-            description: "Key in the card number, expiration, CVV, and amount. Add optional order details or customer info.",
+            icon: FileText,
+            name: "Invoicing",
+            description: "Processing a phone payment for an invoice? Link the terminal transaction directly to the open invoice.",
+            href: "/products/invoicing",
           },
           {
-            title: "Process and send receipt",
-            description: "Submit the payment for instant authorization. The customer receives an email receipt automatically.",
+            icon: CreditCard,
+            name: "Payment Links",
+            description: "Customer on the phone but can't give their card? Send them a payment link instead. They pay on their own time.",
+            href: "/products/payment-links",
           },
         ]}
       />
 
+      {/* SECTION 7: CTA */}
       <ProductCTA
-        heading="Ready to start processing?"
-        description="Create your account in minutes and start accepting payments from any browser. No hardware required."
+        heading="Your customers want to pay you. Make it easy for both of you."
+        description="Start free. Scale as you grow. No contracts."
         primaryCTA={{ label: "Get Started Free", href: "/register" }}
         secondaryCTA={{ label: "View Pricing", href: "/pricing" }}
       />

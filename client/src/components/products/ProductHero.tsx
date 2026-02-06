@@ -11,9 +11,10 @@ interface ProductHeroProps {
   primaryCTA: { label: string; href: string };
   secondaryCTA?: { label: string; href: string };
   icon?: LucideIcon;
+  mockupLabel?: string;
 }
 
-export default function ProductHero({ badge, title, subtitle, primaryCTA, secondaryCTA, icon: Icon }: ProductHeroProps) {
+export default function ProductHero({ badge, title, subtitle, primaryCTA, secondaryCTA, icon: Icon, mockupLabel }: ProductHeroProps) {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -49,8 +50,29 @@ export default function ProductHero({ badge, title, subtitle, primaryCTA, second
           </div>
 
           <div className="flex items-center justify-center">
-            <div className="w-full max-w-md aspect-square bg-[#F6F9FC] rounded-[7px] border border-gray-200 flex items-center justify-center">
-              {Icon && <Icon className="h-24 w-24 text-[#1844A6]/30" />}
+            <div className="w-full max-w-lg rounded-[7px] border border-gray-200 shadow-lg overflow-hidden">
+              {/* Browser frame */}
+              <div className="bg-gray-100 border-b border-gray-200 px-4 py-2.5 flex items-center gap-2">
+                <div className="flex gap-1.5">
+                  <div className="w-3 h-3 rounded-full bg-gray-300" />
+                  <div className="w-3 h-3 rounded-full bg-gray-300" />
+                  <div className="w-3 h-3 rounded-full bg-gray-300" />
+                </div>
+                <div className="flex-1 mx-3">
+                  <div className="bg-white rounded-[7px] px-3 py-1 text-xs text-gray-400 border border-gray-200">
+                    app.swipesblue.com
+                  </div>
+                </div>
+              </div>
+              {/* Mockup content area */}
+              <div className="bg-[#F6F9FC] aspect-[4/3] flex flex-col items-center justify-center p-8">
+                {Icon && <Icon className="h-16 w-16 text-[#1844A6]/25 mb-4" />}
+                {mockupLabel && (
+                  <span className="text-sm text-[#1844A6]/40 font-medium text-center">
+                    {mockupLabel}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
         </div>

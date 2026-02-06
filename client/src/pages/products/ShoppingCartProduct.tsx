@@ -1,107 +1,109 @@
-import { ShoppingCart, Package, Palette, BarChart3, Tag, Globe } from "lucide-react";
+import { ShoppingCart, RefreshCw, Smartphone, Tag, CreditCard, Package, Mail } from "lucide-react";
 import ProductHero from "@/components/products/ProductHero";
+import BeforeAfter from "@/components/products/BeforeAfter";
 import FeatureCards from "@/components/products/FeatureCards";
 import DeepDiveSection from "@/components/products/DeepDiveSection";
-import HowItWorks from "@/components/products/HowItWorks";
+import EcosystemConnect from "@/components/products/EcosystemConnect";
 import ProductCTA from "@/components/products/ProductCTA";
 
 export default function ShoppingCartProduct() {
   return (
     <div className="min-h-screen bg-white">
+      {/* SECTION 1: THE REALITY */}
       <ProductHero
-        badge="Shopping Cart"
-        title="Your online store, built in"
-        subtitle="A complete shopping cart with product management, inventory tracking, and a beautiful storefront. Sell physical goods, digital products, and services — all from your swipesblue account."
+        badge="E-Commerce Suite"
+        title="Your customers want to buy. Don't make it complicated."
+        subtitle="A shopping cart should be invisible. Your customer adds what they want, sees their total, and moves to checkout. No account creation walls. No confusing multi-page flows. No &quot;session expired&quot; errors. swipesblue's cart just works — on every device, every time."
         primaryCTA={{ label: "Start Selling", href: "/register" }}
-        secondaryCTA={{ label: "View Demo", href: "/shoppingcart" }}
+        secondaryCTA={{ label: "View E-Commerce Suite", href: "/products/ecommerce" }}
         icon={ShoppingCart}
+        mockupLabel="Shopping Cart — Desktop & Mobile"
       />
 
+      {/* SECTION 2: THE BEFORE & AFTER */}
+      <BeforeAfter
+        title="What your customers are dealing with"
+        before={[
+          "Customer adds items, gets distracted, comes back — cart is empty.",
+          "Cart doesn't work right on mobile. Customer gives up.",
+          "Discount code field is hidden or broken. Customer leaves.",
+        ]}
+        after={[
+          "Cart persists across sessions. They come back tomorrow, their items are still there.",
+          "Fully responsive. Looks great on a phone. Easy to tap, easy to pay.",
+          "Discount codes work the first time. Apply percentage or fixed amount. Customer feels rewarded.",
+        ]}
+      />
+
+      {/* SECTION 3: WHAT YOU GET */}
       <FeatureCards
-        heading="Everything you need to sell online"
-        subheading="From product catalog to checkout, the shopping cart handles the full commerce experience"
+        heading="What you get"
+        columns={3}
         cards={[
           {
-            icon: Package,
-            title: "Product Management",
-            description: "Add unlimited products with images, variants, descriptions, and pricing. Manage inventory levels in real time.",
+            icon: RefreshCw,
+            title: "Persistent Cart",
+            description: "Your customer's cart survives page refreshes, browser restarts, and second thoughts. When they come back, their items are waiting.",
           },
           {
-            icon: Palette,
-            title: "Brand Studio Integration",
-            description: "Customize your storefront with your colors, logo, and messaging. Match your brand across the entire experience.",
+            icon: Smartphone,
+            title: "Mobile-First",
+            description: "More than half your customers are shopping on their phone. The cart is built for thumbs, not cursors.",
           },
           {
             icon: Tag,
-            title: "Discounts & Promotions",
-            description: "Create coupon codes, percentage discounts, and time-limited sales. Apply discounts automatically at checkout.",
-          },
-          {
-            icon: BarChart3,
-            title: "Sales Analytics",
-            description: "Track sales volume, top products, conversion rates, and revenue trends. Make data-driven inventory decisions.",
-          },
-          {
-            icon: Globe,
-            title: "Embeddable",
-            description: "Embed your shopping cart on any website. Use our JavaScript SDK or simple iframe integration.",
-          },
-          {
-            icon: ShoppingCart,
-            title: "Abandoned Cart Recovery",
-            description: "Automatically email customers who leave items in their cart. Recover lost revenue with targeted reminders.",
+            title: "Smart Discounts",
+            description: "Create percentage or fixed-amount discount codes. Set expiration dates, usage limits, and minimum order amounts. Customers apply them at cart — no confusion.",
           },
         ]}
       />
 
+      {/* SECTION 4: SEE IT IN ACTION */}
       <DeepDiveSection
-        heading="Sell anything, anywhere"
-        description="The swipesblue shopping cart is built for small businesses that want to sell online without the complexity of a standalone e-commerce platform."
-        bulletPoints={[
-          "Sell physical goods, digital downloads, and services",
-          "Support for product variants (size, color, etc.)",
-          "Automatic tax calculation by region",
-          "Shipping rate configuration and label generation",
-          "Customer order history and account management",
-        ]}
-        icon={ShoppingCart}
-      />
-
-      <DeepDiveSection
-        heading="Integrated with your payments"
-        description="Unlike standalone cart solutions, the swipesblue shopping cart is natively integrated with your payment processing. No third-party plugins or gateway configurations required."
-        bulletPoints={[
-          "Payments process through your existing swipesblue account",
-          "Same low rates: 2.70% + $0.30 per transaction",
-          "Automatic receipt generation and email delivery",
-          "Refunds and disputes managed from one dashboard",
-          "Full transaction history linked to orders and customers",
-        ]}
+        heading="Built for real shopping behavior"
+        description="Your customers don't always buy on the first visit. They browse, compare, and come back. The swipesblue cart remembers what they wanted so they don't have to start over."
         imagePosition="left"
-        icon={Package}
+        icon={ShoppingCart}
+        mockupLabel="Persistent Cart — Return Visit"
       />
 
-      <HowItWorks
-        heading="How it works"
-        steps={[
+      <DeepDiveSection
+        heading="Embed it anywhere"
+        description="Drop the cart widget into your existing website with a single line of code. Or use swipesblue's hosted storefront. Either way, it's your brand, your experience."
+        imagePosition="right"
+        icon={Package}
+        mockupLabel="Embedded Cart Widget"
+        bgColor="gray"
+      />
+
+      {/* SECTION 5: HOW IT CONNECTS */}
+      <EcosystemConnect
+        products={[
           {
-            title: "Add your products",
-            description: "Upload images, set prices, and add descriptions. Organize products into categories.",
+            icon: CreditCard,
+            name: "Checkout",
+            description: "Seamless handoff. Cart totals, discounts, and customer info carry straight into checkout with zero re-entry.",
+            href: "/products/checkout",
           },
           {
-            title: "Share your store",
-            description: "Send customers to your hosted storefront or embed the cart on your existing website.",
+            icon: Package,
+            name: "Product Catalog",
+            description: "Cart pulls real-time pricing, inventory, and product details from your catalog. Always accurate.",
+            href: "/products/ecommerce",
           },
           {
-            title: "Manage orders",
-            description: "Track orders, process fulfillment, and manage inventory from your swipesblue dashboard.",
+            icon: Mail,
+            name: "Abandoned Cart Recovery",
+            description: "When a customer leaves items behind, swipesblue can automatically email them a reminder. (Starter plan+)",
+            href: "/products/ecommerce",
           },
         ]}
       />
 
+      {/* SECTION 7: CTA */}
       <ProductCTA
-        heading="Start your online store"
-        description="Set up your shopping cart and start selling in minutes. Free for up to 25 products."
+        heading="Give your customers a reason to finish what they started."
+        description="Start free. Scale as you grow. No contracts."
         primaryCTA={{ label: "Get Started Free", href: "/register" }}
         secondaryCTA={{ label: "View Pricing", href: "/pricing" }}
       />

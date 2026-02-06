@@ -1,76 +1,115 @@
-import { ShoppingCart, Shield, Palette, Smartphone, Globe, Zap } from "lucide-react";
+import { Zap, Palette, Lock, CreditCard, ShoppingCart, Users, Shield } from "lucide-react";
 import ProductHero from "@/components/products/ProductHero";
+import BeforeAfter from "@/components/products/BeforeAfter";
 import FeatureCards from "@/components/products/FeatureCards";
 import DeepDiveSection from "@/components/products/DeepDiveSection";
-import HowItWorks from "@/components/products/HowItWorks";
+import EcosystemConnect from "@/components/products/EcosystemConnect";
 import CodeBlock from "@/components/products/CodeBlock";
 import ProductCTA from "@/components/products/ProductCTA";
 
 export default function CheckoutProduct() {
   return (
     <div className="min-h-screen bg-white">
+      {/* SECTION 1: THE REALITY */}
       <ProductHero
-        badge="Online Checkout"
-        title="A checkout experience that converts"
-        subtitle="Hosted, PCI-compliant checkout pages that match your brand. Embed on your site or redirect customers — either way, you're covered."
-        primaryCTA={{ label: "Start Selling", href: "/register" }}
+        badge="E-Commerce Suite"
+        title="The moment of truth. Make it count."
+        subtitle="Your customer found what they wanted, added it to their cart, and clicked checkout. This is where most businesses lose them — complicated forms, forced account creation, slow loading, and payment errors. swipesblue checkout is one page, one click, and done. You get paid. They get their confirmation. Nobody gets frustrated."
+        primaryCTA={{ label: "Start Accepting Payments", href: "/register" }}
         secondaryCTA={{ label: "View API Docs", href: "/developers" }}
-        icon={ShoppingCart}
+        icon={CreditCard}
+        mockupLabel="Branded Checkout Page"
       />
 
+      {/* SECTION 2: THE BEFORE & AFTER */}
+      <BeforeAfter
+        title="Where sales go to die — and how to fix it"
+        before={[
+          "Customer has to create an account before they can pay. 23% of them leave.",
+          "Checkout is three pages. Each page is another chance to lose them.",
+          "Payment fails with a generic error. Customer doesn't know why. They don't try again.",
+        ]}
+        after={[
+          "Guest checkout by default. No account required. Enter payment info, click pay, done.",
+          "One page. Everything visible. No surprises between cart and confirmation.",
+          "Clear, specific error messages. 'Card declined — try another card' not 'Error 500.'",
+        ]}
+      />
+
+      {/* SECTION 3: WHAT YOU GET */}
       <FeatureCards
-        heading="Conversion-optimized checkout"
-        subheading="Every detail designed to reduce cart abandonment and increase completed purchases"
+        heading="What you get"
+        columns={4}
         cards={[
           {
-            icon: Palette,
-            title: "Fully Brandable",
-            description: "Customize colors, logos, and messaging with Brand Studio. Your checkout, your brand.",
-          },
-          {
-            icon: Smartphone,
-            title: "Mobile-First Design",
-            description: "Responsive layouts that look great on any device. Optimized input fields for mobile keyboards.",
-          },
-          {
-            icon: Shield,
-            title: "PCI DSS Level 1",
-            description: "Card data never touches your servers. Fully hosted checkout handles all PCI compliance for you.",
-          },
-          {
-            icon: Globe,
-            title: "Multi-Currency",
-            description: "Accept payments in USD and major currencies. Automatic currency display for international customers.",
-          },
-          {
             icon: Zap,
-            title: "One-Click Payments",
-            description: "Returning customers pay with saved cards from the Customer Vault. Fewer fields, faster checkout.",
+            title: "One-Page Checkout",
+            description: "Everything on a single page. Billing, shipping, payment method, order summary. Customer sees exactly what they're paying before they click.",
           },
           {
-            icon: ShoppingCart,
-            title: "Cart Integration",
-            description: "Works with the swipesblue Shopping Cart or your own. Pass line items for itemized receipts.",
+            icon: Palette,
+            title: "Fully Branded",
+            description: "Your logo, your colors, your domain. Customers feel like they're buying from YOU, not from some third-party payment page.",
+          },
+          {
+            icon: Lock,
+            title: "PCI Compliant",
+            description: "You never see or store raw card numbers. swipesblue handles all the security through NMI's PCI DSS Level 1 infrastructure. You just get paid.",
+          },
+          {
+            icon: CreditCard,
+            title: "Every Payment Method",
+            description: "Visa, Mastercard, Amex, Discover, ACH bank transfers, Apple Pay, Google Pay. Your customer pays however they want.",
           },
         ]}
+      />
+
+      {/* SECTION 4: SEE IT IN ACTION */}
+      <DeepDiveSection
+        heading="Hosted or embedded — your call"
+        description="Use swipesblue's hosted checkout page and we handle everything. Or drop the checkout form directly into your website with our JavaScript SDK. Both options are fully PCI compliant, because the sensitive data never touches your servers."
+        imagePosition="left"
+        icon={CreditCard}
+        mockupLabel="Hosted Checkout Page"
       />
 
       <DeepDiveSection
-        heading="Reduce abandonment, increase revenue"
-        description="Our checkout pages are designed to remove friction at every step. Customers complete purchases faster with fewer form fields and smart defaults."
-        bulletPoints={[
-          "Address auto-complete reduces typing by 60%",
-          "Real-time card validation catches errors before submission",
-          "Guest checkout — no forced account creation",
-          "Automatic tax calculation based on customer location",
-          "Support for discount codes and promotional pricing",
-        ]}
-        icon={ShoppingCart}
+        heading="Built-in fraud protection"
+        description="Every transaction runs through AVS verification, CVV checks, and velocity controls. 3D Secure authentication is built in for high-risk transactions. You reduce chargebacks without adding friction for good customers."
+        imagePosition="right"
+        icon={Shield}
+        mockupLabel="Fraud Rules Dashboard"
+        bgColor="gray"
       />
 
+      {/* SECTION 5: HOW IT CONNECTS */}
+      <EcosystemConnect
+        products={[
+          {
+            icon: ShoppingCart,
+            name: "Shopping Cart",
+            description: "Cart totals, items, and discount codes flow directly into checkout. Zero re-entry for your customer.",
+            href: "/products/cart",
+          },
+          {
+            icon: Users,
+            name: "Customer Vault",
+            description: "When a customer pays, their details can be saved to the vault for one-click future purchases.",
+            href: "/products/customers",
+          },
+          {
+            icon: Shield,
+            name: "Fraud Prevention",
+            description: "Your fraud rules run automatically on every checkout transaction. Block bad actors without blocking good customers.",
+            href: "/products/fraud",
+          },
+        ]}
+      />
+
+      {/* SECTION 6: FOR DEVELOPERS */}
       <CodeBlock
-        heading="Embed or redirect — your choice"
-        description="Drop in our JavaScript SDK to embed checkout inline, or redirect customers to a hosted page. Both approaches are fully PCI-compliant and require zero card data handling on your end."
+        heading="Build this into your workflow"
+        description="Drop in our JavaScript SDK to embed checkout inline, or redirect customers to a hosted page. Both approaches are fully PCI-compliant."
         code={`// Embed swipesblue checkout
 const checkout = SwipesBlue.createCheckout({
   apiKey: "sb_live_xxxxxxxxxxxx",
@@ -90,27 +129,10 @@ const checkout = SwipesBlue.createCheckout({
 checkout.mount("#checkout-container");`}
       />
 
-      <HowItWorks
-        heading="How it works"
-        steps={[
-          {
-            title: "Create a checkout session",
-            description: "Use the API or dashboard to create a checkout with your products, prices, and branding.",
-          },
-          {
-            title: "Customer completes payment",
-            description: "The customer enters their payment details on the secure, PCI-compliant checkout page.",
-          },
-          {
-            title: "Receive confirmation",
-            description: "Get a webhook notification and redirect the customer to your success page.",
-          },
-        ]}
-      />
-
+      {/* SECTION 7: CTA */}
       <ProductCTA
-        heading="Build your checkout today"
-        description="Start accepting payments with a secure, branded checkout experience in minutes."
+        heading="Stop losing sales at the finish line."
+        description="Start free. Scale as you grow. No contracts."
         primaryCTA={{ label: "Get Started Free", href: "/register" }}
         secondaryCTA={{ label: "View Pricing", href: "/pricing" }}
       />

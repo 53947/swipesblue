@@ -1,107 +1,127 @@
-import { ShoppingCart, CreditCard, Package, Shield, Zap, BarChart3, Check, ArrowRight } from "lucide-react";
+import { ShoppingCart, CreditCard, Package, ClipboardList, Users, FileText, Repeat, Shield, Check } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import ProductHero from "@/components/products/ProductHero";
+import BeforeAfter from "@/components/products/BeforeAfter";
 import FeatureCards from "@/components/products/FeatureCards";
-import HowItWorks from "@/components/products/HowItWorks";
+import DeepDiveSection from "@/components/products/DeepDiveSection";
+import EcosystemConnect from "@/components/products/EcosystemConnect";
 import ProductCTA from "@/components/products/ProductCTA";
 
 export default function EcommerceSuite() {
   return (
     <div className="min-h-screen bg-white">
+      {/* SECTION 1: THE REALITY */}
       <ProductHero
         badge="E-Commerce Suite"
-        title="Everything you need to sell online"
-        subtitle="A complete commerce platform with shopping cart, checkout, payment processing, and business tools — all in one account. No plugins, no third-party gateways, no complexity."
-        primaryCTA={{ label: "Start Selling", href: "/register" }}
-        secondaryCTA={{ label: "View Pricing", href: "/pricing" }}
+        title="You built your business. Now sell online without the headache."
+        subtitle="You shouldn't need WordPress, five plugins, a developer, and a separate payment processor just to sell your products online. swipesblue gives you the cart, checkout, product catalog, and order management in one place — with payment processing already built in. No piecing things together. No surprise fees from three different vendors."
+        primaryCTA={{ label: "Start Selling for Free", href: "/register" }}
+        secondaryCTA={{ label: "See Pricing", href: "/pricing" }}
         icon={ShoppingCart}
+        mockupLabel="Product Catalog Dashboard"
       />
 
+      {/* SECTION 2: THE BEFORE & AFTER */}
+      <BeforeAfter
+        title="Sound familiar?"
+        before={[
+          "You're paying $30/month for hosting, $79/year for an abandoned cart plugin, 2.9% + $0.30 to Stripe, and spending weekends updating WordPress.",
+          "Your cart lives on one platform, your payments on another, and your order tracking in a spreadsheet.",
+          "Every new plugin is another subscription, another login, another thing that can break.",
+        ]}
+        after={[
+          "One platform. One login. One fee. Cart, checkout, payments, orders — all connected.",
+          "You add products, your customers buy them, and the money shows up in your account. That's it.",
+          "No WordPress. No plugins. No developer required.",
+        ]}
+      />
+
+      {/* SECTION 3: WHAT YOU GET */}
       <FeatureCards
-        heading="One platform, complete commerce"
-        subheading="From product catalog to checkout to recurring billing — everything works together out of the box"
+        heading="What you get"
+        columns={4}
         cards={[
           {
             icon: ShoppingCart,
             title: "Shopping Cart",
-            description: "Product catalog, inventory management, and a beautiful storefront. Sell physical goods, digital products, and services.",
+            description: "Your customers add items, see their totals, and check out — all on your branded storefront. Works on mobile, tablet, and desktop.",
           },
           {
             icon: CreditCard,
-            title: "Secure Checkout",
-            description: "Hosted, PCI-compliant checkout pages. Mobile-optimized, fully brandable, and designed to convert.",
+            title: "One-Page Checkout",
+            description: "No multi-step forms. No account creation required. Customer enters their info, clicks pay, done. Conversion rates go up when friction goes down.",
           },
           {
             icon: Package,
+            title: "Product Catalog",
+            description: "Add products with images, descriptions, pricing, variants, and inventory tracking. Import from CSV or add them one at a time.",
+          },
+          {
+            icon: ClipboardList,
             title: "Order Management",
-            description: "Track orders from purchase to fulfillment. Manage shipping, returns, and customer communication.",
-          },
-          {
-            icon: Shield,
-            title: "Fraud Protection",
-            description: "Real-time fraud scoring, velocity checks, and custom rules. Protect revenue without blocking good customers.",
-          },
-          {
-            icon: Zap,
-            title: "Payment Processing",
-            description: "Accept cards, ACH, and digital wallets at 2.70% + $0.30. No hidden fees, no monthly minimums.",
-          },
-          {
-            icon: BarChart3,
-            title: "Analytics & Reporting",
-            description: "Track sales, revenue, conversion rates, and top products. Make data-driven decisions about your business.",
+            description: "Every order from payment to fulfillment, in one place. Automated receipts, refund processing, shipping status, and customer communication.",
           },
         ]}
       />
 
-      {/* Product links */}
-      <section className="py-20 md:py-28 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-[#09080E] mb-4">
-              Explore the suite
-            </h2>
-            <p className="text-lg text-[#4B5563] max-w-2xl mx-auto">
-              Each tool works on its own or together as a complete commerce solution.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[
-              { title: "Shopping Cart", description: "Product catalog and online storefront", href: "/products/cart", icon: ShoppingCart },
-              { title: "Online Checkout", description: "Hosted, PCI-compliant checkout pages", href: "/products/checkout", icon: CreditCard },
-              { title: "Virtual Terminal", description: "Process payments from any browser", href: "/products/terminal", icon: CreditCard },
-              { title: "Payment Links", description: "Shareable payment URLs", href: "/products/payment-links", icon: Zap },
-              { title: "Invoicing", description: "Professional invoices with payment links", href: "/products/invoicing", icon: Package },
-              { title: "Recurring Billing", description: "Subscriptions and payment plans", href: "/products/billing", icon: BarChart3 },
-              { title: "Customer Vault", description: "Secure payment method storage", href: "/products/customers", icon: Shield },
-              { title: "Fraud Prevention", description: "Real-time fraud detection and rules", href: "/products/fraud", icon: Shield },
-            ].map((product) => {
-              const Icon = product.icon;
-              return (
-                <Link key={product.title} href={product.href}>
-                  <div className="border border-gray-200 rounded-[7px] p-6 hover:border-[#1844A6]/30 hover:shadow-md transition-all cursor-pointer h-full">
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 bg-[#1844A6]/10 rounded-[7px] flex items-center justify-center flex-shrink-0">
-                        <Icon className="h-5 w-5 text-[#1844A6]" />
-                      </div>
-                      <div>
-                        <h3 className="text-base font-semibold text-[#09080E] mb-1">{product.title}</h3>
-                        <p className="text-sm text-[#4B5563]">{product.description}</p>
-                        <span className="text-[#1844A6] font-medium text-sm mt-3 inline-flex items-center">
-                          Learn more <ArrowRight className="ml-1 h-4 w-4" />
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      </section>
+      {/* SECTION 4: SEE IT IN ACTION */}
+      <DeepDiveSection
+        heading="Add your products in minutes"
+        description="Upload your catalog with photos, descriptions, and pricing. Set up variants like size and color. Track inventory automatically — when stock gets low, you'll know before your customers do."
+        imagePosition="left"
+        icon={Package}
+        mockupLabel="Product Catalog — Add/Edit Screen"
+      />
 
-      {/* Comparison table */}
+      <DeepDiveSection
+        heading="Your customers shop on your terms"
+        description="Whether you embed the storefront on your existing website or use a hosted shop page, your customers see YOUR brand. Your logo, your colors, your domain. They never know swipesblue is behind the scenes."
+        imagePosition="right"
+        icon={ShoppingCart}
+        mockupLabel="Branded Storefront"
+        bgColor="gray"
+      />
+
+      <DeepDiveSection
+        heading="Orders tracked from click to delivery"
+        description="When a customer buys, you see it immediately. Order details, payment confirmation, shipping status, and customer info — all in your dashboard. Issue refunds with one click if you need to."
+        imagePosition="left"
+        icon={ClipboardList}
+        mockupLabel="Order Management Dashboard"
+      />
+
+      {/* SECTION 5: HOW IT CONNECTS */}
+      <EcosystemConnect
+        products={[
+          {
+            icon: Users,
+            name: "Customer Vault",
+            description: "Every customer who buys from your store is automatically saved. Charge them again with one click.",
+            href: "/products/customers",
+          },
+          {
+            icon: FileText,
+            name: "Invoicing",
+            description: "Need to bill a customer manually? Create an invoice right from their order history.",
+            href: "/products/invoicing",
+          },
+          {
+            icon: Repeat,
+            name: "Recurring Billing",
+            description: "Sell subscriptions and memberships alongside one-time products. Same cart, same checkout.",
+            href: "/products/billing",
+          },
+          {
+            icon: Shield,
+            name: "Fraud Prevention",
+            description: "Every checkout transaction is automatically screened. Block bad actors without blocking good customers.",
+            href: "/products/fraud",
+          },
+        ]}
+      />
+
+      {/* SECTION 6: COMPARISON TABLE */}
       <section className="py-20 md:py-28 bg-[#F6F9FC]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -109,71 +129,49 @@ export default function EcommerceSuite() {
               How swipesblue compares
             </h2>
             <p className="text-lg text-[#4B5563]">
-              See how swipesblue stacks up against other e-commerce platforms.
+              See what you're actually paying across platforms.
             </p>
           </div>
           <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden shadow-sm">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left py-4 px-6 font-semibold text-[#09080E]">Feature</th>
-                  <th className="text-center py-4 px-6 font-semibold text-[#1844A6]">swipesblue</th>
-                  <th className="text-center py-4 px-6 font-semibold text-[#09080E]">WooCommerce</th>
-                  <th className="text-center py-4 px-6 font-semibold text-[#09080E]">Shopify</th>
-                </tr>
-              </thead>
-              <tbody>
-                {[
-                  { feature: "Built-in payment processing", swipes: true, woo: false, shopify: true },
-                  { feature: "No third-party gateway needed", swipes: true, woo: false, shopify: false },
-                  { feature: "Virtual terminal included", swipes: true, woo: false, shopify: false },
-                  { feature: "Recurring billing included", swipes: true, woo: false, shopify: false },
-                  { feature: "Customer vault included", swipes: true, woo: false, shopify: false },
-                  { feature: "Invoicing included", swipes: true, woo: false, shopify: false },
-                  { feature: "No hosting required", swipes: true, woo: false, shopify: true },
-                  { feature: "Fraud prevention included", swipes: true, woo: false, shopify: true },
-                  { feature: "Transaction fee", swipes: "2.70% + $0.30", woo: "Varies by gateway", shopify: "2.90% + $0.30" },
-                  { feature: "Monthly fee (starter)", swipes: "$0", woo: "$0 + hosting", shopify: "$39/mo" },
-                ].map((row) => (
-                  <tr key={row.feature} className="border-b border-gray-100">
-                    <td className="py-4 px-6 text-sm text-[#4B5563] font-medium">{row.feature}</td>
-                    <td className="py-4 px-6 text-center">
-                      {typeof row.swipes === "boolean" ? (
-                        row.swipes ? (
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )
-                      ) : (
-                        <span className="text-sm font-semibold text-[#1844A6]">{row.swipes}</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      {typeof row.woo === "boolean" ? (
-                        row.woo ? (
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )
-                      ) : (
-                        <span className="text-sm text-[#4B5563]">{row.woo}</span>
-                      )}
-                    </td>
-                    <td className="py-4 px-6 text-center">
-                      {typeof row.shopify === "boolean" ? (
-                        row.shopify ? (
-                          <Check className="h-5 w-5 text-green-600 mx-auto" />
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )
-                      ) : (
-                        <span className="text-sm text-[#4B5563]">{row.shopify}</span>
-                      )}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left py-4 px-6 font-semibold text-[#09080E]">Feature</th>
+                    <th className="text-center py-4 px-6 font-semibold text-[#1844A6]">swipesblue</th>
+                    <th className="text-center py-4 px-6 font-semibold text-[#09080E]">WooCommerce</th>
+                    <th className="text-center py-4 px-6 font-semibold text-[#09080E]">Shopify</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {([
+                    { feature: "Cart + Checkout", swipes: "Included", woo: "Free (requires WordPress + hosting)", shopify: "$39+/mo" },
+                    { feature: "Payment processing", swipesCheck: true, woo: "Stripe/PayPal required", shopify: "Built in" },
+                    { feature: "Transaction fees", swipes: "2.70% + $0.30", woo: "2.90% + $0.30 (Stripe)", shopify: "2.90% + $0.30" },
+                    { feature: "Hosting required", swipes: "Included", woo: "$30+/mo separate", shopify: "Included" },
+                    { feature: "Plugins required", swipes: "None", woo: "10+ average", shopify: "Varies" },
+                    { feature: "Abandoned cart recovery", swipes: "Starter plan", woo: "$79-399/yr plugin", shopify: "$79+/mo plan" },
+                  ] as Array<{ feature: string; swipes?: string; swipesCheck?: boolean; woo: string; shopify: string }>).map((row) => (
+                    <tr key={row.feature} className="border-b border-gray-100">
+                      <td className="py-4 px-6 text-sm text-[#4B5563] font-medium">{row.feature}</td>
+                      <td className="py-4 px-6 text-center">
+                        {row.swipesCheck ? (
+                          <Check className="h-5 w-5 text-green-600 mx-auto" />
+                        ) : (
+                          <span className="text-sm font-semibold text-[#1844A6]">{row.swipes}</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="text-sm text-[#4B5563]">{row.woo}</span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <span className="text-sm text-[#4B5563]">{row.shopify}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           <div className="text-center mt-8">
             <Link href="/pricing">
@@ -185,27 +183,10 @@ export default function EcommerceSuite() {
         </div>
       </section>
 
-      <HowItWorks
-        heading="Get started in minutes"
-        steps={[
-          {
-            title: "Create your account",
-            description: "Sign up for free and configure your store settings, branding, and payment preferences.",
-          },
-          {
-            title: "Add your products",
-            description: "Upload products, set prices, and organize your catalog. Import from CSV or add manually.",
-          },
-          {
-            title: "Start selling",
-            description: "Share your store link, embed on your website, or use payment links. Payments process automatically.",
-          },
-        ]}
-      />
-
+      {/* SECTION 7: CTA */}
       <ProductCTA
-        heading="Ready to sell online?"
-        description="Get a complete e-commerce platform with built-in payment processing. Start free, scale as you grow."
+        heading="Ready to sell online without the complexity?"
+        description="Start free. Scale as you grow. No contracts."
         primaryCTA={{ label: "Get Started Free", href: "/register" }}
         secondaryCTA={{ label: "View Pricing", href: "/pricing" }}
       />
