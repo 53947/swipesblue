@@ -55,10 +55,10 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
         title: "Accept Payments",
         subtitle: "In-person and online payment solutions",
         items: [
-          { icon: CreditCard, label: "Virtual Terminal", description: "Process cards in your browser", href: "/demo" },
+          { icon: CreditCard, label: "Virtual Terminal", description: "Process cards in your browser", href: "/dashboard/virtual-terminal" },
           { icon: ShoppingCart, label: "Online Checkout", description: "Secure hosted checkout pages", href: "/checkout" },
-          { icon: LinkIcon, label: "Payment Links", description: "Shareable payment URLs", href: "/demo" },
-          { icon: Receipt, label: "Invoicing", description: "Send professional invoices", href: "/demo" },
+          { icon: LinkIcon, label: "Payment Links", description: "Shareable payment URLs", href: "/dashboard/payment-links" },
+          { icon: Receipt, label: "Invoicing", description: "Send professional invoices", href: "/dashboard/invoicing" },
         ],
         ctaLabel: "View all payment features",
         ctaHref: "/demo"
@@ -67,8 +67,8 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
         title: "Manage Business",
         subtitle: "Tools to run your business",
         items: [
-          { icon: Users, label: "Customer Vault", description: "Store payment methods securely", href: "/demo" },
-          { icon: RefreshCw, label: "Recurring Billing", description: "Subscriptions & payment plans", href: "/demo" },
+          { icon: Users, label: "Customer Vault", description: "Store payment methods securely", href: "/dashboard/customer-vault" },
+          { icon: RefreshCw, label: "Recurring Billing", description: "Subscriptions & payment plans", href: "/dashboard/recurring-billing" },
           { icon: Package, label: "Product Catalog", description: "Manage products & inventory", href: "/products", badge: "FREE" },
           { icon: Palette, label: "Brand Studio", description: "White-label your checkout", href: "/brand-studio", badge: "PRO" },
         ],
@@ -79,10 +79,10 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
         title: "Protect & Analyze",
         subtitle: "Security and insights",
         items: [
-          { icon: Lock, label: "Fraud Prevention", description: "Real-time fraud detection", href: "/demo" },
-          { icon: BarChart3, label: "Analytics", description: "Revenue & performance insights", href: "/dashboard" },
+          { icon: Lock, label: "Fraud Prevention", description: "Real-time fraud detection", href: "/dashboard/fraud-prevention" },
+          { icon: BarChart3, label: "Analytics", description: "Revenue & performance insights", href: "/dashboard/analytics" },
           { icon: Shield, label: "Security Suite", description: "PCI compliance & encryption", href: "/demo" },
-          { icon: Activity, label: "Dispute Management", description: "Handle chargebacks efficiently", href: "/demo" },
+          { icon: Activity, label: "Dispute Management", description: "Handle chargebacks efficiently", href: "/dashboard/dispute-management" },
         ],
         ctaLabel: "View security features",
         ctaHref: "/demo"

@@ -1,11 +1,11 @@
 import { Link, useLocation } from "wouter";
-import { 
-  LayoutDashboard, 
-  Package, 
-  ShoppingCart, 
-  CreditCard, 
-  Mail, 
-  Palette, 
+import {
+  LayoutDashboard,
+  Package,
+  ShoppingCart,
+  CreditCard,
+  Mail,
+  Palette,
   BarChart3,
   Shield,
   Settings,
@@ -17,7 +17,11 @@ import {
   Layers,
   Zap,
   Lock,
-  Code
+  Code,
+  Receipt,
+  RefreshCw,
+  Link as LinkIcon,
+  AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,9 +32,19 @@ interface DashboardLayoutProps {
 
 const mainNavItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Virtual Terminal", href: "/dashboard/virtual-terminal", icon: CreditCard },
   { name: "Products", href: "/dashboard/products", icon: Package },
   { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { name: "Transactions", href: "/dashboard/transactions", icon: CreditCard },
+];
+
+const paymentsNavItems = [
+  { name: "Invoicing", href: "/dashboard/invoicing", icon: Receipt },
+  { name: "Recurring Billing", href: "/dashboard/recurring-billing", icon: RefreshCw },
+  { name: "Payment Links", href: "/dashboard/payment-links", icon: LinkIcon },
+  { name: "Customer Vault", href: "/dashboard/customer-vault", icon: Users },
+  { name: "Dispute Management", href: "/dashboard/dispute-management", icon: AlertTriangle },
+  { name: "Fraud Prevention", href: "/dashboard/fraud-prevention", icon: Shield },
 ];
 
 const ecommerceNavItems = [
@@ -150,6 +164,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <NavLink key={item.name} item={item} />
             ))}
           </nav>
+
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* Payments Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+              Payments
+            </h4>
+            <nav className="space-y-1">
+              {paymentsNavItems.map((item) => (
+                <NavLink key={item.name} item={item} />
+              ))}
+            </nav>
+          </div>
 
           {/* Divider */}
           <div className="border-t border-gray-200" />

@@ -29,6 +29,13 @@ import Webhooks from "@/pages/admin/Webhooks";
 import RateManagement from "@/pages/admin/RateManagement";
 import NotFound from "@/pages/not-found";
 import ProductDetail from "@/pages/ProductDetail";
+import VirtualTerminal from "@/pages/dashboard/VirtualTerminal";
+import Invoicing from "@/pages/dashboard/Invoicing";
+import RecurringBilling from "@/pages/dashboard/RecurringBilling";
+import FraudPrevention from "@/pages/dashboard/FraudPrevention";
+import CustomerVault from "@/pages/dashboard/CustomerVault";
+import PaymentLinks from "@/pages/dashboard/PaymentLinks";
+import DisputeManagement from "@/pages/dashboard/DisputeManagement";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
@@ -100,6 +107,55 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Transactions />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/virtual-terminal">
+        {() => (
+          <DashboardLayout>
+            <VirtualTerminal />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/invoicing">
+        {() => (
+          <DashboardLayout>
+            <Invoicing />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/recurring-billing">
+        {() => (
+          <DashboardLayout>
+            <RecurringBilling />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/fraud-prevention">
+        {() => (
+          <DashboardLayout>
+            <FraudPrevention />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/customer-vault">
+        {() => (
+          <DashboardLayout>
+            <CustomerVault />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/payment-links">
+        {() => (
+          <DashboardLayout>
+            <PaymentLinks />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/dispute-management">
+        {() => (
+          <DashboardLayout>
+            <DisputeManagement />
           </DashboardLayout>
         )}
       </Route>
