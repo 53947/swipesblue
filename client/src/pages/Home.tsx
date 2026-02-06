@@ -151,7 +151,7 @@ export default function Home() {
             {/* Left */}
             <div>
               <h1 className="text-5xl font-bold text-swipes-black leading-tight">
-                Built for business<br />to grow
+                Built for businesses<br />to grow
               </h1>
               <p className="text-xl font-semibold text-swipes-blue-deep mt-2">
                 Less fees. More revenue.
