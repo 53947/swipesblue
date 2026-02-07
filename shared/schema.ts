@@ -87,15 +87,85 @@ export const products = pgTable("products", {
   stock: integer("stock").notNull().default(0),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
+  // Prompt 13: Merchant catalog columns
+  merchantId: varchar("merchant_id"),
+  sku: text("sku"),
+  compareAtPrice: decimal("compare_at_price", { precision: 10, scale: 2 }),
+  tags: json("tags").$type<string[]>(),
+  images: json("images").$type<string[]>(),
+  weight: decimal("weight", { precision: 10, scale: 2 }),
+  weightUnit: text("weight_unit").default("lb"),
+  taxClass: text("tax_class"),
+  seoTitle: text("seo_title"),
+  seoDescription: text("seo_description"),
+  status: text("status").default("active"), // 'active' | 'draft' | 'archived'
+  lowStockThreshold: integer("low_stock_threshold").default(5),
+  trackInventory: boolean("track_inventory").default(true),
+  metadata: json("metadata"),
+  updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const insertProductSchema = createInsertSchema(products).omit({
   id: true,
   createdAt: true,
+  updatedAt: true,
 });
 
 export type InsertProduct = z.infer<typeof insertProductSchema>;
 export type Product = typeof products.$inferSelect;
+
+// Product Variants table (Prompt 13)
+export const productVariants = pgTable("product_variants", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  productId: varchar("product_id")
+    .notNull()
+    .references(() => products.id, { onDelete: "cascade" }),
+  variantType: text("variant_type").notNull(), // e.g., 'size', 'color'
+  variantValue: text("variant_value").notNull(), // e.g., 'Large', 'Red'
+  price: decimal("price", { precision: 10, scale: 2 }),
+  sku: text("sku"),
+  stockQuantity: integer("stock_quantity").default(0),
+  weight: decimal("weight", { precision: 10, scale: 2 }),
+  status: text("status").default("active"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertProductVariantSchema = createInsertSchema(productVariants).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProductVariant = z.infer<typeof insertProductVariantSchema>;
+export type ProductVariant = typeof productVariants.$inferSelect;
+
+// Product Imports table (Prompt 13)
+export const productImports = pgTable("product_imports", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  fileName: text("file_name").notNull(),
+  fileSize: integer("file_size"),
+  totalRows: integer("total_rows").default(0),
+  importedCount: integer("imported_count").default(0),
+  updatedCount: integer("updated_count").default(0),
+  skippedCount: integer("skipped_count").default(0),
+  errorCount: integer("error_count").default(0),
+  errors: json("errors").$type<Array<{ row: number; message: string }>>(),
+  status: text("status").notNull().default("pending"), // 'pending' | 'processing' | 'completed' | 'failed'
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  completedAt: timestamp("completed_at"),
+});
+
+export const insertProductImportSchema = createInsertSchema(productImports).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertProductImport = z.infer<typeof insertProductImportSchema>;
+export type ProductImport = typeof productImports.$inferSelect;
 
 // Cart items table
 export const cartItems = pgTable("cart_items", {

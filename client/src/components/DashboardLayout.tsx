@@ -22,10 +22,14 @@ import {
   RefreshCw,
   Link as LinkIcon,
   AlertTriangle,
-  FileText
+  FileText,
+  Plus,
+  Table2,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useMerchantAuth } from "@/hooks/use-merchant-auth";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -34,7 +38,6 @@ interface DashboardLayoutProps {
 const mainNavItems = [
   { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
   { name: "Virtual Terminal", href: "/dashboard/virtual-terminal", icon: CreditCard },
-  { name: "Products", href: "/dashboard/products", icon: Package },
   { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { name: "Transactions", href: "/dashboard/transactions", icon: CreditCard },
 ];
@@ -50,6 +53,7 @@ const paymentsNavItems = [
 ];
 
 const ecommerceNavItems = [
+  { name: "swipesblue Store", href: "/dashboard/products", icon: Package, badge: "FREE" },
   { name: "Shopping Cart", href: "/cart", icon: ShoppingCart, badge: "FREE" },
   { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: Mail, badge: "PRO", locked: true },
   { name: "Brand Studio", href: "/dashboard/brand-studio", icon: Palette, badge: "PRO", locked: true },
@@ -82,6 +86,7 @@ const platformLinks = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [location] = useLocation();
+  const { tier, canAccess } = useMerchantAuth();
 
   const NavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; badge?: string; locked?: boolean } }) => {
     const isActive = location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href));
@@ -166,6 +171,56 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               <NavLink key={item.name} item={item} />
             ))}
           </nav>
+
+          {/* Divider */}
+          <div className="border-t border-gray-200" />
+
+          {/* Your Catalog Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+              Your Catalog
+            </h4>
+            <nav className="space-y-1">
+              <NavLink item={{ name: "All Products", href: "/dashboard/catalog", icon: Package }} />
+              <NavLink item={{ name: "Add Product", href: "/dashboard/catalog/create", icon: Plus }} />
+              <Link href="/dashboard/catalog/bulk-edit">
+                <div
+                  className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer hover-elevate ${
+                    location === "/dashboard/catalog/bulk-edit"
+                      ? "bg-swipes-blue-deep text-white"
+                      : "text-swipes-pro-gray"
+                  }`}
+                >
+                  <Table2 className="h-4 w-4" />
+                  <span className="flex-1">Bulk Editor</span>
+                  {!canAccess("Starter") && (
+                    <>
+                      <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">STARTER+</Badge>
+                      <Lock className="h-3 w-3" />
+                    </>
+                  )}
+                </div>
+              </Link>
+              <Link href="/dashboard/catalog/import">
+                <div
+                  className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer hover-elevate ${
+                    location === "/dashboard/catalog/import"
+                      ? "bg-swipes-blue-deep text-white"
+                      : "text-swipes-pro-gray"
+                  }`}
+                >
+                  <Upload className="h-4 w-4" />
+                  <span className="flex-1">Import / Export</span>
+                  {!canAccess("Starter") && (
+                    <>
+                      <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">STARTER+</Badge>
+                      <Lock className="h-3 w-3" />
+                    </>
+                  )}
+                </div>
+              </Link>
+            </nav>
+          </div>
 
           {/* Divider */}
           <div className="border-t border-gray-200" />
@@ -284,7 +339,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="border-t border-gray-200 p-4">
           <div className="mb-3">
             <span className="text-xs text-swipes-pro-gray">Your Plan:</span>
-            <span className="ml-2 text-sm font-semibold text-swipes-black">FREE</span>
+            <span className="ml-2 text-sm font-semibold text-swipes-black">{tier}</span>
           </div>
           <Link href="/pricing">
             <Button 

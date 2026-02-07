@@ -36,6 +36,10 @@ import {
   type InsertAddOnProduct,
   type MerchantAccount,
   type InsertMerchantAccount,
+  type ProductVariant,
+  type InsertProductVariant,
+  type ProductImport,
+  type InsertProductImport,
   users,
   products,
   cartItems,
@@ -54,8 +58,10 @@ import {
   ratesAuditLog,
   addOnProducts,
   merchantAccounts,
+  productVariants,
+  productImports,
 } from "@shared/schema";
-import { eq, and, desc, like, or, lte } from "drizzle-orm";
+import { eq, and, desc, like, or, lte, sql, count, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
 
 export interface IStorage {
@@ -191,6 +197,25 @@ export interface IStorage {
   createAddOnProduct(addOn: InsertAddOnProduct): Promise<AddOnProduct>;
   updateAddOnProduct(id: string, addOn: Partial<InsertAddOnProduct>): Promise<AddOnProduct | undefined>;
   deleteAddOnProduct(id: string): Promise<boolean>;
+
+  // Merchant Product Catalog operations (Prompt 13)
+  getProductsByMerchant(merchantId: string): Promise<Product[]>;
+  getProductCountByMerchant(merchantId: string): Promise<number>;
+  getProductBySkuAndMerchant(sku: string, merchantId: string): Promise<Product | undefined>;
+  bulkUpdateProducts(updates: Array<{ id: string; data: Partial<InsertProduct> }>): Promise<Product[]>;
+  bulkDeleteProducts(ids: string[]): Promise<boolean>;
+  bulkCreateProducts(products: InsertProduct[]): Promise<Product[]>;
+
+  // Product Variant operations (Prompt 13)
+  getVariantsByProduct(productId: string): Promise<ProductVariant[]>;
+  createVariant(variant: InsertProductVariant): Promise<ProductVariant>;
+  updateVariant(id: string, data: Partial<InsertProductVariant>): Promise<ProductVariant | undefined>;
+  deleteVariant(id: string): Promise<boolean>;
+
+  // Product Import operations (Prompt 13)
+  createProductImport(record: InsertProductImport): Promise<ProductImport>;
+  updateProductImport(id: string, data: Partial<InsertProductImport>): Promise<ProductImport | undefined>;
+  getProductImportsByMerchant(merchantId: string): Promise<ProductImport[]>;
 }
 
 export class DbStorage implements IStorage {
@@ -895,6 +920,115 @@ export class DbStorage implements IStorage {
   async deleteAddOnProduct(id: string): Promise<boolean> {
     const result = await db.delete(addOnProducts).where(eq(addOnProducts.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Merchant Product Catalog operations (Prompt 13)
+  async getProductsByMerchant(merchantId: string): Promise<Product[]> {
+    return await db
+      .select()
+      .from(products)
+      .where(eq(products.merchantId, merchantId))
+      .orderBy(desc(products.createdAt));
+  }
+
+  async getProductCountByMerchant(merchantId: string): Promise<number> {
+    const result = await db
+      .select({ count: count() })
+      .from(products)
+      .where(and(
+        eq(products.merchantId, merchantId),
+        or(eq(products.status, "active"), eq(products.status, "draft"))
+      ));
+    return result[0]?.count ?? 0;
+  }
+
+  async getProductBySkuAndMerchant(sku: string, merchantId: string): Promise<Product | undefined> {
+    const result = await db
+      .select()
+      .from(products)
+      .where(and(eq(products.sku, sku), eq(products.merchantId, merchantId)));
+    return result[0];
+  }
+
+  async bulkUpdateProducts(updates: Array<{ id: string; data: Partial<InsertProduct> }>): Promise<Product[]> {
+    return await db.transaction(async (tx) => {
+      const results: Product[] = [];
+      for (const { id, data } of updates) {
+        const result = await tx
+          .update(products)
+          .set({ ...data, updatedAt: new Date() })
+          .where(eq(products.id, id))
+          .returning();
+        if (result[0]) results.push(result[0]);
+      }
+      return results;
+    });
+  }
+
+  async bulkDeleteProducts(ids: string[]): Promise<boolean> {
+    if (ids.length === 0) return true;
+    const result = await db
+      .update(products)
+      .set({ status: "archived", updatedAt: new Date() })
+      .where(inArray(products.id, ids))
+      .returning();
+    return result.length > 0;
+  }
+
+  async bulkCreateProducts(productList: InsertProduct[]): Promise<Product[]> {
+    if (productList.length === 0) return [];
+    return await db.insert(products).values(productList).returning();
+  }
+
+  // Product Variant operations (Prompt 13)
+  async getVariantsByProduct(productId: string): Promise<ProductVariant[]> {
+    return await db
+      .select()
+      .from(productVariants)
+      .where(eq(productVariants.productId, productId))
+      .orderBy(productVariants.createdAt);
+  }
+
+  async createVariant(variant: InsertProductVariant): Promise<ProductVariant> {
+    const result = await db.insert(productVariants).values(variant).returning();
+    return result[0];
+  }
+
+  async updateVariant(id: string, data: Partial<InsertProductVariant>): Promise<ProductVariant | undefined> {
+    const result = await db
+      .update(productVariants)
+      .set(data)
+      .where(eq(productVariants.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async deleteVariant(id: string): Promise<boolean> {
+    const result = await db.delete(productVariants).where(eq(productVariants.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Product Import operations (Prompt 13)
+  async createProductImport(record: InsertProductImport): Promise<ProductImport> {
+    const result = await db.insert(productImports).values(record).returning();
+    return result[0];
+  }
+
+  async updateProductImport(id: string, data: Partial<InsertProductImport>): Promise<ProductImport | undefined> {
+    const result = await db
+      .update(productImports)
+      .set(data)
+      .where(eq(productImports.id, id))
+      .returning();
+    return result[0];
+  }
+
+  async getProductImportsByMerchant(merchantId: string): Promise<ProductImport[]> {
+    return await db
+      .select()
+      .from(productImports)
+      .where(eq(productImports.merchantId, merchantId))
+      .orderBy(desc(productImports.createdAt));
   }
 }
 

@@ -46,6 +46,10 @@ import MultiGateway from "@/pages/dashboard/MultiGateway";
 import CustomerPortal from "@/pages/dashboard/CustomerPortal";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
+import MerchantProducts from "@/pages/dashboard/MerchantProducts";
+import ProductForm from "@/pages/dashboard/ProductForm";
+import BulkEditor from "@/pages/dashboard/BulkEditor";
+import ImportExport from "@/pages/dashboard/ImportExport";
 import TermsOfService from "@/pages/legal/TermsOfService";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import CookiePolicy from "@/pages/legal/CookiePolicy";
@@ -286,6 +290,43 @@ function Router() {
         {() => (
           <DashboardLayout>
             <Webhooks />
+          </DashboardLayout>
+        )}
+      </Route>
+
+      {/* Merchant Catalog Routes (Prompt 13) */}
+      <Route path="/dashboard/catalog">
+        {() => (
+          <DashboardLayout>
+            <MerchantProducts />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/catalog/create">
+        {() => (
+          <DashboardLayout>
+            <ProductForm />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/catalog/:id/edit">
+        {() => (
+          <DashboardLayout>
+            <ProductForm />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/catalog/bulk-edit">
+        {() => (
+          <DashboardLayout>
+            <BulkEditor />
+          </DashboardLayout>
+        )}
+      </Route>
+      <Route path="/dashboard/catalog/import">
+        {() => (
+          <DashboardLayout>
+            <ImportExport />
           </DashboardLayout>
         )}
       </Route>

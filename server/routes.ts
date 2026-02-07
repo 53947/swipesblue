@@ -2427,6 +2427,524 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ========================================
+  // Merchant Product Catalog API (Prompt 13)
+  // ========================================
+
+  // Tier limit constants
+  const TIER_PRODUCT_LIMITS: Record<string, number> = {
+    FREE: 25,
+    Starter: 500,
+    Pro: Infinity,
+    Enterprise: Infinity,
+  };
+
+  const TIER_HIERARCHY: Record<string, number> = {
+    FREE: 0,
+    Starter: 1,
+    Pro: 2,
+    Enterprise: 3,
+  };
+
+  // Middleware to protect merchant routes
+  function requireMerchant(req: any, res: any, next: any) {
+    if ((req.session as any)?.isMerchant === true && (req.session as any)?.merchantId) {
+      next();
+    } else {
+      res.status(401).json({ error: "Unauthorized", message: "Merchant authentication required" });
+    }
+  }
+
+  // Helper to check if merchant tier meets minimum requirement
+  function meetsMinTier(currentTier: string, requiredTier: string): boolean {
+    return (TIER_HIERARCHY[currentTier] || 0) >= (TIER_HIERARCHY[requiredTier] || 0);
+  }
+
+  // Middleware to require minimum tier
+  function requireTier(minTier: string) {
+    return (req: any, res: any, next: any) => {
+      const tier = (req.session as any)?.merchantTier || "FREE";
+      if (meetsMinTier(tier, minTier)) {
+        next();
+      } else {
+        res.status(403).json({
+          error: "Upgrade Required",
+          message: `This feature requires ${minTier} tier or higher`,
+          requiredTier: minTier,
+          currentTier: tier,
+        });
+      }
+    };
+  }
+
+  // GET /api/merchant/products — List merchant products with optional filters
+  app.get("/api/merchant/products", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const allProducts = await storage.getProductsByMerchant(merchantId);
+
+      // Apply optional filters
+      const { status, category, search } = req.query;
+      let filtered = allProducts;
+
+      if (status && typeof status === "string" && status !== "all") {
+        filtered = filtered.filter(p => p.status === status);
+      }
+      if (category && typeof category === "string" && category !== "all") {
+        filtered = filtered.filter(p => p.category === category);
+      }
+      if (search && typeof search === "string") {
+        const q = search.toLowerCase();
+        filtered = filtered.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          (p.sku && p.sku.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q))
+        );
+      }
+
+      res.json(filtered);
+    } catch (error) {
+      console.error("Error fetching merchant products:", error);
+      res.status(500).json({ message: "Failed to fetch products" });
+    }
+  });
+
+  // GET /api/merchant/products/count — Product count for limit display
+  app.get("/api/merchant/products/count", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const count = await storage.getProductCountByMerchant(merchantId);
+      const tier = (req.session as any).merchantTier || "FREE";
+      const limit = TIER_PRODUCT_LIMITS[tier] || 25;
+      res.json({ count, limit, tier });
+    } catch (error) {
+      console.error("Error fetching product count:", error);
+      res.status(500).json({ message: "Failed to fetch product count" });
+    }
+  });
+
+  // GET /api/merchant/products/export — Export products as CSV/JSON/XML
+  app.get("/api/merchant/products/export", requireMerchant, requireTier("Starter"), async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const { format = "csv", status: filterStatus } = req.query;
+
+      let allProducts = await storage.getProductsByMerchant(merchantId);
+      if (filterStatus && typeof filterStatus === "string" && filterStatus !== "all") {
+        allProducts = allProducts.filter(p => p.status === filterStatus);
+      }
+
+      if (format === "json") {
+        const tier = (req.session as any).merchantTier || "FREE";
+        if (!meetsMinTier(tier, "Pro")) {
+          return res.status(403).json({ error: "JSON export requires Pro tier or higher" });
+        }
+        res.setHeader("Content-Disposition", "attachment; filename=products.json");
+        res.setHeader("Content-Type", "application/json");
+        return res.json(allProducts);
+      }
+
+      if (format === "xml") {
+        const tier = (req.session as any).merchantTier || "FREE";
+        if (!meetsMinTier(tier, "Pro")) {
+          return res.status(403).json({ error: "XML export requires Pro tier or higher" });
+        }
+        let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<products>\n';
+        for (const p of allProducts) {
+          xml += `  <product>\n`;
+          xml += `    <name>${escapeXml(p.name)}</name>\n`;
+          xml += `    <sku>${escapeXml(p.sku || "")}</sku>\n`;
+          xml += `    <price>${p.price}</price>\n`;
+          xml += `    <stock>${p.stock}</stock>\n`;
+          xml += `    <status>${p.status || "active"}</status>\n`;
+          xml += `    <category>${escapeXml(p.category || "")}</category>\n`;
+          xml += `    <description>${escapeXml(p.description || "")}</description>\n`;
+          xml += `  </product>\n`;
+        }
+        xml += '</products>';
+        res.setHeader("Content-Disposition", "attachment; filename=products.xml");
+        res.setHeader("Content-Type", "application/xml");
+        return res.send(xml);
+      }
+
+      // Default: CSV
+      const Papa = (await import("papaparse")).default;
+      const csvData = allProducts.map(p => ({
+        name: p.name,
+        sku: p.sku || "",
+        price: p.price,
+        compare_at_price: p.compareAtPrice || "",
+        category: p.category || "",
+        stock: p.stock,
+        status: p.status || "active",
+        description: p.description || "",
+        weight: p.weight || "",
+        weight_unit: p.weightUnit || "",
+        tax_class: p.taxClass || "",
+        seo_title: p.seoTitle || "",
+        seo_description: p.seoDescription || "",
+        tags: Array.isArray(p.tags) ? (p.tags as string[]).join(", ") : "",
+        images: Array.isArray(p.images) ? (p.images as string[]).join(", ") : "",
+      }));
+      const csv = Papa.unparse(csvData);
+      res.setHeader("Content-Disposition", "attachment; filename=products.csv");
+      res.setHeader("Content-Type", "text/csv");
+      return res.send(csv);
+    } catch (error) {
+      console.error("Error exporting products:", error);
+      res.status(500).json({ message: "Failed to export products" });
+    }
+  });
+
+  // GET /api/merchant/products/template — Download CSV import template
+  app.get("/api/merchant/products/template", requireMerchant, requireTier("Starter"), async (_req, res) => {
+    try {
+      const Papa = (await import("papaparse")).default;
+      const templateCsv = Papa.unparse({
+        fields: ["name", "sku", "price", "compare_at_price", "category", "stock", "status", "description", "weight", "weight_unit", "tax_class", "seo_title", "seo_description", "tags", "images"],
+        data: [
+          ["Example Product", "SKU-001", "29.99", "39.99", "Electronics", "100", "active", "A great product", "1.5", "lb", "standard", "Example Product - Buy Now", "Great product at a great price", "tag1, tag2", "https://example.com/image1.jpg"]
+        ],
+      });
+      res.setHeader("Content-Disposition", "attachment; filename=product_import_template.csv");
+      res.setHeader("Content-Type", "text/csv");
+      res.send(templateCsv);
+    } catch (error) {
+      console.error("Error generating template:", error);
+      res.status(500).json({ message: "Failed to generate template" });
+    }
+  });
+
+  // GET /api/merchant/products/import/history — Import history
+  app.get("/api/merchant/products/import/history", requireMerchant, requireTier("Starter"), async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const imports = await storage.getProductImportsByMerchant(merchantId);
+      res.json(imports);
+    } catch (error) {
+      console.error("Error fetching import history:", error);
+      res.status(500).json({ message: "Failed to fetch import history" });
+    }
+  });
+
+  // GET /api/merchant/products/:id — Single product + variants
+  app.get("/api/merchant/products/:id", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const product = await storage.getProduct(req.params.id);
+
+      if (!product || product.merchantId !== merchantId) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const variants = await storage.getVariantsByProduct(product.id);
+      res.json({ ...product, variants });
+    } catch (error) {
+      console.error("Error fetching merchant product:", error);
+      res.status(500).json({ message: "Failed to fetch product" });
+    }
+  });
+
+  // POST /api/merchant/products — Create product (enforce tier limit)
+  app.post("/api/merchant/products", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const tier = (req.session as any).merchantTier || "FREE";
+      const limit = TIER_PRODUCT_LIMITS[tier] || 25;
+
+      // Check tier limit
+      const currentCount = await storage.getProductCountByMerchant(merchantId);
+      if (currentCount >= limit) {
+        return res.status(403).json({
+          error: "Product limit reached",
+          message: `Your ${tier} plan allows up to ${limit === Infinity ? "unlimited" : limit} products. Upgrade to add more.`,
+          currentCount,
+          limit,
+        });
+      }
+
+      const productData = {
+        ...req.body,
+        merchantId,
+        status: req.body.status || "active",
+      };
+
+      const product = await storage.createProduct(productData);
+      res.status(201).json(product);
+    } catch (error) {
+      console.error("Error creating merchant product:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid product data", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create product" });
+    }
+  });
+
+  // PATCH /api/merchant/products/:id — Update single product (verify ownership)
+  app.patch("/api/merchant/products/:id", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const existing = await storage.getProduct(req.params.id);
+
+      if (!existing || existing.merchantId !== merchantId) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const product = await storage.updateProduct(req.params.id, { ...req.body, updatedAt: new Date() });
+      res.json(product);
+    } catch (error) {
+      console.error("Error updating merchant product:", error);
+      res.status(500).json({ message: "Failed to update product" });
+    }
+  });
+
+  // DELETE /api/merchant/products/:id — Soft-delete (verify ownership)
+  app.delete("/api/merchant/products/:id", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const existing = await storage.getProduct(req.params.id);
+
+      if (!existing || existing.merchantId !== merchantId) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      await storage.updateProduct(req.params.id, { status: "archived" });
+      res.json({ message: "Product deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting merchant product:", error);
+      res.status(500).json({ message: "Failed to delete product" });
+    }
+  });
+
+  // POST /api/merchant/products/bulk-update — Bulk update (Starter+)
+  app.post("/api/merchant/products/bulk-update", requireMerchant, requireTier("Starter"), async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const { updates } = req.body;
+
+      if (!Array.isArray(updates) || updates.length === 0) {
+        return res.status(400).json({ message: "Updates array is required" });
+      }
+
+      // Verify ownership of all products
+      for (const { id } of updates) {
+        const product = await storage.getProduct(id);
+        if (!product || product.merchantId !== merchantId) {
+          return res.status(403).json({ message: `Product ${id} not found or not owned` });
+        }
+      }
+
+      const results = await storage.bulkUpdateProducts(updates);
+      res.json(results);
+    } catch (error) {
+      console.error("Error bulk updating products:", error);
+      res.status(500).json({ message: "Failed to bulk update products" });
+    }
+  });
+
+  // POST /api/merchant/products/bulk-delete — Bulk delete (Starter+)
+  app.post("/api/merchant/products/bulk-delete", requireMerchant, requireTier("Starter"), async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const { ids } = req.body;
+
+      if (!Array.isArray(ids) || ids.length === 0) {
+        return res.status(400).json({ message: "IDs array is required" });
+      }
+
+      // Verify ownership
+      for (const id of ids) {
+        const product = await storage.getProduct(id);
+        if (!product || product.merchantId !== merchantId) {
+          return res.status(403).json({ message: `Product ${id} not found or not owned` });
+        }
+      }
+
+      await storage.bulkDeleteProducts(ids);
+      res.json({ message: `${ids.length} products deleted` });
+    } catch (error) {
+      console.error("Error bulk deleting products:", error);
+      res.status(500).json({ message: "Failed to bulk delete products" });
+    }
+  });
+
+  // GET /api/merchant/products/:id/variants — List variants
+  app.get("/api/merchant/products/:id/variants", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const product = await storage.getProduct(req.params.id);
+
+      if (!product || product.merchantId !== merchantId) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const variants = await storage.getVariantsByProduct(req.params.id);
+      res.json(variants);
+    } catch (error) {
+      console.error("Error fetching variants:", error);
+      res.status(500).json({ message: "Failed to fetch variants" });
+    }
+  });
+
+  // POST /api/merchant/products/:id/variants — Create variant
+  app.post("/api/merchant/products/:id/variants", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const product = await storage.getProduct(req.params.id);
+
+      if (!product || product.merchantId !== merchantId) {
+        return res.status(404).json({ message: "Product not found" });
+      }
+
+      const variant = await storage.createVariant({
+        ...req.body,
+        productId: req.params.id,
+      });
+      res.status(201).json(variant);
+    } catch (error) {
+      console.error("Error creating variant:", error);
+      res.status(500).json({ message: "Failed to create variant" });
+    }
+  });
+
+  // PATCH /api/merchant/products/variants/:vid — Update variant
+  app.patch("/api/merchant/products/variants/:vid", requireMerchant, async (req, res) => {
+    try {
+      const variant = await storage.updateVariant(req.params.vid, req.body);
+      if (!variant) {
+        return res.status(404).json({ message: "Variant not found" });
+      }
+      res.json(variant);
+    } catch (error) {
+      console.error("Error updating variant:", error);
+      res.status(500).json({ message: "Failed to update variant" });
+    }
+  });
+
+  // DELETE /api/merchant/products/variants/:vid — Delete variant
+  app.delete("/api/merchant/products/variants/:vid", requireMerchant, async (req, res) => {
+    try {
+      const deleted = await storage.deleteVariant(req.params.vid);
+      if (!deleted) {
+        return res.status(404).json({ message: "Variant not found" });
+      }
+      res.json({ message: "Variant deleted" });
+    } catch (error) {
+      console.error("Error deleting variant:", error);
+      res.status(500).json({ message: "Failed to delete variant" });
+    }
+  });
+
+  // POST /api/merchant/products/import/execute — Execute import from mapped data
+  app.post("/api/merchant/products/import/execute", requireMerchant, requireTier("Starter"), async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const tier = (req.session as any).merchantTier || "FREE";
+      const limit = TIER_PRODUCT_LIMITS[tier] || 25;
+      const { products: importProducts, fileName, fileSize, updateExisting } = req.body;
+
+      if (!Array.isArray(importProducts) || importProducts.length === 0) {
+        return res.status(400).json({ message: "Products array is required" });
+      }
+
+      // Create import record
+      const importRecord = await storage.createProductImport({
+        merchantId,
+        fileName: fileName || "import.csv",
+        fileSize: fileSize || 0,
+        totalRows: importProducts.length,
+        status: "processing",
+      });
+
+      let importedCount = 0;
+      let updatedCount = 0;
+      let skippedCount = 0;
+      let errorCount = 0;
+      const errors: Array<{ row: number; message: string }> = [];
+
+      const currentCount = await storage.getProductCountByMerchant(merchantId);
+
+      for (let i = 0; i < importProducts.length; i++) {
+        try {
+          const p = importProducts[i];
+
+          if (!p.name || !p.price) {
+            errors.push({ row: i + 1, message: "Name and price are required" });
+            errorCount++;
+            continue;
+          }
+
+          // Check if SKU exists and we should update
+          if (p.sku && updateExisting) {
+            const existing = await storage.getProductBySkuAndMerchant(p.sku, merchantId);
+            if (existing) {
+              await storage.updateProduct(existing.id, {
+                ...p,
+                merchantId,
+                updatedAt: new Date(),
+              });
+              updatedCount++;
+              continue;
+            }
+          }
+
+          // Check limit for new products
+          if (currentCount + importedCount >= limit) {
+            errors.push({ row: i + 1, message: "Product limit reached" });
+            skippedCount++;
+            continue;
+          }
+
+          await storage.createProduct({
+            ...p,
+            merchantId,
+            stock: p.stock ? parseInt(p.stock) : 0,
+            status: p.status || "active",
+            tags: p.tags ? (typeof p.tags === "string" ? p.tags.split(",").map((t: string) => t.trim()) : p.tags) : null,
+            images: p.images ? (typeof p.images === "string" ? p.images.split(",").map((i: string) => i.trim()) : p.images) : null,
+          });
+          importedCount++;
+        } catch (err: any) {
+          errors.push({ row: i + 1, message: err.message || "Unknown error" });
+          errorCount++;
+        }
+      }
+
+      // Update import record
+      await storage.updateProductImport(importRecord.id, {
+        importedCount,
+        updatedCount,
+        skippedCount,
+        errorCount,
+        errors: errors.length > 0 ? errors : null,
+        status: "completed",
+        completedAt: new Date(),
+      });
+
+      res.json({
+        importId: importRecord.id,
+        importedCount,
+        updatedCount,
+        skippedCount,
+        errorCount,
+        errors,
+      });
+    } catch (error) {
+      console.error("Error executing import:", error);
+      res.status(500).json({ message: "Failed to execute import" });
+    }
+  });
+
+  // Helper function for XML escaping
+  function escapeXml(str: string): string {
+    return str
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&apos;");
+  }
+
   const httpServer = createServer(app);
 
   return httpServer;
