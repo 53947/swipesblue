@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, ArrowRight, Check, AlertTriangle, Users, Layers, Shield, Zap, ShoppingCart, BarChart3, Palette, Code } from "lucide-react";
 import type { AddOnProduct } from "@shared/schema";
-import Header from "@/components/Header";
 import {
   Accordion,
   AccordionContent,
@@ -288,7 +287,6 @@ export default function ProductDetail() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-8 bg-muted rounded w-32 mb-8" />
@@ -303,7 +301,6 @@ export default function ProductDetail() {
   if (error || !addOn) {
     return (
       <div className="min-h-screen bg-white">
-        <Header />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-16 text-center">
           <h1 className="text-2xl font-bold mb-4">Product Not Found</h1>
           <Link href="/products">
@@ -324,8 +321,6 @@ export default function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link href="/products" className="inline-flex items-center text-swipes-blue-deep hover:underline mb-8" data-testid="link-back-to-products">
           <ArrowLeft className="h-4 w-4 mr-2" />

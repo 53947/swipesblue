@@ -7,7 +7,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Search, ArrowRight, Users, Layers, Shield, Zap, ShoppingCart, BarChart3, Palette, Code } from "lucide-react";
 import type { AddOnProduct } from "@shared/schema";
-import Header from "@/components/Header";
 
 const iconMap: Record<string, React.ElementType> = {
   "users": Users,
@@ -66,8 +65,6 @@ export default function Products() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
           <h1 className="text-4xl font-bold mb-2 text-swipes-black">Products</h1>
