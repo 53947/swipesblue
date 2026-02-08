@@ -55,18 +55,18 @@ const paymentsNavItems = [
 const ecommerceNavItems = [
   { name: "swipesblue Store", href: "/dashboard/products", icon: Package, badge: "FREE" },
   { name: "Shopping Cart", href: "/cart", icon: ShoppingCart, badge: "FREE" },
-  { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: Mail, badge: "PRO", locked: true },
-  { name: "Brand Studio", href: "/dashboard/brand-studio", icon: Palette, badge: "PRO", locked: true },
+  { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: Mail, badge: "SCALE", locked: true },
+  { name: "Brand Studio", href: "/dashboard/brand-studio", icon: Palette, badge: "SCALE", locked: true },
 ];
 
 const addOnNavItems = [
-  { name: "Customer Portal", href: "/dashboard/customer-portal", icon: Users, slug: "customer-portal", active: false },
-  { name: "Security Suite", href: "/dashboard/security", icon: Shield, slug: "security-suite", active: false },
-  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3, slug: "advanced-analytics", active: false },
-  { name: "Checkout Optimizer", href: "/dashboard/checkout-optimizer", icon: Zap, slug: "checkout-optimizer", active: false },
-  { name: "Cart Pro", href: "/dashboard/cart-settings", icon: ShoppingCart, slug: "shopping-cart-pro", active: false },
-  { name: "Multi-Gateway", href: "/dashboard/gateways", icon: Layers, slug: "multi-gateway", active: false },
-  { name: "API Access", href: "/dashboard/api-keys", icon: Code, slug: "premium-api", active: false },
+  { name: "Customer Portal", href: "/dashboard/customer-portal", icon: Users, slug: "customer-portal" },
+  { name: "Security Suite", href: "/dashboard/security", icon: Shield, slug: "security-suite" },
+  { name: "Analytics", href: "/dashboard/analytics", icon: BarChart3, slug: "advanced-analytics" },
+  { name: "Checkout Optimizer", href: "/dashboard/checkout-optimizer", icon: Zap, slug: "checkout-optimizer" },
+  { name: "Cart Pro", href: "/dashboard/cart-settings", icon: ShoppingCart, slug: "shopping-cart-pro" },
+  { name: "Multi-Gateway", href: "/dashboard/gateways", icon: Layers, slug: "multi-gateway" },
+  { name: "API Access", href: "/dashboard/api-keys", icon: Code, slug: "premium-api" },
 ];
 
 const developerNavItems = [
@@ -86,18 +86,20 @@ const platformLinks = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const [location] = useLocation();
-  const { tier, canAccess } = useMerchantAuth();
+  const { tier, canAccess, hasAddon, addons } = useMerchantAuth();
+
+  const showDeveloperSection = canAccess("Scale") || hasAddon("premium-api");
 
   const NavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; badge?: string; locked?: boolean } }) => {
     const isActive = location === item.href || (item.href !== "/dashboard" && location.startsWith(item.href));
     const Icon = item.icon;
-    
+
     return (
       <Link href={item.href}>
         <div
           className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer hover-elevate ${
-            isActive 
-              ? "bg-swipes-blue-deep text-white" 
+            isActive
+              ? "bg-swipes-blue-deep text-white"
               : "text-swipes-pro-gray"
           }`}
           data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -105,10 +107,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           <Icon className="h-4 w-4" />
           <span className="flex-1">{item.name}</span>
           {item.badge && (
-            <Badge 
+            <Badge
               className={`text-xs no-default-hover-elevate ${
-                item.badge === "FREE" 
-                  ? "bg-swipes-trusted-green text-white" 
+                item.badge === "FREE"
+                  ? "bg-swipes-trusted-green text-white"
                   : "bg-swipes-blue-deep text-white"
               }`}
               data-testid={`badge-${item.name.toLowerCase().replace(/\s+/g, '-')}-${item.badge.toLowerCase()}`}
@@ -124,19 +126,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     );
   };
 
-  const AddOnNavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; slug: string; active: boolean } }) => {
+  const AddOnNavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType; slug: string } }) => {
     const isActive = location === item.href || location.startsWith(item.href);
     const Icon = item.icon;
-    const isSubscribed = item.active;
-    
+    const isSubscribed = addons.includes(item.slug);
+
     const linkHref = isSubscribed ? item.href : `/products/${item.slug}`;
-    
+
     return (
       <Link href={linkHref}>
         <div
           className={`flex items-center gap-3 px-3 py-2 rounded-[7px] text-sm transition-colors cursor-pointer hover-elevate ${
-            isActive 
-              ? "bg-swipes-blue-deep text-white" 
+            isActive
+              ? "bg-swipes-blue-deep text-white"
               : "text-swipes-pro-gray"
           }`}
           data-testid={`nav-addon-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -193,9 +195,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   <Table2 className="h-4 w-4" />
                   <span className="flex-1">Bulk Editor</span>
-                  {!canAccess("Starter") && (
+                  {!canAccess("Growth") && (
                     <>
-                      <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">STARTER+</Badge>
+                      <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">GROWTH+</Badge>
                       <Lock className="h-3 w-3" />
                     </>
                   )}
@@ -211,9 +213,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 >
                   <Upload className="h-4 w-4" />
                   <span className="flex-1">Import / Export</span>
-                  {!canAccess("Starter") && (
+                  {!canAccess("Growth") && (
                     <>
-                      <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">STARTER+</Badge>
+                      <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">GROWTH+</Badge>
                       <Lock className="h-3 w-3" />
                     </>
                   )}
@@ -270,20 +272,24 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Divider */}
           <div className="border-t border-gray-200" />
 
-          {/* Developer Section */}
-          <div>
-            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
-              Developer
-            </h4>
-            <nav className="space-y-1">
-              {developerNavItems.map((item) => (
-                <NavLink key={item.name} item={item} />
-              ))}
-            </nav>
-          </div>
+          {/* Developer Section — only visible for Scale+ or Premium API Access holders */}
+          {showDeveloperSection && (
+            <>
+              <div>
+                <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+                  Developer
+                </h4>
+                <nav className="space-y-1">
+                  {developerNavItems.map((item) => (
+                    <NavLink key={item.name} item={item} />
+                  ))}
+                </nav>
+              </div>
 
-          {/* Divider */}
-          <div className="border-t border-gray-200" />
+              {/* Divider */}
+              <div className="border-t border-gray-200" />
+            </>
+          )}
 
           {/* Settings Section */}
           <div>
@@ -342,12 +348,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <span className="ml-2 text-sm font-semibold text-swipes-black">{tier}</span>
           </div>
           <Link href="/pricing">
-            <Button 
+            <Button
               className="w-full group bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white text-sm"
-              data-testid="button-upgrade-to-pro"
+              data-testid="button-upgrade-to-scale"
             >
               <span className="flex items-center justify-center">
-                Upgrade to Pro
+                Upgrade to Scale
                 <span className="inline-flex w-0 opacity-0 group-hover:w-5 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
                   <ArrowRight className="h-4 w-4 ml-1" />
                 </span>

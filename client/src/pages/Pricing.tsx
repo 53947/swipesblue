@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Check, X, CheckCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -9,11 +10,19 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+interface RateData {
+  tierName: string;
+  transactionPercent: string;
+  transactionFlat: string;
+  tierType: string;
+}
+
 const tiers = [
   {
-    name: "FREE",
+    name: "Free",
     monthly: 0,
     annual: 0,
+    rateKey: "Free",
     features: [
       "Online checkout",
       "Payment links",
@@ -21,7 +30,7 @@ const tiers = [
       "Up to 25 products",
       "1 user",
       "Email support",
-      "Basic dashboard",
+      "Basic branding (Settings)",
     ],
     cta: "Get Started Free",
     ctaLink: "/register",
@@ -29,17 +38,18 @@ const tiers = [
     ctaStyle: "border-2 border-swipes-blue-deep text-swipes-blue-deep bg-transparent hover:bg-swipes-blue-deep/5",
   },
   {
-    name: "Starter",
+    name: "Growth",
     monthly: 29,
     annual: 290,
+    rateKey: "Growth",
     features: [
-      "Everything in FREE, plus:",
-      "Unlimited products",
+      "Everything in Free, plus:",
+      "Up to 500 products",
       "Abandoned cart recovery (basic)",
       "Discount codes",
-      "Basic analytics",
+      "Basic analytics & reporting",
       "3 users",
-      "Basic reporting",
+      "CSV data export",
     ],
     cta: "Start Free Trial",
     ctaLink: "/register",
@@ -47,18 +57,20 @@ const tiers = [
     ctaStyle: "border-2 border-swipes-blue-deep text-swipes-blue-deep bg-transparent hover:bg-swipes-blue-deep/5",
   },
   {
-    name: "Pro",
+    name: "Scale",
     monthly: 79,
     annual: 790,
+    rateKey: "Scale",
     features: [
-      "Everything in Starter, plus:",
+      "Everything in Growth, plus:",
+      "Unlimited products",
       "Brand Studio (white-label)",
       "Advanced abandoned cart recovery",
-      "Advanced analytics",
-      "Fraud prevention tools",
+      "Advanced analytics & reporting",
+      "Customer vault",
+      "Virtual terminal",
       "Priority support",
       "10 users",
-      "Advanced reporting",
     ],
     cta: "Start Free Trial",
     ctaLink: "/register",
@@ -69,15 +81,16 @@ const tiers = [
     name: "Enterprise",
     monthly: 299,
     annual: 2990,
+    rateKey: "Enterprise",
     features: [
-      "Everything in Pro, plus:",
-      "Multi-gateway routing",
-      "Full API access",
-      "Webhooks",
-      "Custom integrations",
+      "Everything in Scale, plus:",
+      "Full API access & webhooks",
+      "Sandbox environment",
+      "Custom reporting",
       "Dedicated account manager",
       "Unlimited users",
       "SLA guarantee",
+      "CSV, PDF, XLSX export",
     ],
     cta: "Contact Sales",
     ctaLink: "/",
@@ -101,17 +114,17 @@ const comparisonCategories = [
   {
     name: "E-Commerce",
     features: [
-      { name: "Product catalog", values: ["25 max", "Unlimited", "Unlimited", "Unlimited"] },
+      { name: "Product catalog", values: ["25 max", "500 max", "Unlimited", "Unlimited"] },
       { name: "Shopping cart", values: [true, true, true, true] },
       { name: "Abandoned cart recovery", values: [false, "Basic", "Advanced", "Advanced"] },
       { name: "Discount codes", values: [false, true, true, true] },
       { name: "Brand Studio (white-label)", values: [false, false, true, true] },
+      { name: "Basic branding (Settings)", values: [true, true, true, true] },
     ],
   },
   {
     name: "Security & Fraud",
     features: [
-      { name: "PCI compliance", values: [true, true, true, true] },
       { name: "Basic fraud detection", values: [true, true, true, true] },
       { name: "Advanced fraud rules", values: [false, false, true, true] },
       { name: "Dispute management", values: [false, false, true, true] },
@@ -120,7 +133,6 @@ const comparisonCategories = [
   {
     name: "Analytics & Reporting",
     features: [
-      { name: "Basic dashboard", values: [true, true, true, true] },
       { name: "Analytics", values: [false, "Basic", "Advanced", "Advanced"] },
       { name: "Reporting", values: [false, "Basic", "Advanced", "Custom"] },
       { name: "Data export", values: [false, "CSV", "CSV, PDF", "CSV, PDF, XLSX"] },
@@ -132,7 +144,6 @@ const comparisonCategories = [
       { name: "API access", values: [false, false, false, true] },
       { name: "Webhooks", values: [false, false, false, true] },
       { name: "Sandbox environment", values: [false, false, false, true] },
-      { name: "Custom integrations", values: [false, false, false, true] },
     ],
   },
   {
@@ -178,7 +189,7 @@ const faqs = [
     answer: "Enterprise customers can contact sales for custom pricing based on processing volume.",
   },
   {
-    question: "What happens if I exceed the free plan limits?",
+    question: "What happens if I exceed the Free plan limits?",
     answer: "You'll be prompted to upgrade. We'll never charge you without your consent.",
   },
   {
@@ -197,8 +208,33 @@ function CellValue({ value }: { value: boolean | string }) {
   return <span className="text-sm text-swipes-pro-gray">{value}</span>;
 }
 
+function formatRate(rates: RateData[] | undefined, tierKey: string): string {
+  if (!rates || rates.length === 0) return "2.70% + $0.30";
+  const aliases: Record<string, string[]> = {
+    Free: ["Free", "FREE"],
+    Growth: ["Growth", "Starter"],
+    Scale: ["Scale", "Pro"],
+    Enterprise: ["Enterprise"],
+  };
+  const keys = aliases[tierKey] || [tierKey];
+  const match = rates.find(r => keys.includes(r.tierName) && r.tierType === "ecommerce");
+  if (!match) return "2.70% + $0.30";
+  const pct = parseFloat(match.transactionPercent).toFixed(2);
+  const flat = parseFloat(match.transactionFlat).toFixed(2);
+  return `${pct}% + $${flat}`;
+}
+
 export default function Pricing() {
   const [annual, setAnnual] = useState(false);
+
+  const { data: rates } = useQuery<RateData[]>({
+    queryKey: ["/api/rates"],
+    queryFn: async () => {
+      const res = await fetch("/api/rates");
+      if (!res.ok) return [];
+      return res.json();
+    },
+  });
 
   return (
     <div className="min-h-screen bg-white">
@@ -210,9 +246,6 @@ export default function Pricing() {
           </h1>
           <p className="text-lg text-swipes-pro-gray mt-4">
             No hidden fees. No surprises. Scale with plans that fit your business.
-          </p>
-          <p className="text-sm text-swipes-pro-gray mt-2">
-            All plans include: <span className="font-semibold text-swipes-blue-deep">2.70% + $0.30</span> per transaction
           </p>
         </div>
       </section>
@@ -281,7 +314,7 @@ export default function Pricing() {
                     </span>
                   </div>
                   <p className="text-sm text-swipes-pro-gray mt-2">
-                    2.70% + $0.30 per transaction
+                    <span className="font-semibold text-swipes-blue-deep">{formatRate(rates, tier.rateKey)}</span> per transaction
                   </p>
                 </div>
                 <ul className="space-y-3 mb-8">

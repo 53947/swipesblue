@@ -64,6 +64,7 @@ import InvoicingProduct from "@/pages/products/InvoicingProduct";
 import RecurringBillingProduct from "@/pages/products/RecurringBillingProduct";
 import CustomerVaultProduct from "@/pages/products/CustomerVaultProduct";
 import FraudPreventionProduct from "@/pages/products/FraudPreventionProduct";
+import TierGate from "@/components/TierGate";
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
 
@@ -206,13 +207,19 @@ function Router() {
       <Route path="/dashboard/abandoned-carts">
         {() => (
           <DashboardLayout>
-            <div className="p-8">
-              <h1 className="text-2xl font-bold text-swipes-black mb-2">Abandoned Carts</h1>
-              <p className="text-swipes-pro-gray">Recover lost sales with automated email recovery.</p>
-              <div className="mt-8 p-6 bg-white rounded-[7px] border border-gray-200">
-                <p className="text-swipes-pro-gray">This feature requires Pro plan or higher.</p>
+            <TierGate
+              requiredTier="Scale"
+              featureName="Abandoned Carts"
+              featureDescription="Recover lost sales with automated email recovery campaigns."
+            >
+              <div className="p-8">
+                <h1 className="text-2xl font-bold text-swipes-black mb-2">Abandoned Carts</h1>
+                <p className="text-swipes-pro-gray">Recover lost sales with automated email recovery.</p>
+                <div className="mt-8 p-6 bg-white rounded-[7px] border border-gray-200">
+                  <p className="text-swipes-pro-gray">View and manage abandoned cart recovery campaigns.</p>
+                </div>
               </div>
-            </div>
+            </TierGate>
           </DashboardLayout>
         )}
       </Route>

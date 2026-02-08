@@ -1,4 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
+import { TIER_HIERARCHY, normalizeTier, meetsMinTier } from "@shared/tier-constants";
 
 interface MerchantSession {
   authenticated: boolean;
@@ -8,13 +9,6 @@ interface MerchantSession {
   businessName: string | null;
   tier: string | null;
 }
-
-const TIER_HIERARCHY: Record<string, number> = {
-  FREE: 0,
-  Starter: 1,
-  Pro: 2,
-  Enterprise: 3,
-};
 
 export function useMerchantAuth() {
   const { data, isLoading } = useQuery<MerchantSession>({
@@ -26,11 +20,25 @@ export function useMerchantAuth() {
     },
   });
 
-  const tier = data?.tier || "FREE";
+  const { data: addons } = useQuery<string[]>({
+    queryKey: ["/api/merchant/addon-subscriptions"],
+    queryFn: async () => {
+      const res = await fetch("/api/merchant/addon-subscriptions");
+      if (!res.ok) return [];
+      return res.json();
+    },
+    enabled: data?.authenticated === true,
+  });
+
+  const tier = normalizeTier(data?.tier || "Free");
   const isAuthenticated = data?.authenticated ?? false;
 
   function canAccess(requiredTier: string): boolean {
-    return (TIER_HIERARCHY[tier] || 0) >= (TIER_HIERARCHY[requiredTier] || 0);
+    return meetsMinTier(tier, requiredTier);
+  }
+
+  function hasAddon(slug: string): boolean {
+    return (addons || []).includes(slug);
   }
 
   return {
@@ -41,5 +49,7 @@ export function useMerchantAuth() {
     isAuthenticated,
     isLoading,
     canAccess,
+    addons: addons || [],
+    hasAddon,
   };
 }

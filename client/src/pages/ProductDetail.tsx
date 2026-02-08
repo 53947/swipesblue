@@ -58,8 +58,8 @@ const productDetails: Record<string, {
     ],
     faqs: [
       { question: "How do my customers access the portal?", answer: "They visit yourdomain.com/portal and log in with their email." },
-      { question: "Can I customize the portal appearance?", answer: "Yes, with the Custom Branding Package add-on you can white-label the portal with your logo and colors." },
-      { question: "Is the FREE version limited?", answer: "The free version shows the last 10 orders only. Upgrade for unlimited." },
+      { question: "Can I customize the portal appearance?", answer: "Yes, basic branding is available on all tiers through Settings. Scale and Enterprise plans include Brand Studio for full white-label customization." },
+      { question: "Is the Free version limited?", answer: "The free version shows the last 10 orders only. Upgrade for unlimited." },
       { question: "Can customers update their own payment methods?", answer: "Yes, with the paid version they can add, remove, and set default cards." }
     ]
   },
@@ -206,41 +206,6 @@ const productDetails: Record<string, {
       { question: "What export formats are available?", answer: "CSV for spreadsheet analysis and PDF for presentations." }
     ]
   },
-  "custom-branding": {
-    freeFeatures: [
-      "swipesblue logo on checkout",
-      '"Powered by swipesblue" footer',
-      "Default colors"
-    ],
-    paidFeatures: [
-      "Your logo on checkout",
-      "Your logo on receipts",
-      "Your logo in customer portal",
-      "Custom colors (primary, secondary, background)",
-      "Custom fonts (Google Fonts or upload your own)",
-      'Remove "Powered by swipesblue"',
-      "Custom email templates",
-      "Custom receipt design",
-      "Custom checkout domain (checkout.yourdomain.com)"
-    ],
-    freePrice: "$0",
-    howItWorks: [
-      { title: "1. Upload Assets", description: "Add your logo, choose colors, select fonts" },
-      { title: "2. Preview", description: "See exactly how your branded checkout will look" },
-      { title: "3. Go Live", description: "Apply branding instantly to all customer touchpoints" }
-    ],
-    featuresInfo: [
-      { title: "Custom Domain", description: "Instead of checkout.swipesblue.com/your-store, you get checkout.yourdomain.com" },
-      { title: "Email Templates", description: "Customize every email: order confirmation, shipping, receipts, password reset." },
-      { title: "Full Color Control", description: "Primary, secondary, and background colors match your brand perfectly." },
-      { title: "Font Selection", description: "Choose from Google Fonts or upload your own brand typeface." }
-    ],
-    faqs: [
-      { question: "How do I set up a custom domain?", answer: "We'll guide you through DNS setup. Takes about 10 minutes." },
-      { question: "Can I preview before going live?", answer: "Yes. Full preview mode lets you see exactly how everything will look." },
-      { question: "Is this included in Pro tier?", answer: "Pro tier includes Brand Studio. This add-on is for FREE and Starter users who want branding." }
-    ]
-  },
   "premium-api": {
     paidFeatures: [
       "Full REST API access",
@@ -263,7 +228,7 @@ const productDetails: Record<string, {
       { title: "Sandbox Environment", description: "Full test environment with test cards and simulated responses." }
     ],
     faqs: [
-      { question: "Is API access included in Enterprise?", answer: "Yes. Enterprise tier includes full API access. This add-on is for FREE, Starter, and Pro users." },
+      { question: "Is API access included in Enterprise?", answer: "Yes. Enterprise tier includes full API access. This add-on is for Free, Growth, and Scale users." },
       { question: "What's the rate limit?", answer: "1,000 requests per minute for standard, 10,000 for Enterprise." },
       { question: "Is there a sandbox for testing?", answer: "Yes. Full sandbox environment with test cards and simulated responses." }
     ]
@@ -347,11 +312,11 @@ export default function ProductDetail() {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="h-5 w-5 text-swipes-gold flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-swipes-black">Requires Pro or Enterprise Plan</p>
-                      <p className="text-sm text-swipes-pro-gray">This add-on is only available for Pro ($79/mo) and Enterprise ($299/mo) subscribers.</p>
+                      <p className="font-semibold text-swipes-black">Requires Scale or Enterprise Plan</p>
+                      <p className="text-sm text-swipes-pro-gray">This add-on is only available for Scale ($79/mo) and Enterprise ($299/mo) subscribers.</p>
                       <Link href="/pricing">
                         <Button variant="ghost" className="text-swipes-blue-deep p-0 h-auto mt-2">
-                          Upgrade to Pro
+                          Upgrade to Scale
                           <ArrowRight className="h-4 w-4 ml-1" />
                         </Button>
                       </Link>

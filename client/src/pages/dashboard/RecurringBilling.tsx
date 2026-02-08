@@ -41,7 +41,7 @@ const mockSubscriptions: Subscription[] = [
   },
   {
     id: "SUB-002",
-    planName: "Starter Plan",
+    planName: "Growth Plan",
     customer: "Maria Gonzalez",
     amount: 29.99,
     frequency: "Monthly",
@@ -86,7 +86,7 @@ const mockSubscriptions: Subscription[] = [
   },
   {
     id: "SUB-007",
-    planName: "Starter Plan",
+    planName: "Growth Plan",
     customer: "Tom Richardson",
     amount: 29.99,
     frequency: "Monthly",

@@ -36,10 +36,6 @@ const productFeatures: Record<string, { free: string[]; paid: string[] }> = {
     free: ["Total revenue (today/week/month)", "Transaction count", "Success rate"],
     paid: ["Revenue breakdown", "Customer analytics (LTV, AOV)", "Cohort analysis", "Funnel visualization", "Exportable reports", "Scheduled email reports"]
   },
-  "custom-branding": {
-    free: ["swipesblue logo on checkout", "Default colors"],
-    paid: ["Your logo on checkout", "Custom colors", "Custom fonts", "Remove swipesblue branding", "Custom email templates", "Custom checkout domain"]
-  },
   "premium-api": {
     free: [],
     paid: ["Full REST API access", "Webhooks with retry", "Test and live API keys", "Sandbox environment", "SDK libraries", "Priority developer support"]

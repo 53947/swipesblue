@@ -13,7 +13,6 @@ const productSettingsPath: Record<string, string> = {
   "checkout-optimizer": "/dashboard/checkout-optimizer",
   "shopping-cart-pro": "/dashboard/cart-settings",
   "advanced-analytics": "/dashboard/analytics",
-  "custom-branding": "/dashboard/brand-studio",
   "premium-api": "/dashboard/api-keys"
 };
 

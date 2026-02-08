@@ -336,7 +336,7 @@ export default function RateManagement() {
               id="tierName"
               value={formData.tierName}
               onChange={(e) => setFormData({ ...formData, tierName: e.target.value })}
-              placeholder="e.g., FREE, Starter, Pro"
+              placeholder="e.g., Free, Growth, Scale"
               required
               data-testid="input-tier-name"
             />

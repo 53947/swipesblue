@@ -9,7 +9,10 @@ import {
   Upload,
   ExternalLink,
   Copy,
+  Palette,
 } from "lucide-react";
+import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import TierBadge from "@/components/TierBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,15 +38,17 @@ import {
 } from "@/components/ui/table";
 
 const billingHistory = [
-  { date: "Oct 1, 2025", description: "Pro Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0010" },
-  { date: "Sep 1, 2025", description: "Pro Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0009" },
-  { date: "Aug 1, 2025", description: "Pro Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0008" },
-  { date: "Jul 1, 2025", description: "Starter Plan — Monthly", amount: "$19.00", status: "Paid", invoice: "INV-2025-0007" },
-  { date: "Jun 1, 2025", description: "Starter Plan — Monthly", amount: "$19.00", status: "Paid", invoice: "INV-2025-0006" },
-  { date: "May 15, 2025", description: "Plan upgrade: Starter → Pro", amount: "$30.00", status: "Paid", invoice: "INV-2025-0005" },
+  { date: "Oct 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0010" },
+  { date: "Sep 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0009" },
+  { date: "Aug 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0008" },
+  { date: "Jul 1, 2025", description: "Growth Plan — Monthly", amount: "$19.00", status: "Paid", invoice: "INV-2025-0007" },
+  { date: "Jun 1, 2025", description: "Growth Plan — Monthly", amount: "$19.00", status: "Paid", invoice: "INV-2025-0006" },
+  { date: "May 15, 2025", description: "Plan upgrade: Growth → Scale", amount: "$30.00", status: "Paid", invoice: "INV-2025-0005" },
 ];
 
 export default function SettingsPage() {
+  const { tier } = useMerchantAuth();
+
   // General
   const [companyName, setCompanyName] = useState("swipesblue, inc.");
   const [primaryEmail, setPrimaryEmail] = useState("admin@swipesblue.com");
@@ -376,6 +381,49 @@ export default function SettingsPage() {
               <Button variant="outline" className="mt-4 rounded-[7px]">
                 Choose File
               </Button>
+            </div>
+          </div>
+
+          {/* Basic Branding — available to ALL tiers */}
+          <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
+            <div className="flex items-center gap-3">
+              <Palette className="h-5 w-5 text-swipes-blue-deep" />
+              <h3 className="text-lg font-semibold text-swipes-black">Basic Branding</h3>
+            </div>
+            <p className="text-sm text-swipes-pro-gray">
+              Customize how your business appears on checkout pages and customer-facing emails.
+            </p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-swipes-black">Primary Brand Color</Label>
+                <div className="flex items-center gap-3">
+                  <Input
+                    type="color"
+                    defaultValue="#374151"
+                    className="w-12 h-10 p-1 rounded-[7px] cursor-pointer"
+                  />
+                  <Input
+                    defaultValue="#374151"
+                    placeholder="#000000"
+                    className="flex-1 rounded-[7px] font-mono text-sm"
+                  />
+                </div>
+                <p className="text-xs text-swipes-pro-gray">
+                  Used for buttons and accents on your checkout and emails.
+                </p>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-swipes-black">Checkout Logo</Label>
+                <div className="border-2 border-dashed border-gray-300 rounded-[7px] p-4 text-center">
+                  <Upload className="h-6 w-6 text-swipes-pro-gray mx-auto mb-2" />
+                  <p className="text-xs text-swipes-pro-gray">
+                    Upload a logo for your checkout page (PNG, JPG, SVG — Max 1MB)
+                  </p>
+                  <Button variant="outline" size="sm" className="mt-2 rounded-[7px]">
+                    Choose File
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -752,7 +800,8 @@ export default function SettingsPage() {
                 <h3 className="text-lg font-semibold text-swipes-black">Current Plan</h3>
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-swipes-blue-deep">Pro Plan</span>
+                    <span className="text-2xl font-bold text-swipes-blue-deep">{tier} Plan</span>
+                    <TierBadge tier={tier} size="sm" />
                     <Badge className="bg-swipes-trusted-green text-white">Active</Badge>
                   </div>
                   <p className="text-sm text-swipes-pro-gray">$49.00/month — Billed monthly</p>

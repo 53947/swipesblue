@@ -72,7 +72,7 @@ const bentoFeatures = [
 
 const pricingTiers = [
   {
-    name: "FREE",
+    name: "Free",
     price: "$0",
     period: "forever",
     description: "Start selling with zero monthly fees",
@@ -87,13 +87,13 @@ const pricingTiers = [
     highlight: false,
   },
   {
-    name: "Starter",
+    name: "Growth",
     price: "$29",
     period: "/month",
     description: "For growing businesses",
     features: [
-      "Unlimited products",
-      "Abandoned cart recovery",
+      "Up to 500 products",
+      "Recurring billing",
       "Discount codes",
       "Basic analytics",
     ],
@@ -102,12 +102,12 @@ const pricingTiers = [
     highlight: false,
   },
   {
-    name: "Pro",
+    name: "Scale",
     price: "$79",
     period: "/month",
     description: "For established businesses",
     features: [
-      "Everything in Starter",
+      "Everything in Growth",
       "Brand Studio (white-label)",
       "Advanced analytics",
       "Priority support",
@@ -123,10 +123,10 @@ const pricingTiers = [
     period: "/month",
     description: "For high-volume merchants",
     features: [
-      "Everything in Pro",
-      "Multi-store support",
+      "Everything in Scale",
       "API access & webhooks",
       "Dedicated account manager",
+      "Custom SLA",
     ],
     cta: "Contact Sales",
     href: "/pricing",

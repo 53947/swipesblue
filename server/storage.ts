@@ -40,6 +40,8 @@ import {
   type InsertProductVariant,
   type ProductImport,
   type InsertProductImport,
+  type TierEntitlement,
+  type InsertTierEntitlement,
   users,
   products,
   cartItems,
@@ -60,6 +62,7 @@ import {
   merchantAccounts,
   productVariants,
   productImports,
+  tierEntitlements,
 } from "@shared/schema";
 import { eq, and, desc, like, or, lte, sql, count, inArray } from "drizzle-orm";
 import { randomUUID } from "crypto";
@@ -216,6 +219,13 @@ export interface IStorage {
   createProductImport(record: InsertProductImport): Promise<ProductImport>;
   updateProductImport(id: string, data: Partial<InsertProductImport>): Promise<ProductImport | undefined>;
   getProductImportsByMerchant(merchantId: string): Promise<ProductImport[]>;
+
+  // Tier Entitlement operations (Prompt 14)
+  getTierEntitlements(tierName: string): Promise<TierEntitlement[]>;
+  getAllTierEntitlements(): Promise<TierEntitlement[]>;
+  getTierEntitlement(tierName: string, featureKey: string): Promise<TierEntitlement | undefined>;
+  createTierEntitlement(entitlement: InsertTierEntitlement): Promise<TierEntitlement>;
+  updateTierEntitlement(id: string, data: Partial<InsertTierEntitlement>): Promise<TierEntitlement | undefined>;
 }
 
 export class DbStorage implements IStorage {
@@ -1029,6 +1039,44 @@ export class DbStorage implements IStorage {
       .from(productImports)
       .where(eq(productImports.merchantId, merchantId))
       .orderBy(desc(productImports.createdAt));
+  }
+
+  // Tier Entitlement operations (Prompt 14)
+  async getTierEntitlements(tierName: string): Promise<TierEntitlement[]> {
+    return await db
+      .select()
+      .from(tierEntitlements)
+      .where(and(eq(tierEntitlements.tierName, tierName), eq(tierEntitlements.isActive, true)));
+  }
+
+  async getAllTierEntitlements(): Promise<TierEntitlement[]> {
+    return await db
+      .select()
+      .from(tierEntitlements)
+      .where(eq(tierEntitlements.isActive, true))
+      .orderBy(tierEntitlements.tierName, tierEntitlements.featureKey);
+  }
+
+  async getTierEntitlement(tierName: string, featureKey: string): Promise<TierEntitlement | undefined> {
+    const result = await db
+      .select()
+      .from(tierEntitlements)
+      .where(and(eq(tierEntitlements.tierName, tierName), eq(tierEntitlements.featureKey, featureKey)));
+    return result[0];
+  }
+
+  async createTierEntitlement(entitlement: InsertTierEntitlement): Promise<TierEntitlement> {
+    const result = await db.insert(tierEntitlements).values(entitlement).returning();
+    return result[0];
+  }
+
+  async updateTierEntitlement(id: string, data: Partial<InsertTierEntitlement>): Promise<TierEntitlement | undefined> {
+    const result = await db
+      .update(tierEntitlements)
+      .set({ ...data, updatedAt: new Date() })
+      .where(eq(tierEntitlements.id, id))
+      .returning();
+    return result[0];
   }
 }
 

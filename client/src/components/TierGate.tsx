@@ -2,6 +2,7 @@ import { Lock, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import { normalizeTier } from "@shared/tier-constants";
 
 interface TierGateProps {
   requiredTier: string;
@@ -17,6 +18,9 @@ export default function TierGate({ requiredTier, featureName, featureDescription
     return <>{children}</>;
   }
 
+  const displayRequired = normalizeTier(requiredTier);
+  const displayCurrent = normalizeTier(tier);
+
   return (
     <div className="relative">
       <div className="pointer-events-none select-none">
@@ -31,14 +35,14 @@ export default function TierGate({ requiredTier, featureName, featureDescription
             {featureName}
           </h3>
           <p className="text-sm text-gray-500 mb-1">
-            Requires <span className="font-medium text-[#1844A6]">{requiredTier}</span> tier or higher
+            Requires <span className="font-medium text-[#1844A6]">{displayRequired}</span> tier or higher
           </p>
           {featureDescription && (
             <p className="text-sm text-gray-500 mb-4">{featureDescription}</p>
           )}
           {!featureDescription && <div className="mb-4" />}
           <p className="text-xs text-gray-400 mb-4">
-            You are currently on the <span className="font-medium">{tier}</span> plan
+            You are currently on the <span className="font-medium">{displayCurrent}</span> plan
           </p>
           <Link href="/pricing">
             <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px] group">

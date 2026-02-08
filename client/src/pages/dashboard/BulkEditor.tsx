@@ -759,7 +759,7 @@ function BulkEditorContent() {
 export default function BulkEditor() {
   return (
     <TierGate
-      requiredTier="Starter"
+      requiredTier="Growth"
       featureName="Bulk Editor"
       featureDescription="Edit multiple products at once with a spreadsheet-style interface."
     >

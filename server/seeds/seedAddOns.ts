@@ -4,13 +4,12 @@ import { notInArray } from "drizzle-orm";
 
 const officialSlugs = [
   "customer-portal",
-  "multi-gateway",
-  "security-suite",
-  "checkout-optimizer",
-  "shopping-cart-pro",
   "advanced-analytics",
-  "custom-branding",
+  "checkout-optimizer",
   "premium-api",
+  "shopping-cart-pro",
+  "security-suite",
+  "multi-gateway",
 ];
 
 const addOns = [
@@ -34,42 +33,24 @@ const addOns = [
     displayOrder: 1,
   },
   {
-    name: "Multi-Gateway Support",
-    slug: "multi-gateway",
-    description: "Connect multiple payment processors, route transactions by rules, and get failover protection.",
-    annualPrice: "449.99",
+    name: "Advanced Analytics Dashboard",
+    slug: "advanced-analytics",
+    description: "Deep insights with revenue breakdowns, customer analytics, cohort analysis, and exportable reports.",
+    annualPrice: "199.99",
     features: [
-      "Connect up to 3 gateways",
-      "Smart transaction routing",
-      "Route by card type, amount, geography",
-      "Auto-failover if primary fails",
-      "Failover logs and analytics"
-    ],
-    requiredTier: "Pro",
-    category: "integration",
-    icon: "Network",
-    isActive: true,
-    displayOrder: 2,
-  },
-  {
-    name: "Transaction Security Suite",
-    slug: "security-suite",
-    description: "Advanced fraud prevention with velocity checks, geolocation blocking, device fingerprinting, and chargeback alerts.",
-    annualPrice: "399.99",
-    features: [
-      "Velocity checks",
-      "Geolocation blocking",
-      "Device fingerprinting",
-      "3D Secure 2.0",
-      "Real-time fraud scoring (0-100)",
-      "Manual review queue",
-      "Chargeback alerts (Verifi, Ethoca)"
+      "Revenue breakdown by product, category, time",
+      "Customer analytics (LTV, AOV, frequency)",
+      "Cohort analysis",
+      "Funnel visualization",
+      "Exportable reports (CSV, PDF)",
+      "Scheduled email reports",
+      "Custom date ranges"
     ],
     requiredTier: null,
-    category: "security",
-    icon: "ShieldCheck",
+    category: "analytics",
+    icon: "BarChart3",
     isActive: true,
-    displayOrder: 3,
+    displayOrder: 2,
   },
   {
     name: "Checkout Optimizer",
@@ -87,6 +68,26 @@ const addOns = [
     requiredTier: null,
     category: "marketing",
     icon: "Zap",
+    isActive: true,
+    displayOrder: 3,
+  },
+  {
+    name: "Premium API Access",
+    slug: "premium-api",
+    description: "Full REST API access with webhooks, SDK libraries, sandbox environment, and developer support.",
+    annualPrice: "299.99",
+    features: [
+      "Full REST API",
+      "Webhooks with retry logic",
+      "API keys (test/live)",
+      "Sandbox environment",
+      "SDK libraries",
+      "Full documentation",
+      "Developer support"
+    ],
+    requiredTier: null,
+    category: "integration",
+    icon: "Code2",
     isActive: true,
     displayOrder: 4,
   },
@@ -110,70 +111,48 @@ const addOns = [
     displayOrder: 5,
   },
   {
-    name: "Advanced Analytics Dashboard",
-    slug: "advanced-analytics",
-    description: "Deep insights with revenue breakdowns, customer analytics, cohort analysis, and exportable reports.",
-    annualPrice: "199.99",
+    name: "Transaction Security Suite",
+    slug: "security-suite",
+    description: "Advanced fraud prevention with velocity checks, geolocation blocking, device fingerprinting, and chargeback alerts.",
+    annualPrice: "399.99",
     features: [
-      "Revenue breakdown by product, category, time",
-      "Customer analytics (LTV, AOV, frequency)",
-      "Cohort analysis",
-      "Funnel visualization",
-      "Exportable reports (CSV, PDF)",
-      "Scheduled email reports",
-      "Custom date ranges"
+      "Velocity checks",
+      "Geolocation blocking",
+      "Device fingerprinting",
+      "3D Secure 2.0",
+      "Real-time fraud scoring (0-100)",
+      "Manual review queue",
+      "Chargeback alerts (Verifi, Ethoca)"
     ],
     requiredTier: null,
-    category: "analytics",
-    icon: "BarChart3",
+    category: "security",
+    icon: "ShieldCheck",
     isActive: true,
     displayOrder: 6,
   },
   {
-    name: "Custom Branding Package",
-    slug: "custom-branding",
-    description: "White-label your checkout with custom logo, colors, fonts, email templates, and custom domain.",
-    annualPrice: "149.99",
+    name: "Multi-Gateway Support",
+    slug: "multi-gateway",
+    description: "Connect multiple payment processors, route transactions by rules, and get failover protection.",
+    annualPrice: "449.99",
     features: [
-      "Custom logo",
-      "Custom colors",
-      "Custom fonts",
-      "Remove SwipesBlue branding",
-      "Custom email templates",
-      "Custom receipt design",
-      "Custom checkout domain"
+      "Connect up to 3 gateways",
+      "Smart transaction routing",
+      "Route by card type, amount, geography",
+      "Auto-failover if primary fails",
+      "Failover logs and analytics"
     ],
-    requiredTier: null,
-    category: "marketing",
-    icon: "Palette",
+    requiredTier: "Scale",
+    category: "integration",
+    icon: "Network",
     isActive: true,
     displayOrder: 7,
-  },
-  {
-    name: "Premium API Integration",
-    slug: "premium-api",
-    description: "Full REST API access with webhooks, SDK libraries, sandbox environment, and developer support.",
-    annualPrice: "299.99",
-    features: [
-      "Full REST API",
-      "Webhooks with retry logic",
-      "API keys (test/live)",
-      "Sandbox environment",
-      "SDK libraries",
-      "Full documentation",
-      "Developer support"
-    ],
-    requiredTier: null,
-    category: "integration",
-    icon: "Code2",
-    isActive: true,
-    displayOrder: 8,
   },
 ];
 
 export async function seedAddOns() {
   console.log("Seeding add-on products...");
-  
+
   console.log("Removing legacy add-ons...");
   const deleted = await db.delete(addOnProducts)
     .where(notInArray(addOnProducts.slug, officialSlugs))
@@ -181,7 +160,7 @@ export async function seedAddOns() {
   if (deleted.length > 0) {
     console.log(`  Removed ${deleted.length} legacy add-on(s)`);
   }
-  
+
   for (const addOn of addOns) {
     try {
       await db.insert(addOnProducts).values({
@@ -207,7 +186,7 @@ export async function seedAddOns() {
       console.error(`  ✗ Failed to seed ${addOn.name}:`, error);
     }
   }
-  
+
   console.log("Add-on seeding complete!");
 }
 

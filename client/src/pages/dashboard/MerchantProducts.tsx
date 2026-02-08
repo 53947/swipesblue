@@ -193,7 +193,7 @@ export default function MerchantProducts() {
           <p className="text-sm text-gray-500 mt-1">Manage your product catalog</p>
         </div>
         <div className="flex items-center gap-3">
-          {canAccess("Starter") && (
+          {canAccess("Growth") && (
             <Button
               variant="outline"
               className="rounded-[7px]"
@@ -304,7 +304,7 @@ export default function MerchantProducts() {
             size="sm"
             className="rounded-[7px]"
             onClick={() => setBulkDeleteOpen(true)}
-            disabled={!canAccess("Starter")}
+            disabled={!canAccess("Growth")}
           >
             <Trash2 className="h-3 w-3 mr-1" />
             Delete
@@ -314,7 +314,7 @@ export default function MerchantProducts() {
               bulkStatusMutation.mutate({ ids: Array.from(selectedIds), status: v })
             }
           >
-            <SelectTrigger className="w-[130px] h-8 rounded-[7px]" disabled={!canAccess("Starter")}>
+            <SelectTrigger className="w-[130px] h-8 rounded-[7px]" disabled={!canAccess("Growth")}>
               <SelectValue placeholder="Set Status" />
             </SelectTrigger>
             <SelectContent>

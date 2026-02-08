@@ -40,8 +40,8 @@ const revenueByMethod = [
 
 const revenueByPlan = [
   { plan: "Enterprise Plan", revenue: "$52,400.00", customers: 12, avgOrder: "$4,366.67" },
-  { plan: "Pro Plan", revenue: "$34,200.00", customers: 38, avgOrder: "$900.00" },
-  { plan: "Starter Plan", revenue: "$18,600.00", customers: 62, avgOrder: "$300.00" },
+  { plan: "Scale Plan", revenue: "$34,200.00", customers: 38, avgOrder: "$900.00" },
+  { plan: "Growth Plan", revenue: "$18,600.00", customers: 62, avgOrder: "$300.00" },
   { plan: "One-time Purchases", revenue: "$9,800.00", customers: 145, avgOrder: "$67.59" },
 ];
 

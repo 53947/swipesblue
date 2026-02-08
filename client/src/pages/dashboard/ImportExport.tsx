@@ -619,12 +619,12 @@ function ImportExportContent() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="csv">CSV (Starter+)</SelectItem>
-                    <SelectItem value="json" disabled={!canAccess("Pro")}>
-                      JSON (Pro+) {!canAccess("Pro") && "🔒"}
+                    <SelectItem value="csv">CSV (Growth+)</SelectItem>
+                    <SelectItem value="json" disabled={!canAccess("Scale")}>
+                      JSON (Scale+) {!canAccess("Scale") && "🔒"}
                     </SelectItem>
-                    <SelectItem value="xml" disabled={!canAccess("Pro")}>
-                      XML (Pro+) {!canAccess("Pro") && "🔒"}
+                    <SelectItem value="xml" disabled={!canAccess("Scale")}>
+                      XML (Scale+) {!canAccess("Scale") && "🔒"}
                     </SelectItem>
                   </SelectContent>
                 </Select>
@@ -709,7 +709,7 @@ function ImportExportContent() {
 export default function ImportExport() {
   return (
     <TierGate
-      requiredTier="Starter"
+      requiredTier="Growth"
       featureName="Import / Export"
       featureDescription="Import products from CSV/Excel or export your catalog."
     >

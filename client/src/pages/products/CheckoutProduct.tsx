@@ -116,7 +116,7 @@ const checkout = SwipesBlue.createCheckout({
   amount: 49.99,
   currency: "USD",
   items: [
-    { name: "Pro Plan", quantity: 1, price: 49.99 }
+    { name: "Scale Plan", quantity: 1, price: 49.99 }
   ],
   onSuccess: (result) => {
     console.log("Payment complete:", result.transactionId);

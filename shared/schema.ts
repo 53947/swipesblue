@@ -45,7 +45,7 @@ export const merchantAccounts = pgTable("merchant_accounts", {
   passwordHash: text("password_hash").notNull(),
   businessName: text("business_name").notNull(),
   fullName: text("full_name").notNull(),
-  tier: text("tier").notNull().default("FREE"), // 'FREE' | 'Starter' | 'Pro' | 'Enterprise'
+  tier: text("tier").notNull().default("Free"), // 'Free' | 'Growth' | 'Scale' | 'Enterprise'
   status: text("status").notNull().default("active"), // 'active' | 'suspended' | 'pending'
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at"),
@@ -478,7 +478,7 @@ export const ratesActive = pgTable("rates_active", {
   id: varchar("id")
     .primaryKey()
     .default(sql`gen_random_uuid()`),
-  tierName: text("tier_name").notNull(), // 'FREE' | 'Starter' | 'Pro' | 'Enterprise' | 'API' | 'API Pro'
+  tierName: text("tier_name").notNull(), // 'Free' | 'Growth' | 'Scale' | 'Enterprise' | 'API' | 'API Pro'
   tierType: text("tier_type").notNull(), // 'ecommerce' | 'developer'
   monthlyFee: decimal("monthly_fee", { precision: 10, scale: 2 })
     .notNull()
@@ -1249,3 +1249,26 @@ export const insertVaultPaymentMethodSchema = createInsertSchema(vaultPaymentMet
 });
 export type InsertVaultPaymentMethod = z.infer<typeof insertVaultPaymentMethodSchema>;
 export type VaultPaymentMethod = typeof vaultPaymentMethods.$inferSelect;
+
+// ========================================
+// Tier Entitlements Table (Prompt 14)
+// ========================================
+
+export const tierEntitlements = pgTable("tier_entitlements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  tierName: text("tier_name").notNull(), // 'Free' | 'Growth' | 'Scale' | 'Enterprise'
+  featureKey: text("feature_key").notNull(),
+  featureValue: json("feature_value"), // JSON value for complex features
+  limit: integer("limit"), // null = unlimited
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertTierEntitlementSchema = createInsertSchema(tierEntitlements).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertTierEntitlement = z.infer<typeof insertTierEntitlementSchema>;
+export type TierEntitlement = typeof tierEntitlements.$inferSelect;

@@ -17,6 +17,7 @@ import { createNMIPartnerService, type MerchantBoardingRequest } from "./service
 import { createMerchantPaymentService, type MerchantPaymentRequest } from "./services/merchant-payment";
 import { requireApiKey, requirePermission, generateApiKey, generateApiSecret, type AuthenticatedRequest } from "./middleware/api-auth";
 import { webhookService, WebhookEventType } from "./services/webhook";
+import { normalizeTier, meetsMinTier as sharedMeetsMinTier, TIER_PRODUCT_LIMITS as SHARED_TIER_PRODUCT_LIMITS } from "@shared/tier-constants";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Session helper to get session ID from express-session
@@ -1506,18 +1507,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Check merchant auth status
   app.get("/api/auth/check", (req, res) => {
     const isMerchant = (req.session as any)?.isMerchant === true;
-    res.json({ 
+    const rawTier = (req.session as any)?.merchantTier || null;
+    res.json({
       authenticated: isMerchant,
       merchantId: (req.session as any)?.merchantId || null,
       email: (req.session as any)?.merchantEmail || null,
       name: (req.session as any)?.merchantName || null,
       businessName: (req.session as any)?.businessName || null,
-      tier: (req.session as any)?.merchantTier || null,
+      tier: rawTier ? normalizeTier(rawTier) : null,
     });
   });
 
   // ========================================
-  // Admin Auth Endpoints  
+  // Tier Entitlements Endpoints (Prompt 14)
+  // ========================================
+  app.get("/api/tier-entitlements", async (_req, res) => {
+    try {
+      const entitlements = await storage.getAllTierEntitlements();
+      res.json(entitlements);
+    } catch (error) {
+      console.error("Error fetching tier entitlements:", error);
+      res.status(500).json({ message: "Failed to fetch tier entitlements" });
+    }
+  });
+
+  app.get("/api/tier-entitlements/:tierName", async (req, res) => {
+    try {
+      const tierName = normalizeTier(req.params.tierName);
+      const entitlements = await storage.getTierEntitlements(tierName);
+      res.json(entitlements);
+    } catch (error) {
+      console.error("Error fetching tier entitlements:", error);
+      res.status(500).json({ message: "Failed to fetch tier entitlements" });
+    }
+  });
+
+  // Get active addon subscriptions for current merchant
+  app.get("/api/merchant/addon-subscriptions", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const { getAddonSubscriptionSlugs } = await import("./addon-subscriptions");
+      const slugs = await getAddonSubscriptionSlugs(merchantId);
+      res.json(slugs);
+    } catch (error) {
+      console.error("Error fetching addon subscriptions:", error);
+      res.json([]);
+    }
+  });
+
+  // ========================================
+  // Admin Auth Endpoints
   // ========================================
   const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
   const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme123";
@@ -2431,21 +2470,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Merchant Product Catalog API (Prompt 13)
   // ========================================
 
-  // Tier limit constants
-  const TIER_PRODUCT_LIMITS: Record<string, number> = {
-    FREE: 25,
-    Starter: 500,
-    Pro: Infinity,
-    Enterprise: Infinity,
-  };
-
-  const TIER_HIERARCHY: Record<string, number> = {
-    FREE: 0,
-    Starter: 1,
-    Pro: 2,
-    Enterprise: 3,
-  };
-
   // Middleware to protect merchant routes
   function requireMerchant(req: any, res: any, next: any) {
     if ((req.session as any)?.isMerchant === true && (req.session as any)?.merchantId) {
@@ -2455,23 +2479,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   }
 
-  // Helper to check if merchant tier meets minimum requirement
-  function meetsMinTier(currentTier: string, requiredTier: string): boolean {
-    return (TIER_HIERARCHY[currentTier] || 0) >= (TIER_HIERARCHY[requiredTier] || 0);
-  }
-
-  // Middleware to require minimum tier
+  // Middleware to require minimum tier (uses shared tier constants)
   function requireTier(minTier: string) {
     return (req: any, res: any, next: any) => {
-      const tier = (req.session as any)?.merchantTier || "FREE";
-      if (meetsMinTier(tier, minTier)) {
+      const rawTier = (req.session as any)?.merchantTier || "Free";
+      if (sharedMeetsMinTier(rawTier, minTier)) {
         next();
       } else {
+        const displayTier = normalizeTier(minTier);
         res.status(403).json({
           error: "Upgrade Required",
-          message: `This feature requires ${minTier} tier or higher`,
-          requiredTier: minTier,
-          currentTier: tier,
+          message: `This feature requires ${displayTier} tier or higher`,
+          requiredTier: displayTier,
+          currentTier: normalizeTier(rawTier),
         });
       }
     };
@@ -2514,8 +2534,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const merchantId = (req.session as any).merchantId;
       const count = await storage.getProductCountByMerchant(merchantId);
-      const tier = (req.session as any).merchantTier || "FREE";
-      const limit = TIER_PRODUCT_LIMITS[tier] || 25;
+      const rawTier = (req.session as any).merchantTier || "Free";
+      const tier = normalizeTier(rawTier);
+      const limit = SHARED_TIER_PRODUCT_LIMITS[tier] || 25;
       res.json({ count, limit, tier });
     } catch (error) {
       console.error("Error fetching product count:", error);
@@ -2524,7 +2545,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/merchant/products/export — Export products as CSV/JSON/XML
-  app.get("/api/merchant/products/export", requireMerchant, requireTier("Starter"), async (req, res) => {
+  app.get("/api/merchant/products/export", requireMerchant, requireTier("Growth"), async (req, res) => {
     try {
       const merchantId = (req.session as any).merchantId;
       const { format = "csv", status: filterStatus } = req.query;
@@ -2535,9 +2556,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (format === "json") {
-        const tier = (req.session as any).merchantTier || "FREE";
-        if (!meetsMinTier(tier, "Pro")) {
-          return res.status(403).json({ error: "JSON export requires Pro tier or higher" });
+        const tier = (req.session as any).merchantTier || "Free";
+        if (!sharedMeetsMinTier(tier, "Scale")) {
+          return res.status(403).json({ error: "JSON export requires Scale tier or higher" });
         }
         res.setHeader("Content-Disposition", "attachment; filename=products.json");
         res.setHeader("Content-Type", "application/json");
@@ -2545,9 +2566,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       if (format === "xml") {
-        const tier = (req.session as any).merchantTier || "FREE";
-        if (!meetsMinTier(tier, "Pro")) {
-          return res.status(403).json({ error: "XML export requires Pro tier or higher" });
+        const tier = (req.session as any).merchantTier || "Free";
+        if (!sharedMeetsMinTier(tier, "Scale")) {
+          return res.status(403).json({ error: "XML export requires Scale tier or higher" });
         }
         let xml = '<?xml version="1.0" encoding="UTF-8"?>\n<products>\n';
         for (const p of allProducts) {
@@ -2597,7 +2618,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/merchant/products/template — Download CSV import template
-  app.get("/api/merchant/products/template", requireMerchant, requireTier("Starter"), async (_req, res) => {
+  app.get("/api/merchant/products/template", requireMerchant, requireTier("Growth"), async (_req, res) => {
     try {
       const Papa = (await import("papaparse")).default;
       const templateCsv = Papa.unparse({
@@ -2616,7 +2637,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // GET /api/merchant/products/import/history — Import history
-  app.get("/api/merchant/products/import/history", requireMerchant, requireTier("Starter"), async (req, res) => {
+  app.get("/api/merchant/products/import/history", requireMerchant, requireTier("Growth"), async (req, res) => {
     try {
       const merchantId = (req.session as any).merchantId;
       const imports = await storage.getProductImportsByMerchant(merchantId);
@@ -2649,8 +2670,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/merchant/products", requireMerchant, async (req, res) => {
     try {
       const merchantId = (req.session as any).merchantId;
-      const tier = (req.session as any).merchantTier || "FREE";
-      const limit = TIER_PRODUCT_LIMITS[tier] || 25;
+      const rawTier = (req.session as any).merchantTier || "Free";
+      const tier = normalizeTier(rawTier);
+      const limit = SHARED_TIER_PRODUCT_LIMITS[tier] || 25;
 
       // Check tier limit
       const currentCount = await storage.getProductCountByMerchant(merchantId);
@@ -2717,7 +2739,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/merchant/products/bulk-update — Bulk update (Starter+)
-  app.post("/api/merchant/products/bulk-update", requireMerchant, requireTier("Starter"), async (req, res) => {
+  app.post("/api/merchant/products/bulk-update", requireMerchant, requireTier("Growth"), async (req, res) => {
     try {
       const merchantId = (req.session as any).merchantId;
       const { updates } = req.body;
@@ -2743,7 +2765,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/merchant/products/bulk-delete — Bulk delete (Starter+)
-  app.post("/api/merchant/products/bulk-delete", requireMerchant, requireTier("Starter"), async (req, res) => {
+  app.post("/api/merchant/products/bulk-delete", requireMerchant, requireTier("Growth"), async (req, res) => {
     try {
       const merchantId = (req.session as any).merchantId;
       const { ids } = req.body;
@@ -2836,11 +2858,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/merchant/products/import/execute — Execute import from mapped data
-  app.post("/api/merchant/products/import/execute", requireMerchant, requireTier("Starter"), async (req, res) => {
+  app.post("/api/merchant/products/import/execute", requireMerchant, requireTier("Growth"), async (req, res) => {
     try {
       const merchantId = (req.session as any).merchantId;
-      const tier = (req.session as any).merchantTier || "FREE";
-      const limit = TIER_PRODUCT_LIMITS[tier] || 25;
+      const rawTier = (req.session as any).merchantTier || "Free";
+      const tier = normalizeTier(rawTier);
+      const limit = SHARED_TIER_PRODUCT_LIMITS[tier] || 25;
       const { products: importProducts, fileName, fileSize, updateExisting } = req.body;
 
       if (!Array.isArray(importProducts) || importProducts.length === 0) {
