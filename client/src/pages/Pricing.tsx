@@ -163,14 +163,6 @@ const comparisonCategories = [
   },
 ];
 
-const additionalFees = [
-  { type: "Chargeback fee", amount: "$15.00" },
-  { type: "ACH return fee", amount: "$25.00" },
-  { type: "Voice authorization", amount: "$0.45" },
-  { type: "Retrieval request", amount: "$5.00" },
-  { type: "Monthly minimum", amount: "$10.00" },
-];
-
 const faqs = [
   {
     question: "Can I switch plans anytime?",
@@ -392,28 +384,6 @@ export default function Pricing() {
                     ))}
                   </div>
                 ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Additional Fees */}
-      <section className="py-20 bg-white">
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-xl font-semibold text-swipes-black mb-8">
-            Additional fees
-          </h2>
-          <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
-            {additionalFees.map((fee, idx) => (
-              <div
-                key={fee.type}
-                className={`flex justify-between px-6 py-3 text-sm ${
-                  idx % 2 === 1 ? "bg-gray-50" : "bg-white"
-                } ${idx > 0 ? "border-t border-gray-100" : ""}`}
-              >
-                <span className="text-swipes-pro-gray">{fee.type}</span>
-                <span className="text-swipes-pro-gray font-medium">{fee.amount}</span>
               </div>
             ))}
           </div>

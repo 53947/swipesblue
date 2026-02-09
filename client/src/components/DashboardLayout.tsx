@@ -4,8 +4,6 @@ import {
   Package,
   ShoppingCart,
   CreditCard,
-  Mail,
-  Palette,
   BarChart3,
   Shield,
   Settings,
@@ -35,28 +33,20 @@ interface DashboardLayoutProps {
   children: React.ReactNode;
 }
 
-const mainNavItems = [
-  { name: "Overview", href: "/dashboard", icon: LayoutDashboard },
+const paymentsNavItems = [
   { name: "Virtual Terminal", href: "/dashboard/virtual-terminal", icon: CreditCard },
   { name: "Orders", href: "/dashboard/orders", icon: ShoppingCart },
   { name: "Transactions", href: "/dashboard/transactions", icon: CreditCard },
+  { name: "Invoicing", href: "/dashboard/invoicing", icon: Receipt },
+  { name: "Payment Links", href: "/dashboard/payment-links", icon: LinkIcon },
+  { name: "Reporting", href: "/dashboard/reporting", icon: FileText },
+  { name: "Fraud Prevention", href: "/dashboard/fraud-prevention", icon: Shield },
 ];
 
-const paymentsNavItems = [
-  { name: "Invoicing", href: "/dashboard/invoicing", icon: Receipt },
+const billingNavItems = [
   { name: "Recurring Billing", href: "/dashboard/recurring-billing", icon: RefreshCw },
-  { name: "Payment Links", href: "/dashboard/payment-links", icon: LinkIcon },
   { name: "Customer Vault", href: "/dashboard/customer-vault", icon: Users },
   { name: "Dispute Management", href: "/dashboard/dispute-management", icon: AlertTriangle },
-  { name: "Fraud Prevention", href: "/dashboard/fraud-prevention", icon: Shield },
-  { name: "Reporting", href: "/dashboard/reporting", icon: FileText },
-];
-
-const ecommerceNavItems = [
-  { name: "swipesblue Store", href: "/dashboard/products", icon: Package, badge: "FREE" },
-  { name: "Shopping Cart", href: "/cart", icon: ShoppingCart, badge: "FREE" },
-  { name: "Abandoned Carts", href: "/dashboard/abandoned-carts", icon: Mail, badge: "SCALE", locked: true },
-  { name: "Brand Studio", href: "/dashboard/brand-studio", icon: Palette, badge: "SCALE", locked: true },
 ];
 
 const addOnNavItems = [
@@ -74,14 +64,65 @@ const developerNavItems = [
   { name: "Webhooks", href: "/dashboard/webhooks", icon: Link2 },
 ];
 
-const settingsNavItems = [
-  { name: "Settings", href: "/dashboard/settings", icon: Settings },
-];
-
 const platformLinks = [
-  { name: "swipesblue.com", href: "/" },
-  { name: "hostsblue.com", href: "https://hostsblue.com", external: true },
-  { name: "businessblueprint.io", href: "https://businessblueprint.io", external: true },
+  {
+    name: "swipesblue.com",
+    href: "/",
+    external: false,
+    renderName: () => (
+      <span className="text-sm">
+        <span style={{ color: '#374151' }}>swipes</span>
+        <span style={{ color: '#0000FF' }}>blue</span>
+        <span style={{ color: '#374151' }}>.com</span>
+      </span>
+    ),
+  },
+  {
+    name: "hostsblue.com",
+    href: "https://hostsblue.com",
+    external: true,
+    renderName: () => (
+      <span className="text-sm">
+        <span style={{ color: '#008060' }}>hosts</span>
+        <span style={{ color: '#0000FF' }}>blue</span>
+        <span style={{ color: '#008060' }}>.com</span>
+      </span>
+    ),
+  },
+  {
+    name: "businessblueprint.io",
+    href: "https://businessblueprint.io",
+    external: true,
+    renderName: () => (
+      <span className="text-sm">
+        <span style={{ color: '#FF6B00' }}>business</span>
+        <span style={{ color: '#0000FF' }}>blueprint</span>
+        <span style={{ color: '#FF6B00' }}>.io</span>
+      </span>
+    ),
+  },
+  {
+    name: "scansblue.com",
+    href: "https://scansblue.com",
+    external: true,
+    renderName: () => (
+      <span className="text-sm">
+        <span style={{ color: '#A00028' }}>scans</span>
+        <span style={{ color: '#0000FF' }}>blue</span>
+        <span style={{ color: '#A00028' }}>.com</span>
+      </span>
+    ),
+  },
+  {
+    name: "triadblue.com",
+    href: "https://triadblue.com",
+    external: true,
+    renderName: () => (
+      <span className="text-sm" style={{ color: '#1844A6' }}>
+        triadblue.com
+      </span>
+    ),
+  },
 ];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
@@ -167,20 +208,23 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Sidebar */}
       <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
         <div className="flex-1 py-6 px-4 space-y-4 overflow-y-auto">
-          {/* Main Navigation */}
-          <nav className="space-y-1">
-            {mainNavItems.map((item) => (
-              <NavLink key={item.name} item={item} />
-            ))}
-          </nav>
+          {/* Dashboard Section */}
+          <div>
+            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+              Dashboard
+            </h4>
+            <nav className="space-y-1">
+              <NavLink item={{ name: "Overview", href: "/dashboard", icon: LayoutDashboard }} />
+            </nav>
+          </div>
 
           {/* Divider */}
           <div className="border-t border-gray-200" />
 
-          {/* Your Catalog Section */}
+          {/* My Product Section */}
           <div>
             <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
-              Your Catalog
+              My Product
             </h4>
             <nav className="space-y-1">
               <NavLink item={{ name: "All Products", href: "/dashboard/catalog", icon: Package }} />
@@ -242,13 +286,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Divider */}
           <div className="border-t border-gray-200" />
 
-          {/* E-Commerce Section */}
+          {/* Billing Section */}
           <div>
             <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
-              E-Commerce
+              Billing
             </h4>
             <nav className="space-y-1">
-              {ecommerceNavItems.map((item) => (
+              {billingNavItems.map((item) => (
                 <NavLink key={item.name} item={item} />
               ))}
             </nav>
@@ -257,10 +301,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Divider */}
           <div className="border-t border-gray-200" />
 
-          {/* Add-ons Section */}
+          {/* Enhancements Section */}
           <div>
             <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
-              Add-Ons
+              Enhancements
             </h4>
             <nav className="space-y-1">
               {addOnNavItems.map((item) => (
@@ -272,12 +316,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Divider */}
           <div className="border-t border-gray-200" />
 
-          {/* Developer Section — only visible for Scale+ or Premium API Access holders */}
+          {/* Developers Section — only visible for Scale+ or Premium API Access holders */}
           {showDeveloperSection && (
             <>
               <div>
                 <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
-                  Developer
+                  Developers
                 </h4>
                 <nav className="space-y-1">
                   {developerNavItems.map((item) => (
@@ -297,9 +341,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
               Settings
             </h4>
             <nav className="space-y-1">
-              {settingsNavItems.map((item) => (
-                <NavLink key={item.name} item={item} />
-              ))}
+              <NavLink item={{ name: "Settings", href: "/dashboard/settings", icon: Settings }} />
             </nav>
           </div>
 
@@ -309,7 +351,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           {/* Platform Links */}
           <div>
             <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
-              Platforms
+              Platform
             </h4>
             <nav className="space-y-1">
               {platformLinks.map((link) => (
@@ -319,20 +361,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     href={link.href}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray rounded-[7px] transition-colors hover-elevate"
+                    className="flex items-center gap-3 px-3 py-2 text-sm rounded-[7px] transition-colors hover-elevate"
                     data-testid={`nav-platform-${link.name.toLowerCase().replace(/\./g, '-')}`}
                   >
-                    <ExternalLink className="h-4 w-4" />
-                    <span>{link.name}</span>
+                    <ExternalLink className="h-4 w-4 text-swipes-pro-gray" />
+                    {link.renderName()}
                   </a>
                 ) : (
                   <Link key={link.name} href={link.href}>
                     <div
-                      className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray rounded-[7px] transition-colors cursor-pointer hover-elevate"
+                      className="flex items-center gap-3 px-3 py-2 text-sm rounded-[7px] transition-colors cursor-pointer hover-elevate"
                       data-testid={`nav-platform-${link.name.toLowerCase().replace(/\./g, '-')}`}
                     >
-                      <ExternalLink className="h-4 w-4" />
-                      <span>{link.name}</span>
+                      <ExternalLink className="h-4 w-4 text-swipes-pro-gray" />
+                      {link.renderName()}
                     </div>
                   </Link>
                 )

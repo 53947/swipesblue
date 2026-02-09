@@ -145,18 +145,18 @@ export default function Products() {
           </div>
         </section>
 
-        {/* ─── Section 2: Enhancement Add-Ons ─── */}
+        {/* ─── Section 2: Enhancements ─── */}
         <section>
-          <h2 className="text-2xl font-bold text-swipes-black mb-1">Enhancement Add-Ons</h2>
+          <h2 className="text-2xl font-bold text-swipes-black mb-1">Enhancements</h2>
           <p className="text-swipes-pro-gray mb-6">
-            Extend your swipesblue platform with powerful add-ons.
+            Extend your swipesblue platform with powerful enhancements.
           </p>
 
           {/* Search */}
           <div className="relative max-w-md mb-6">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search add-ons..."
+              placeholder="Search enhancements..."
               className="pl-10 rounded-[7px]"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -185,7 +185,7 @@ export default function Products() {
             </div>
           ) : (
             <div className="text-center py-16">
-              <p className="text-xl text-muted-foreground mb-2">No add-ons found</p>
+              <p className="text-xl text-muted-foreground mb-2">No enhancements found</p>
               <p className="text-sm text-muted-foreground">Try adjusting your search term</p>
             </div>
           )}

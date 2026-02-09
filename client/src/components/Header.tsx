@@ -60,7 +60,7 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
           { icon: CreditCard, label: "Online Checkout", description: "Secure hosted checkout pages", href: "/products/checkout" },
         ],
         ctaLabel: "Explore the suite",
-        ctaHref: "/products/ecommerce"
+        ctaHref: "/products"
       },
       {
         title: "Payment Tools",
@@ -74,7 +74,7 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
           { icon: Lock, label: "Fraud Prevention", description: "Real-time fraud detection", href: "/products/fraud" },
         ],
         ctaLabel: "View all products",
-        ctaHref: "/products/ecommerce"
+        ctaHref: "/products"
       }
     ]
   },
@@ -220,22 +220,24 @@ export default function Header() {
         {/* Center: Navigation */}
         <nav className="hidden lg:flex items-center gap-1">
           {/* Products dropdown */}
-          <div 
+          <div
             className="relative"
             onMouseEnter={() => handleMouseEnter('products')}
             onMouseLeave={handleMouseLeave}
           >
-            <Button
-              variant="ghost"
-              size="sm"
-              className={`gap-1 text-[15px] font-medium rounded-[7px] ${
-                activeMenu === 'products' ? "text-swipes-blue-deep bg-gray-50" : "text-gray-600"
-              }`}
-              data-testid="button-nav-products"
-            >
-              Products
-              <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${activeMenu === 'products' ? 'rotate-180' : ''}`} />
-            </Button>
+            <Link href="/products">
+              <Button
+                variant="ghost"
+                size="sm"
+                className={`gap-1 text-[15px] font-medium rounded-[7px] ${
+                  activeMenu === 'products' ? "text-swipes-blue-deep bg-gray-50" : "text-gray-600"
+                }`}
+                data-testid="button-nav-products"
+              >
+                Products
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${activeMenu === 'products' ? 'rotate-180' : ''}`} />
+              </Button>
+            </Link>
           </div>
 
           {/* Developers dropdown */}
@@ -401,7 +403,7 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden py-4 border-t border-gray-100 bg-white shadow-lg">
           <nav className="flex flex-col gap-1 px-4">
-            <Link href="/products/ecommerce" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-products">
+            <Link href="/products" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-products">
               <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">Products</span>
             </Link>
             <Link href="/developers" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-developers">

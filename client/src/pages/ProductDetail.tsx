@@ -228,7 +228,7 @@ const productDetails: Record<string, {
       { title: "Sandbox Environment", description: "Full test environment with test cards and simulated responses." }
     ],
     faqs: [
-      { question: "Is API access included in Enterprise?", answer: "Yes. Enterprise tier includes full API access. This add-on is for Free, Growth, and Scale users." },
+      { question: "Is API access included in Enterprise?", answer: "Yes. Enterprise tier includes full API access. This enhancement is for Free, Growth, and Scale users." },
       { question: "What's the rate limit?", answer: "1,000 requests per minute for standard, 10,000 for Enterprise." },
       { question: "Is there a sandbox for testing?", answer: "Yes. Full sandbox environment with test cards and simulated responses." }
     ]
@@ -313,7 +313,7 @@ export default function ProductDetail() {
                     <AlertTriangle className="h-5 w-5 text-swipes-gold flex-shrink-0 mt-0.5" />
                     <div>
                       <p className="font-semibold text-swipes-black">Requires Scale or Enterprise Plan</p>
-                      <p className="text-sm text-swipes-pro-gray">This add-on is only available for Scale ($79/mo) and Enterprise ($299/mo) subscribers.</p>
+                      <p className="text-sm text-swipes-pro-gray">This enhancement is only available for Scale ($79/mo) and Enterprise ($299/mo) subscribers.</p>
                       <Link href="/pricing">
                         <Button variant="ghost" className="text-swipes-blue-deep p-0 h-auto mt-2">
                           Upgrade to Scale

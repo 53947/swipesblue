@@ -47,7 +47,7 @@ const recoveredCarts = [
 const abandonedProducts = [
   { name: "Premium Subscription (Annual)", timesAbandoned: 45, cartValue: "$4,050", abandonmentRate: "34%" },
   { name: "Enterprise Plan", timesAbandoned: 32, cartValue: "$9,600", abandonmentRate: "28%" },
-  { name: "Pro Add-On Bundle", timesAbandoned: 28, cartValue: "$1,400", abandonmentRate: "25%" },
+  { name: "Pro Enhancement Bundle", timesAbandoned: 28, cartValue: "$1,400", abandonmentRate: "25%" },
   { name: "Custom Integration Setup", timesAbandoned: 22, cartValue: "$3,300", abandonmentRate: "41%" },
   { name: "API Access License", timesAbandoned: 18, cartValue: "$900", abandonmentRate: "20%" },
 ];

@@ -36,6 +36,7 @@ const footerSections = {
     title: "Resources",
     links: [
       { label: "Help Center", href: "/" },
+      { label: "Processing Fees", href: "/processing-fees" },
       { label: "Security", href: "/dashboard/security" },
       { label: "Compliance", href: "/dashboard/security" },
       { label: "System Status", href: "/" },

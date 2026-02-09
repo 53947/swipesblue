@@ -55,6 +55,7 @@ import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import CookiePolicy from "@/pages/legal/CookiePolicy";
 import AcceptableUsePolicy from "@/pages/legal/AcceptableUsePolicy";
 import About from "@/pages/About";
+import ProcessingFees from "@/pages/ProcessingFees";
 import EcommerceSuite from "@/pages/products/EcommerceSuite";
 import ShoppingCartProduct from "@/pages/products/ShoppingCartProduct";
 import CheckoutProduct from "@/pages/products/CheckoutProduct";
@@ -94,6 +95,7 @@ function Router() {
       <Route path="/demo" component={Demo} />
       <Route path="/developers" component={Developers} />
       <Route path="/about" component={About} />
+      <Route path="/processing-fees" component={ProcessingFees} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
       

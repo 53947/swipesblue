@@ -102,7 +102,7 @@ export default function SubscriptionSuccess() {
                   data-testid="button-configure"
                 >
                   <span className="flex items-center justify-center">
-                    Configure {addOn?.name || "Add-on"}
+                    Configure {addOn?.name || "Enhancement"}
                     <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
                       <ArrowRight className="h-4 w-4 ml-2" />
                     </span>
