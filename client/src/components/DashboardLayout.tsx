@@ -145,8 +145,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           }`}
           data-testid={`nav-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
         >
-          <Icon className="h-4 w-4" />
-          <span className="flex-1">{item.name}</span>
+          <Icon className="h-4 w-4 shrink-0" />
+          <span className="flex-1 whitespace-nowrap">{item.name}</span>
           {item.badge && (
             <Badge
               className={`text-xs no-default-hover-elevate ${
@@ -184,8 +184,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           }`}
           data-testid={`nav-addon-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
         >
-          <Icon className="h-4 w-4" />
-          <span className="flex-1">{item.name}</span>
+          <Icon className="h-4 w-4 shrink-0" />
+          <span className="flex-1 whitespace-nowrap">{item.name}</span>
           {isSubscribed ? (
             <Badge className="text-xs bg-swipes-trusted-green text-white no-default-hover-elevate" data-testid={`badge-addon-${item.slug}-active`}>
               ACTIVE
@@ -206,8 +206,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="flex min-h-[calc(100vh-64px)]">
       {/* Sidebar */}
-      <aside className="w-64 border-r border-gray-200 bg-white flex flex-col">
-        <div className="flex-1 py-6 px-4 space-y-4 overflow-y-auto">
+      <aside className="w-64 xl:w-72 2xl:w-80 border-r border-gray-200 bg-white flex flex-col shrink-0">
+        <div className="flex-1 py-6 px-4 xl:px-5 space-y-4 overflow-y-auto">
           {/* Dashboard Section */}
           <div>
             <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
@@ -237,8 +237,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       : "text-swipes-pro-gray"
                   }`}
                 >
-                  <Table2 className="h-4 w-4" />
-                  <span className="flex-1">Bulk Editor</span>
+                  <Table2 className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 whitespace-nowrap">Bulk Editor</span>
                   {!canAccess("Growth") && (
                     <>
                       <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">GROWTH+</Badge>
@@ -255,8 +255,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                       : "text-swipes-pro-gray"
                   }`}
                 >
-                  <Upload className="h-4 w-4" />
-                  <span className="flex-1">Import / Export</span>
+                  <Upload className="h-4 w-4 shrink-0" />
+                  <span className="flex-1 whitespace-nowrap">Import / Export</span>
                   {!canAccess("Growth") && (
                     <>
                       <Badge className="text-xs bg-[#1844A6] text-white no-default-hover-elevate">GROWTH+</Badge>

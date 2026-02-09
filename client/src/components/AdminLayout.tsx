@@ -59,7 +59,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
       <aside
         className={cn(
-          "fixed top-0 left-0 z-50 h-full w-64 bg-white border-r border-gray-200 transition-transform duration-300 lg:translate-x-0 flex flex-col",
+          "fixed top-0 left-0 z-50 h-full w-64 xl:w-72 2xl:w-80 bg-white border-r border-gray-200 transition-transform duration-300 lg:translate-x-0 flex flex-col",
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         )}
         data-testid="sidebar"
@@ -176,7 +176,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
       </aside>
 
-      <div className="lg:pl-64">
+      <div className="lg:pl-64 xl:pl-72 2xl:pl-80">
         <div className="sticky top-0 z-30 h-16 bg-white border-b border-gray-200 flex items-center px-4 lg:hidden">
           <Button
             variant="ghost"
