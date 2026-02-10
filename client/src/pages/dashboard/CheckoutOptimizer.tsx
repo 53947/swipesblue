@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   Zap,
   ShoppingCart,
@@ -17,7 +18,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import {
   Select,
@@ -26,15 +26,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const basePath = "/dashboard/enhance/checkout-optimizer";
+
+const tabs = [
+  { label: "Optimization", href: basePath },
+  { label: "A/B Tests", href: `${basePath}?tab=ab-tests` },
+  { label: "Smart Routing", href: `${basePath}?tab=smart-routing` },
+  { label: "Checkout Analytics", href: `${basePath}?tab=checkout-analytics` },
+];
 
 interface OptimizationFeature {
   id: string;
@@ -120,11 +122,11 @@ const paymentMethodConversions: PaymentMethodConversion[] = [
 function getTestStatusClasses(status: ABTest["status"]): string {
   switch (status) {
     case "Running":
-      return "bg-swipes-trusted-green text-white";
+      return "bg-green-600 text-white";
     case "Completed":
-      return "bg-swipes-blue-deep text-white";
+      return "bg-[#1844A6] text-white";
     case "Paused":
-      return "bg-swipes-gold text-white";
+      return "bg-yellow-500 text-white";
   }
 }
 
@@ -132,6 +134,9 @@ export default function CheckoutOptimizer() {
   const [features, setFeatures] = useState(initialFeatures);
   const [autoRetry, setAutoRetry] = useState(true);
   const [retryDelay, setRetryDelay] = useState("5");
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "optimization";
 
   const toggleFeature = (featureId: string) => {
     setFeatures((prev) =>
@@ -140,16 +145,13 @@ export default function CheckoutOptimizer() {
   };
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Checkout Optimizer</h1>
-        <p className="text-swipes-pro-gray">
-          Optimize conversion rates with A/B testing, smart payment routing, and checkout flow analytics
-        </p>
-      </div>
+    <div>
+      <p className="text-gray-500 mb-6">
+        Optimize conversion rates with A/B testing, smart payment routing, and checkout flow analytics
+      </p>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Checkout Conversion Rate"
           value="73.2%"
@@ -180,42 +182,36 @@ export default function CheckoutOptimizer() {
         />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="optimization" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="optimization">Optimization</TabsTrigger>
-          <TabsTrigger value="ab-tests">A/B Tests</TabsTrigger>
-          <TabsTrigger value="smart-routing">Smart Routing</TabsTrigger>
-          <TabsTrigger value="checkout-analytics">Checkout Analytics</TabsTrigger>
-        </TabsList>
+      <SubNavTabs tabs={tabs} />
 
-        {/* Optimization Tab */}
-        <TabsContent value="optimization" className="space-y-4">
+      {/* Optimization Tab */}
+      {activeTab === "optimization" && (
+        <div className="space-y-4">
           {features.map((feature) => (
             <div
               key={feature.id}
               className="bg-white rounded-[7px] border border-gray-200 p-6 flex items-center justify-between gap-4"
             >
               <div className="flex items-start gap-4 flex-1 min-w-0">
-                <div className="w-10 h-10 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center shrink-0">
-                  <Zap className="h-5 w-5 text-swipes-blue-deep" />
+                <div className="w-10 h-10 rounded-[7px] bg-[#1844A6]/10 flex items-center justify-center shrink-0">
+                  <Zap className="h-5 w-5 text-[#1844A6]" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3 mb-1">
-                    <h3 className="text-base font-semibold text-swipes-black">
+                    <h3 className="text-base font-semibold text-gray-900">
                       {feature.name}
                     </h3>
                     <Badge
-                      className={
+                      className={`rounded-full ${
                         feature.enabled
-                          ? "bg-swipes-trusted-green text-white"
+                          ? "bg-green-600 text-white"
                           : "bg-gray-400 text-white"
-                      }
+                      }`}
                     >
                       {feature.enabled ? "Enabled" : "Disabled"}
                     </Badge>
                   </div>
-                  <p className="text-sm text-swipes-pro-gray">{feature.description}</p>
+                  <p className="text-sm text-gray-500">{feature.description}</p>
                 </div>
               </div>
               <Switch
@@ -224,46 +220,48 @@ export default function CheckoutOptimizer() {
               />
             </div>
           ))}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* A/B Tests Tab */}
-        <TabsContent value="ab-tests" className="space-y-6">
+      {/* A/B Tests Tab */}
+      {activeTab === "ab-tests" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 flex items-center justify-between border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">A/B Tests</h3>
-              <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+              <h3 className="text-lg font-semibold text-gray-900">A/B Tests</h3>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
                 <Plus className="h-4 w-4 mr-2" />
                 Create Test
               </Button>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Test Name</TableHead>
-                  <TableHead>Variant A</TableHead>
-                  <TableHead>Variant B</TableHead>
-                  <TableHead>Split</TableHead>
-                  <TableHead>Conv. A</TableHead>
-                  <TableHead>Conv. B</TableHead>
-                  <TableHead>Winner</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Test Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Variant A</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Variant B</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Split</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Conv. A</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Conv. B</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Winner</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {abTests.map((test) => (
-                  <TableRow key={test.id}>
-                    <TableCell className="font-medium text-swipes-black">{test.name}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{test.variantA}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{test.variantB}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{test.trafficSplit}</TableCell>
-                    <TableCell className="text-swipes-black">{test.conversionsA}</TableCell>
-                    <TableCell className="text-swipes-black">{test.conversionsB}</TableCell>
-                    <TableCell className="text-swipes-black font-medium">{test.winner}</TableCell>
-                    <TableCell>
-                      <Badge className={getTestStatusClasses(test.status)}>{test.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
+                  <tr key={test.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{test.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{test.variantA}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{test.variantB}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{test.trafficSplit}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{test.conversionsA}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{test.conversionsB}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{test.winner}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`rounded-full ${getTestStatusClasses(test.status)}`}>{test.status}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
                       <Button size="sm" variant="outline" className="rounded-[7px]">
                         {test.status === "Running" ? (
                           <Pause className="h-4 w-4" />
@@ -271,20 +269,22 @@ export default function CheckoutOptimizer() {
                           <Play className="h-4 w-4" />
                         )}
                       </Button>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Smart Routing Tab */}
-        <TabsContent value="smart-routing" className="space-y-6">
+      {/* Smart Routing Tab */}
+      {activeTab === "smart-routing" && (
+        <div className="space-y-6">
           {/* Gateway Priority */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Gateway Priority</h3>
-            <p className="text-sm text-swipes-pro-gray">
+            <h3 className="text-lg font-semibold text-gray-900">Gateway Priority</h3>
+            <p className="text-sm text-gray-500">
               Configure the order in which gateways are used for payment processing.
             </p>
             <div className="space-y-3">
@@ -299,25 +299,25 @@ export default function CheckoutOptimizer() {
                     gw.active ? "border-gray-200 bg-gray-50" : "border-dashed border-gray-300 bg-gray-50/50"
                   }`}
                 >
-                  <GripVertical className="h-5 w-5 text-swipes-pro-gray shrink-0" />
+                  <GripVertical className="h-5 w-5 text-gray-500 shrink-0" />
                   <div className="flex-1">
                     <div className="flex items-center gap-3">
-                      <span className="font-medium text-swipes-black">{gw.name}</span>
+                      <span className="font-medium text-gray-900">{gw.name}</span>
                       <Badge
-                        className={
+                        className={`rounded-full ${
                           gw.active
-                            ? "bg-swipes-trusted-green text-white"
+                            ? "bg-green-600 text-white"
                             : "bg-gray-400 text-white"
-                        }
+                        }`}
                       >
                         {gw.priority}
                       </Badge>
                       {!gw.active && (
-                        <Badge className="bg-gray-400 text-white">Disabled</Badge>
+                        <Badge className="rounded-full bg-gray-400 text-white">Disabled</Badge>
                       )}
                     </div>
                     {gw.active && (
-                      <p className="text-sm text-swipes-pro-gray mt-1">
+                      <p className="text-sm text-gray-500 mt-1">
                         {gw.uptime} uptime · {gw.declineRate} decline rate
                       </p>
                     )}
@@ -331,8 +331,8 @@ export default function CheckoutOptimizer() {
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-swipes-black">Routing Rules</h3>
-                <p className="text-sm text-swipes-pro-gray mt-1">
+                <h3 className="text-lg font-semibold text-gray-900">Routing Rules</h3>
+                <p className="text-sm text-gray-500 mt-1">
                   Route transactions to specific gateways based on conditions.
                 </p>
               </div>
@@ -348,10 +348,10 @@ export default function CheckoutOptimizer() {
                   className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-[7px]"
                 >
                   <div className="flex items-center gap-4">
-                    <ArrowRight className="h-4 w-4 text-swipes-blue-deep" />
-                    <span className="text-sm font-medium text-swipes-black">{rule.condition}</span>
-                    <ArrowRight className="h-4 w-4 text-swipes-pro-gray" />
-                    <Badge className="bg-swipes-blue-deep text-white">{rule.gateway}</Badge>
+                    <ArrowRight className="h-4 w-4 text-[#1844A6]" />
+                    <span className="text-sm font-medium text-gray-900">{rule.condition}</span>
+                    <ArrowRight className="h-4 w-4 text-gray-500" />
+                    <Badge className="rounded-full bg-[#1844A6] text-white">{rule.gateway}</Badge>
                   </div>
                   <Switch checked={rule.enabled} />
                 </div>
@@ -361,18 +361,18 @@ export default function CheckoutOptimizer() {
 
           {/* Failover Settings */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Failover Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Failover Settings</h3>
             <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-[7px]">
               <div>
-                <p className="text-sm font-medium text-swipes-black">Auto-Retry on Decline</p>
-                <p className="text-sm text-swipes-pro-gray">Automatically retry failed transactions on the next available gateway</p>
+                <p className="text-sm font-medium text-gray-900">Auto-Retry on Decline</p>
+                <p className="text-sm text-gray-500">Automatically retry failed transactions on the next available gateway</p>
               </div>
               <Switch checked={autoRetry} onCheckedChange={setAutoRetry} />
             </div>
             <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-[7px]">
               <div>
-                <p className="text-sm font-medium text-swipes-black">Retry Delay</p>
-                <p className="text-sm text-swipes-pro-gray">Time to wait before retrying on fallback gateway</p>
+                <p className="text-sm font-medium text-gray-900">Retry Delay</p>
+                <p className="text-sm text-gray-500">Time to wait before retrying on fallback gateway</p>
               </div>
               <Select value={retryDelay} onValueChange={setRetryDelay}>
                 <SelectTrigger className="w-[140px] rounded-[7px]">
@@ -387,23 +387,25 @@ export default function CheckoutOptimizer() {
               </Select>
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Checkout Analytics Tab */}
-        <TabsContent value="checkout-analytics" className="space-y-6">
+      {/* Checkout Analytics Tab */}
+      {activeTab === "checkout-analytics" && (
+        <div className="space-y-6">
           {/* Funnel Visualization */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-6">Checkout Funnel</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Checkout Funnel</h3>
             <div className="space-y-1">
               {funnelSteps.map((step, i) => (
                 <div key={step.name}>
                   <div className="flex items-center gap-4">
-                    <span className="text-sm font-medium text-swipes-black w-28 shrink-0">
+                    <span className="text-sm font-medium text-gray-900 w-28 shrink-0">
                       {step.name}
                     </span>
                     <div className="flex-1 h-10 bg-gray-100 rounded-[7px] overflow-hidden">
                       <div
-                        className="h-full bg-swipes-blue-deep rounded-[7px] flex items-center justify-end pr-3 transition-all"
+                        className="h-full bg-[#1844A6] rounded-[7px] flex items-center justify-end pr-3 transition-all"
                         style={{ width: `${step.percent}%` }}
                       >
                         <span className="text-xs font-medium text-white">
@@ -415,7 +417,7 @@ export default function CheckoutOptimizer() {
                   {i < funnelSteps.length - 1 && (
                     <div className="flex items-center gap-4 py-1">
                       <span className="w-28 shrink-0" />
-                      <span className="text-xs text-swipes-muted-red ml-2">
+                      <span className="text-xs text-red-600 ml-2">
                         ↓ {((1 - funnelSteps[i + 1].count / step.count) * 100).toFixed(1)}% drop-off
                       </span>
                     </div>
@@ -428,19 +430,19 @@ export default function CheckoutOptimizer() {
           {/* Drop-off Reasons + Device Breakdown */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Top Drop-off Reasons
               </h3>
               <div className="space-y-3">
                 {dropOffReasons.map((item) => (
                   <div key={item.reason} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-swipes-black">{item.reason}</span>
-                      <span className="text-swipes-pro-gray">{item.percent}%</span>
+                      <span className="font-medium text-gray-900">{item.reason}</span>
+                      <span className="text-gray-500">{item.percent}%</span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-swipes-muted-red rounded-full transition-all"
+                        className="h-full bg-red-600 rounded-full transition-all"
                         style={{ width: `${item.percent}%` }}
                       />
                     </div>
@@ -450,24 +452,24 @@ export default function CheckoutOptimizer() {
             </div>
 
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Checkout by Device
               </h3>
               <div className="space-y-6">
                 {[
-                  { label: "Desktop", percent: 52, icon: Monitor, color: "bg-swipes-blue-deep" },
-                  { label: "Mobile", percent: 38, icon: Smartphone, color: "bg-swipes-trusted-green" },
-                  { label: "Tablet", percent: 10, icon: Tablet, color: "bg-swipes-gold" },
+                  { label: "Desktop", percent: 52, icon: Monitor, color: "bg-[#1844A6]" },
+                  { label: "Mobile", percent: 38, icon: Smartphone, color: "bg-green-600" },
+                  { label: "Tablet", percent: 10, icon: Tablet, color: "bg-yellow-500" },
                 ].map((device) => {
                   const Icon = device.icon;
                   return (
                     <div key={device.label} className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <div className="flex items-center gap-2">
-                          <Icon className="h-4 w-4 text-swipes-pro-gray" />
-                          <span className="font-medium text-swipes-black">{device.label}</span>
+                          <Icon className="h-4 w-4 text-gray-500" />
+                          <span className="font-medium text-gray-900">{device.label}</span>
                         </div>
-                        <span className="text-swipes-pro-gray">{device.percent}%</span>
+                        <span className="text-gray-500">{device.percent}%</span>
                       </div>
                       <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                         <div
@@ -485,35 +487,35 @@ export default function CheckoutOptimizer() {
           {/* Payment Method Conversion Rates */}
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">
+              <h3 className="text-lg font-semibold text-gray-900">
                 Payment Method Conversion Rates
               </h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Method</TableHead>
-                  <TableHead>Attempts</TableHead>
-                  <TableHead>Successes</TableHead>
-                  <TableHead>Rate</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Method</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Attempts</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Successes</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Rate</th>
+                </tr>
+              </thead>
+              <tbody>
                 {paymentMethodConversions.map((pm) => (
-                  <TableRow key={pm.method}>
-                    <TableCell className="font-medium text-swipes-black">{pm.method}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{pm.attempts.toLocaleString()}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{pm.successes.toLocaleString()}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-swipes-trusted-green text-white">{pm.rate}</Badge>
-                    </TableCell>
-                  </TableRow>
+                  <tr key={pm.method} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{pm.method}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{pm.attempts.toLocaleString()}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{pm.successes.toLocaleString()}</td>
+                    <td className="px-4 py-3">
+                      <Badge className="rounded-full bg-green-600 text-white">{pm.rate}</Badge>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

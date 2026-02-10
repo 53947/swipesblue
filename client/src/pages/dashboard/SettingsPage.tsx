@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   Settings,
   Building2,
@@ -15,7 +16,6 @@ import { useMerchantAuth } from "@/hooks/use-merchant-auth";
 import TierBadge from "@/components/TierBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -28,14 +28,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const basePath = "/dashboard/settings";
+
+const tabs = [
+  { label: "General", href: basePath },
+  { label: "Business Profile", href: `${basePath}?tab=business` },
+  { label: "Notifications", href: `${basePath}?tab=notifications` },
+  { label: "Payment Settings", href: `${basePath}?tab=payment` },
+  { label: "Billing", href: `${basePath}?tab=billing` },
+  { label: "API", href: `${basePath}?tab=api` },
+];
 
 const billingHistory = [
   { date: "Oct 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0010" },
@@ -48,6 +52,10 @@ const billingHistory = [
 
 export default function SettingsPage() {
   const { tier } = useMerchantAuth();
+  const [location] = useLocation();
+
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "general";
 
   // General
   const [companyName, setCompanyName] = useState("swipesblue, inc.");
@@ -115,29 +123,22 @@ export default function SettingsPage() {
   return (
     <div className="p-8 space-y-8">
       <div>
-        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Settings</h1>
-        <p className="text-swipes-pro-gray">
+        <h1 className="text-2xl font-bold mb-2 text-gray-900">Settings</h1>
+        <p className="text-gray-500">
           Configure your account, business profile, notifications, and preferences
         </p>
       </div>
 
-      <Tabs defaultValue="general" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="business">Business Profile</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="payment">Payment Settings</TabsTrigger>
-          <TabsTrigger value="billing">Billing</TabsTrigger>
-          <TabsTrigger value="api">API</TabsTrigger>
-        </TabsList>
+      <SubNavTabs tabs={tabs} />
 
-        {/* General Tab */}
-        <TabsContent value="general" className="space-y-6">
+      {/* General Tab */}
+      {activeTab === "general" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Account Information</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Account Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Company Name</Label>
+                <Label className="text-sm font-medium text-gray-900">Company Name</Label>
                 <Input
                   value={companyName}
                   onChange={(e) => setCompanyName(e.target.value)}
@@ -145,7 +146,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Primary Email</Label>
+                <Label className="text-sm font-medium text-gray-900">Primary Email</Label>
                 <Input
                   type="email"
                   value={primaryEmail}
@@ -154,7 +155,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Timezone</Label>
+                <Label className="text-sm font-medium text-gray-900">Timezone</Label>
                 <Select value={timezone} onValueChange={setTimezone}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -170,7 +171,7 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Language</Label>
+                <Label className="text-sm font-medium text-gray-900">Language</Label>
                 <Select value={language} onValueChange={setLanguage}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -187,10 +188,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Display Preferences</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Display Preferences</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Default Dashboard View</Label>
+                <Label className="text-sm font-medium text-gray-900">Default Dashboard View</Label>
                 <Select value={defaultView} onValueChange={setDefaultView}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -203,7 +204,7 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Items Per Page</Label>
+                <Label className="text-sm font-medium text-gray-900">Items Per Page</Label>
                 <Select value={itemsPerPage} onValueChange={setItemsPerPage}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -217,7 +218,7 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Date Format</Label>
+                <Label className="text-sm font-medium text-gray-900">Date Format</Label>
                 <Select value={dateFormat} onValueChange={setDateFormat}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -233,19 +234,21 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
               Save Changes
             </Button>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Business Profile Tab */}
-        <TabsContent value="business" className="space-y-6">
+      {/* Business Profile Tab */}
+      {activeTab === "business" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Business Details</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Business Details</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Business Name</Label>
+                <Label className="text-sm font-medium text-gray-900">Business Name</Label>
                 <Input
                   value={businessName}
                   onChange={(e) => setBusinessName(e.target.value)}
@@ -253,7 +256,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">DBA Name</Label>
+                <Label className="text-sm font-medium text-gray-900">DBA Name</Label>
                 <Input
                   value={dbaName}
                   onChange={(e) => setDbaName(e.target.value)}
@@ -261,7 +264,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Business Type</Label>
+                <Label className="text-sm font-medium text-gray-900">Business Type</Label>
                 <Select value={businessType} onValueChange={setBusinessType}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -275,7 +278,7 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Tax ID / EIN</Label>
+                <Label className="text-sm font-medium text-gray-900">Tax ID / EIN</Label>
                 <Input
                   value={taxId}
                   onChange={(e) => setTaxId(e.target.value)}
@@ -286,10 +289,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Business Address</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Business Address</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2 md:col-span-2">
-                <Label className="text-sm font-medium text-swipes-black">Street Address</Label>
+                <Label className="text-sm font-medium text-gray-900">Street Address</Label>
                 <Input
                   value={street}
                   onChange={(e) => setStreet(e.target.value)}
@@ -297,7 +300,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">City</Label>
+                <Label className="text-sm font-medium text-gray-900">City</Label>
                 <Input
                   value={city}
                   onChange={(e) => setCity(e.target.value)}
@@ -305,7 +308,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">State</Label>
+                <Label className="text-sm font-medium text-gray-900">State</Label>
                 <Input
                   value={state}
                   onChange={(e) => setState(e.target.value)}
@@ -313,7 +316,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">ZIP Code</Label>
+                <Label className="text-sm font-medium text-gray-900">ZIP Code</Label>
                 <Input
                   value={zip}
                   onChange={(e) => setZip(e.target.value)}
@@ -321,7 +324,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Country</Label>
+                <Label className="text-sm font-medium text-gray-900">Country</Label>
                 <Select value={country} onValueChange={setCountry}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -339,10 +342,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Contact & Support</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Contact & Support</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Support Phone</Label>
+                <Label className="text-sm font-medium text-gray-900">Support Phone</Label>
                 <Input
                   value={supportPhone}
                   onChange={(e) => setSupportPhone(e.target.value)}
@@ -350,7 +353,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Support Email</Label>
+                <Label className="text-sm font-medium text-gray-900">Support Email</Label>
                 <Input
                   type="email"
                   value={supportEmail}
@@ -359,7 +362,7 @@ export default function SettingsPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Website URL</Label>
+                <Label className="text-sm font-medium text-gray-900">Website URL</Label>
                 <Input
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
@@ -371,13 +374,13 @@ export default function SettingsPage() {
 
           {/* Logo Upload */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Business Logo</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Business Logo</h3>
             <div className="border-2 border-dashed border-gray-300 rounded-[7px] p-8 text-center">
-              <Upload className="h-8 w-8 text-swipes-pro-gray mx-auto mb-3" />
-              <p className="text-sm font-medium text-swipes-black">
+              <Upload className="h-8 w-8 text-gray-500 mx-auto mb-3" />
+              <p className="text-sm font-medium text-gray-900">
                 Drag & drop your logo here, or click to browse
               </p>
-              <p className="text-xs text-swipes-pro-gray mt-1">PNG, JPG, or SVG — Max 2MB</p>
+              <p className="text-xs text-gray-500 mt-1">PNG, JPG, or SVG — Max 2MB</p>
               <Button variant="outline" className="mt-4 rounded-[7px]">
                 Choose File
               </Button>
@@ -387,15 +390,15 @@ export default function SettingsPage() {
           {/* Basic Branding — available to ALL tiers */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
             <div className="flex items-center gap-3">
-              <Palette className="h-5 w-5 text-swipes-blue-deep" />
-              <h3 className="text-lg font-semibold text-swipes-black">Basic Branding</h3>
+              <Palette className="h-5 w-5 text-[#1844A6]" />
+              <h3 className="text-lg font-semibold text-gray-900">Basic Branding</h3>
             </div>
-            <p className="text-sm text-swipes-pro-gray">
+            <p className="text-sm text-gray-500">
               Customize how your business appears on checkout pages and customer-facing emails.
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Primary Brand Color</Label>
+                <Label className="text-sm font-medium text-gray-900">Primary Brand Color</Label>
                 <div className="flex items-center gap-3">
                   <Input
                     type="color"
@@ -408,15 +411,15 @@ export default function SettingsPage() {
                     className="flex-1 rounded-[7px] font-mono text-sm"
                   />
                 </div>
-                <p className="text-xs text-swipes-pro-gray">
+                <p className="text-xs text-gray-500">
                   Used for buttons and accents on your checkout and emails.
                 </p>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Checkout Logo</Label>
+                <Label className="text-sm font-medium text-gray-900">Checkout Logo</Label>
                 <div className="border-2 border-dashed border-gray-300 rounded-[7px] p-4 text-center">
-                  <Upload className="h-6 w-6 text-swipes-pro-gray mx-auto mb-2" />
-                  <p className="text-xs text-swipes-pro-gray">
+                  <Upload className="h-6 w-6 text-gray-500 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">
                     Upload a logo for your checkout page (PNG, JPG, SVG — Max 1MB)
                   </p>
                   <Button variant="outline" size="sm" className="mt-2 rounded-[7px]">
@@ -428,22 +431,24 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
               Save Changes
             </Button>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Notifications Tab */}
-        <TabsContent value="notifications" className="space-y-6">
+      {/* Notifications Tab */}
+      {activeTab === "notifications" && (
+        <div className="space-y-6">
           {/* Payments */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Payments</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Payments</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Successful Payment</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Successful Payment</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Receive a notification when a payment is successfully processed.
                   </p>
                 </div>
@@ -451,8 +456,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Failed Payment</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Failed Payment</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Get alerted when a payment attempt fails.
                   </p>
                 </div>
@@ -460,8 +465,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Refund Processed</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Refund Processed</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Notification when a refund is issued to a customer.
                   </p>
                 </div>
@@ -469,15 +474,15 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">
+                  <Label className="text-sm font-medium text-gray-900">
                     Large Transaction Alert
                   </Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     Notify when a transaction exceeds the threshold below.
                   </p>
                   {notifLargeTransaction && (
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-swipes-pro-gray">Threshold: $</span>
+                      <span className="text-xs text-gray-500">Threshold: $</span>
                       <Input
                         value={largeTransactionThreshold}
                         onChange={(e) => setLargeTransactionThreshold(e.target.value)}
@@ -493,12 +498,12 @@ export default function SettingsPage() {
 
           {/* Security */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Security</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Security</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Login from New Device</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Login from New Device</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Alert when your account is accessed from an unrecognized device.
                   </p>
                 </div>
@@ -506,8 +511,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">API Key Usage</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">API Key Usage</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Notify when API keys are created, modified, or used for the first time.
                   </p>
                 </div>
@@ -515,8 +520,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Fraud Alert</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Fraud Alert</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Immediate notification when a transaction is flagged as potential fraud.
                   </p>
                 </div>
@@ -524,8 +529,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Failed Login Attempt</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Failed Login Attempt</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Alert after multiple failed login attempts on your account.
                   </p>
                 </div>
@@ -536,12 +541,12 @@ export default function SettingsPage() {
 
           {/* Billing Notifications */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Billing</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Billing</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Upcoming Invoice</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Upcoming Invoice</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Reminder before your next billing date.
                   </p>
                 </div>
@@ -549,10 +554,10 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">
+                  <Label className="text-sm font-medium text-gray-900">
                     Payment Method Expiring
                   </Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <p className="text-xs text-gray-500 mt-1">
                     Alert when your payment method is about to expire.
                   </p>
                 </div>
@@ -560,8 +565,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Plan Renewal</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Plan Renewal</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Notification when your subscription renews.
                   </p>
                 </div>
@@ -572,12 +577,12 @@ export default function SettingsPage() {
 
           {/* Reports Notifications */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Reports</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Reports</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Daily Summary</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Daily Summary</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     End-of-day summary of transactions and revenue.
                   </p>
                 </div>
@@ -585,8 +590,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Weekly Summary</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Weekly Summary</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Weekly overview delivered every Monday morning.
                   </p>
                 </div>
@@ -594,8 +599,8 @@ export default function SettingsPage() {
               </div>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Monthly Report</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Monthly Report</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Comprehensive monthly analytics report.
                   </p>
                 </div>
@@ -603,15 +608,17 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Payment Settings Tab */}
-        <TabsContent value="payment" className="space-y-6">
+      {/* Payment Settings Tab */}
+      {activeTab === "payment" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Payment Defaults</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Payment Defaults</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Default Currency</Label>
+                <Label className="text-sm font-medium text-gray-900">Default Currency</Label>
                 <Select value={defaultCurrency} onValueChange={setDefaultCurrency}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -626,13 +633,13 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Capture Mode</Label>
+                <Label className="text-sm font-medium text-gray-900">Capture Mode</Label>
                 <div className="flex items-center justify-between p-3 bg-gray-50 rounded-[7px]">
                   <div>
-                    <p className="text-sm font-medium text-swipes-black">
+                    <p className="text-sm font-medium text-gray-900">
                       {autoCapture ? "Auto-Capture" : "Auth-Only"}
                     </p>
-                    <p className="text-xs text-swipes-pro-gray mt-0.5">
+                    <p className="text-xs text-gray-500 mt-0.5">
                       {autoCapture
                         ? "Payments are captured immediately"
                         : "Payments are authorized and captured manually"}
@@ -645,7 +652,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Accepted Card Brands</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Accepted Card Brands</h3>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
               {[
                 { label: "Visa", state: cardVisa, set: setCardVisa },
@@ -660,7 +667,7 @@ export default function SettingsPage() {
                     checked={card.state}
                     onCheckedChange={(checked) => card.set(checked === true)}
                   />
-                  <Label className="text-sm font-medium text-swipes-black cursor-pointer">
+                  <Label className="text-sm font-medium text-gray-900 cursor-pointer">
                     {card.label}
                   </Label>
                 </div>
@@ -669,10 +676,10 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Verification Settings</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Verification Settings</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">AVS (Address Verification)</Label>
+                <Label className="text-sm font-medium text-gray-900">AVS (Address Verification)</Label>
                 <Select value={avsSetting} onValueChange={setAvsSetting}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -685,7 +692,7 @@ export default function SettingsPage() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">CVV Verification</Label>
+                <Label className="text-sm font-medium text-gray-900">CVV Verification</Label>
                 <Select value={cvvSetting} onValueChange={setCvvSetting}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -700,11 +707,11 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">3D Secure</h3>
+            <h3 className="text-lg font-semibold text-gray-900">3D Secure</h3>
             <div className="flex items-center justify-between">
               <div>
-                <Label className="text-sm font-medium text-swipes-black">Enable 3D Secure</Label>
-                <p className="text-xs text-swipes-pro-gray mt-1">
+                <Label className="text-sm font-medium text-gray-900">Enable 3D Secure</Label>
+                <p className="text-xs text-gray-500 mt-1">
                   Add an extra authentication step for online card payments.
                 </p>
               </div>
@@ -712,17 +719,17 @@ export default function SettingsPage() {
             </div>
             {threeDSecure && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">
+                <Label className="text-sm font-medium text-gray-900">
                   Minimum Transaction Amount
                 </Label>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm text-swipes-pro-gray">$</span>
+                  <span className="text-sm text-gray-500">$</span>
                   <Input
                     value={threeDThreshold}
                     onChange={(e) => setThreeDThreshold(e.target.value)}
                     className="w-32 rounded-[7px]"
                   />
-                  <span className="text-xs text-swipes-pro-gray">
+                  <span className="text-xs text-gray-500">
                     3D Secure applies to transactions above this amount
                   </span>
                 </div>
@@ -732,9 +739,9 @@ export default function SettingsPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-swipes-black">Duplicate Detection</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Duplicate Detection</h3>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">
+                <Label className="text-sm font-medium text-gray-900">
                   Duplicate Transaction Window
                 </Label>
                 <Select value={duplicateWindow} onValueChange={setDuplicateWindow}>
@@ -749,18 +756,18 @@ export default function SettingsPage() {
                     <SelectItem value="1hour">1 Hour</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-xs text-swipes-pro-gray">
+                <p className="text-xs text-gray-500">
                   Block identical transactions within this time window.
                 </p>
               </div>
             </div>
 
             <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-swipes-black">Receipt Settings</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Receipt Settings</h3>
               <div className="flex items-center justify-between">
                 <div>
-                  <Label className="text-sm font-medium text-swipes-black">Auto-Send Receipts</Label>
-                  <p className="text-xs text-swipes-pro-gray mt-1">
+                  <Label className="text-sm font-medium text-gray-900">Auto-Send Receipts</Label>
+                  <p className="text-xs text-gray-500 mt-1">
                     Automatically email receipts after each successful payment.
                   </p>
                 </div>
@@ -771,44 +778,46 @@ export default function SettingsPage() {
 
           {autoReceipts && (
             <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-swipes-black">Receipt Email Template</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Receipt Email Template</h3>
               <Textarea
                 value={receiptTemplate}
                 onChange={(e) => setReceiptTemplate(e.target.value)}
                 rows={6}
                 className="rounded-[7px] font-mono text-sm"
               />
-              <p className="text-xs text-swipes-pro-gray">
+              <p className="text-xs text-gray-500">
                 Available variables: {"{{amount}}"}, {"{{order_id}}"}, {"{{date}}"}, {"{{customer_name}}"}, {"{{customer_email}}"}
               </p>
             </div>
           )}
 
           <div className="flex justify-end">
-            <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
               Save Changes
             </Button>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Billing Tab */}
-        <TabsContent value="billing" className="space-y-6">
+      {/* Billing Tab */}
+      {activeTab === "billing" && (
+        <div className="space-y-6">
           {/* Current Plan */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
             <div className="flex items-start justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-swipes-black">Current Plan</h3>
+                <h3 className="text-lg font-semibold text-gray-900">Current Plan</h3>
                 <div className="mt-3 space-y-2">
                   <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-swipes-blue-deep">{tier} Plan</span>
+                    <span className="text-2xl font-bold text-[#1844A6]">{tier} Plan</span>
                     <TierBadge tier={tier} size="sm" />
-                    <Badge className="bg-swipes-trusted-green text-white">Active</Badge>
+                    <Badge className="bg-green-600 text-white rounded-full">Active</Badge>
                   </div>
-                  <p className="text-sm text-swipes-pro-gray">$49.00/month — Billed monthly</p>
-                  <p className="text-sm text-swipes-pro-gray">Next billing date: November 1, 2025</p>
+                  <p className="text-sm text-gray-500">$49.00/month — Billed monthly</p>
+                  <p className="text-sm text-gray-500">Next billing date: November 1, 2025</p>
                 </div>
               </div>
-              <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
                 Upgrade Plan
               </Button>
             </div>
@@ -816,13 +825,13 @@ export default function SettingsPage() {
 
           {/* Payment Method */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">Payment Method on File</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method on File</h3>
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-[7px]">
               <div className="flex items-center gap-3">
-                <CreditCard className="h-6 w-6 text-swipes-blue-deep" />
+                <CreditCard className="h-6 w-6 text-[#1844A6]" />
                 <div>
-                  <p className="text-sm font-medium text-swipes-black">Visa ending in 4242</p>
-                  <p className="text-xs text-swipes-pro-gray">Expires 12/2026</p>
+                  <p className="text-sm font-medium text-gray-900">Visa ending in 4242</p>
+                  <p className="text-xs text-gray-500">Expires 12/2026</p>
                 </div>
               </div>
               <Button variant="outline" className="rounded-[7px]">
@@ -834,58 +843,62 @@ export default function SettingsPage() {
           {/* Billing History */}
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Billing History</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Billing History</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Invoice</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {billingHistory.map((entry) => (
-                  <TableRow key={entry.invoice}>
-                    <TableCell className="text-swipes-pro-gray">{entry.date}</TableCell>
-                    <TableCell className="font-medium text-swipes-black">
-                      {entry.description}
-                    </TableCell>
-                    <TableCell className="text-swipes-black">{entry.amount}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-swipes-trusted-green text-white">{entry.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button size="sm" variant="outline" className="rounded-[7px]">
-                        <Receipt className="h-4 w-4 mr-1" />
-                        {entry.invoice}
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-[#F6F9FC] text-left">
+                    <th className="px-4 py-3 font-medium text-gray-700">Date</th>
+                    <th className="px-4 py-3 font-medium text-gray-700">Description</th>
+                    <th className="px-4 py-3 font-medium text-gray-700">Amount</th>
+                    <th className="px-4 py-3 font-medium text-gray-700">Status</th>
+                    <th className="px-4 py-3 font-medium text-gray-700 text-right">Invoice</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {billingHistory.map((entry) => (
+                    <tr key={entry.invoice} className="hover:bg-gray-50">
+                      <td className="px-4 py-3 text-gray-500">{entry.date}</td>
+                      <td className="px-4 py-3 font-medium text-gray-900">
+                        {entry.description}
+                      </td>
+                      <td className="px-4 py-3 text-gray-900">{entry.amount}</td>
+                      <td className="px-4 py-3">
+                        <Badge className="bg-green-600 text-white rounded-full">{entry.status}</Badge>
+                      </td>
+                      <td className="px-4 py-3 text-right">
+                        <Button size="sm" variant="outline" className="rounded-[7px]">
+                          <Receipt className="h-4 w-4 mr-1" />
+                          {entry.invoice}
+                        </Button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* API Tab */}
-        <TabsContent value="api" className="space-y-6">
+      {/* API Tab */}
+      {activeTab === "api" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">API Configuration</h3>
+            <h3 className="text-lg font-semibold text-gray-900">API Configuration</h3>
 
             {/* Environment Toggle */}
             <div className="flex items-center justify-between p-4 bg-gray-50 rounded-[7px]">
               <div className="flex items-center gap-3">
                 <div
-                  className={`w-3 h-3 rounded-full ${testMode ? "bg-swipes-gold" : "bg-swipes-trusted-green"}`}
+                  className={`w-3 h-3 rounded-full ${testMode ? "bg-yellow-500" : "bg-green-600"}`}
                 />
                 <div>
-                  <p className="text-sm font-medium text-swipes-black">
+                  <p className="text-sm font-medium text-gray-900">
                     {testMode ? "Test Mode" : "Live Mode"}
                   </p>
-                  <p className="text-xs text-swipes-pro-gray">
+                  <p className="text-xs text-gray-500">
                     {testMode
                       ? "Transactions are simulated — no real charges"
                       : "All transactions are processed with real payment methods"}
@@ -897,19 +910,19 @@ export default function SettingsPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">API Version</Label>
+                <Label className="text-sm font-medium text-gray-900">API Version</Label>
                 <div className="p-3 bg-gray-50 rounded-[7px]">
-                  <code className="text-sm text-swipes-black font-mono">v1</code>
+                  <code className="text-sm text-gray-900 font-mono">v1</code>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Base URL</Label>
+                <Label className="text-sm font-medium text-gray-900">Base URL</Label>
                 <div className="p-3 bg-gray-50 rounded-[7px] flex items-center justify-between">
-                  <code className="text-sm text-swipes-black font-mono">
+                  <code className="text-sm text-gray-900 font-mono">
                     https://api.swipesblue.com/v1
                   </code>
                   <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
-                    <Copy className="h-4 w-4 text-swipes-pro-gray" />
+                    <Copy className="h-4 w-4 text-gray-500" />
                   </Button>
                 </div>
               </div>
@@ -917,50 +930,50 @@ export default function SettingsPage() {
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Webhook URL</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Webhook URL</h3>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Endpoint URL</Label>
+              <Label className="text-sm font-medium text-gray-900">Endpoint URL</Label>
               <Input
                 value={webhookUrl}
                 onChange={(e) => setWebhookUrl(e.target.value)}
                 className="rounded-[7px] font-mono text-sm"
               />
-              <p className="text-xs text-swipes-pro-gray">
+              <p className="text-xs text-gray-500">
                 We'll send POST requests to this URL when events occur.
               </p>
             </div>
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Rate Limits</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Rate Limits</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="p-4 bg-gray-50 rounded-[7px]">
-                <p className="text-sm text-swipes-pro-gray">Requests per Minute</p>
-                <p className="text-2xl font-bold text-swipes-blue-deep mt-1">100</p>
+                <p className="text-sm text-gray-500">Requests per Minute</p>
+                <p className="text-2xl font-bold text-[#1844A6] mt-1">100</p>
               </div>
               <div className="p-4 bg-gray-50 rounded-[7px]">
-                <p className="text-sm text-swipes-pro-gray">Requests per Day</p>
-                <p className="text-2xl font-bold text-swipes-blue-deep mt-1">50,000</p>
+                <p className="text-sm text-gray-500">Requests per Day</p>
+                <p className="text-2xl font-bold text-[#1844A6] mt-1">50,000</p>
               </div>
             </div>
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Quick Reference</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Quick Reference</h3>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                <span className="text-sm text-swipes-pro-gray">Authentication</span>
-                <code className="text-sm text-swipes-black font-mono">Bearer Token (API Key)</code>
+                <span className="text-sm text-gray-500">Authentication</span>
+                <code className="text-sm text-gray-900 font-mono">Bearer Token (API Key)</code>
               </div>
               <div className="flex items-center justify-between py-2 border-b border-gray-100">
-                <span className="text-sm text-swipes-pro-gray">Content Type</span>
-                <code className="text-sm text-swipes-black font-mono">application/json</code>
+                <span className="text-sm text-gray-500">Content Type</span>
+                <code className="text-sm text-gray-900 font-mono">application/json</code>
               </div>
               <div className="flex items-center justify-between py-2">
-                <span className="text-sm text-swipes-pro-gray">Developer Docs</span>
+                <span className="text-sm text-gray-500">Developer Docs</span>
                 <a
                   href="/developers"
-                  className="text-sm text-swipes-blue-deep hover:underline flex items-center gap-1"
+                  className="text-sm text-[#1844A6] hover:underline flex items-center gap-1"
                 >
                   View Documentation
                   <ExternalLink className="h-3 w-3" />
@@ -968,8 +981,8 @@ export default function SettingsPage() {
               </div>
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

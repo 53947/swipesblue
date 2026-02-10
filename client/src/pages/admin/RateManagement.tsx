@@ -500,7 +500,7 @@ export default function RateManagement() {
               }}
               data-testid={`button-delete-rate-${rate.id}`}
             >
-              <Trash2 className="h-4 w-4 text-swipes-muted-red" />
+              <Trash2 className="h-4 w-4 text-red-600" />
             </Button>
           </div>
         </div>
@@ -511,37 +511,37 @@ export default function RateManagement() {
       <CardContent>
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-swipes-pro-gray">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
               <DollarSign className="h-4 w-4" />
               Monthly Fee
             </div>
-            <span className="font-semibold text-swipes-black">
+            <span className="font-semibold text-gray-900">
               ${parseFloat(rate.monthlyFee).toFixed(2)}
             </span>
           </div>
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-swipes-pro-gray">
+            <div className="flex items-center gap-2 text-sm text-gray-500">
               <Percent className="h-4 w-4" />
               Transaction Rate
             </div>
-            <span className="font-semibold text-swipes-black">
+            <span className="font-semibold text-gray-900">
               {parseFloat(rate.transactionPercent).toFixed(2)}% + ${parseFloat(rate.transactionFlat).toFixed(2)}
             </span>
           </div>
           {rate.description && (
-            <p className="text-sm text-swipes-pro-gray mt-2 pt-2 border-t">
+            <p className="text-sm text-gray-500 mt-2 pt-2 border-t">
               {rate.description}
             </p>
           )}
           {rate.features && Array.isArray(rate.features) && rate.features.length > 0 && (
             <div className="mt-2 pt-2 border-t">
-              <p className="text-xs font-medium text-swipes-pro-gray mb-1">Features:</p>
-              <ul className="text-xs text-swipes-pro-gray space-y-0.5">
+              <p className="text-xs font-medium text-gray-500 mb-1">Features:</p>
+              <ul className="text-xs text-gray-500 space-y-0.5">
                 {rate.features.slice(0, 3).map((f, i) => (
                   <li key={i}>• {f}</li>
                 ))}
                 {rate.features.length > 3 && (
-                  <li className="text-swipes-blue-deep">+{rate.features.length - 3} more</li>
+                  <li className="text-[#1844A6]">+{rate.features.length - 3} more</li>
                 )}
               </ul>
             </div>
@@ -554,7 +554,7 @@ export default function RateManagement() {
   if (ratesLoading || costsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-swipes-pro-gray">Loading rates...</div>
+        <div className="text-gray-500">Loading rates...</div>
       </div>
     );
   }
@@ -563,8 +563,8 @@ export default function RateManagement() {
     <div className="space-y-6" data-testid="page-rate-management">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-swipes-black mb-2">Rate Management</h1>
-          <p className="text-swipes-pro-gray">Configure transaction rates and fees for all pricing tiers.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Rate Management</h1>
+          <p className="text-gray-500">Configure transaction rates and fees for all pricing tiers.</p>
         </div>
         <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
           <DialogTrigger asChild>
@@ -590,10 +590,10 @@ export default function RateManagement() {
       </div>
 
       {/* 5-Button Workflow Panel */}
-      <Card className="border-swipes-blue-deep/20 bg-gradient-to-r from-swipes-blue-deep/5 to-transparent">
+      <Card className="border-[#1844A6]/20 bg-gradient-to-r from-[#1844A6]/5 to-transparent">
         <CardHeader className="pb-2">
           <CardTitle className="text-lg flex items-center gap-2">
-            <Calculator className="h-5 w-5 text-swipes-blue-deep" />
+            <Calculator className="h-5 w-5 text-[#1844A6]" />
             Rate Workflow
           </CardTitle>
           <CardDescription>
@@ -650,7 +650,7 @@ export default function RateManagement() {
             <Dialog open={showActivateConfirm} onOpenChange={setShowActivateConfirm}>
               <DialogTrigger asChild>
                 <Button
-                  className="bg-swipes-trusted-green hover:bg-swipes-trusted-green/90 group"
+                  className="bg-green-600 hover:bg-green-600/90 group"
                   disabled={stagedRates.length === 0}
                   data-testid="button-activate"
                 >
@@ -676,7 +676,7 @@ export default function RateManagement() {
                   <Button 
                     onClick={handleActivate}
                     disabled={activateMutation.isPending}
-                    className="bg-swipes-trusted-green hover:bg-swipes-trusted-green/90"
+                    className="bg-green-600 hover:bg-green-600/90"
                     data-testid="button-confirm-activate"
                   >
                     {activateMutation.isPending ? "Activating..." : "Yes, Activate Now"}
@@ -709,7 +709,7 @@ export default function RateManagement() {
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-swipes-trusted-green" />
+                            <div className="w-3 h-3 rounded-full bg-green-600" />
                             Active Rates ({compareData.active.length})
                           </CardTitle>
                         </CardHeader>
@@ -726,13 +726,13 @@ export default function RateManagement() {
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-swipes-gold" />
+                            <div className="w-3 h-3 rounded-full bg-yellow-500" />
                             Staged Rates ({compareData.staged.length})
                           </CardTitle>
                         </CardHeader>
                         <CardContent className="text-sm space-y-2">
                           {compareData.staged.length === 0 ? (
-                            <span className="text-swipes-pro-gray">No staged rates</span>
+                            <span className="text-gray-500">No staged rates</span>
                           ) : (
                             compareData.staged.map(r => (
                               <div key={r.id} className="flex justify-between">
@@ -747,7 +747,7 @@ export default function RateManagement() {
                       <Card>
                         <CardHeader className="pb-2">
                           <CardTitle className="text-sm flex items-center gap-2">
-                            <div className="w-3 h-3 rounded-full bg-swipes-blue-deep" />
+                            <div className="w-3 h-3 rounded-full bg-[#1844A6]" />
                             Draft Rates ({draftRates.length})
                           </CardTitle>
                         </CardHeader>
@@ -777,29 +777,29 @@ export default function RateManagement() {
                             </tr>
                           </thead>
                           <tbody>
-                            <tr className="bg-swipes-blue-deep/5">
-                              <td className="py-2 font-bold text-swipes-blue-deep">swipesblue</td>
+                            <tr className="bg-[#1844A6]/5">
+                              <td className="py-2 font-bold text-[#1844A6]">swipesblue</td>
                               <td className="py-2">2.70% + $0.30</td>
                               <td className="text-right py-2">$3.00</td>
-                              <td className="text-right py-2 font-bold text-swipes-trusted-green">$97.00</td>
+                              <td className="text-right py-2 font-bold text-green-600">$97.00</td>
                             </tr>
                             <tr>
-                              <td className="py-2 text-swipes-pro-gray">Stripe</td>
-                              <td className="py-2 text-swipes-pro-gray">2.90% + $0.30</td>
-                              <td className="text-right py-2 text-swipes-pro-gray">$3.20</td>
-                              <td className="text-right py-2 text-swipes-pro-gray">$96.80</td>
+                              <td className="py-2 text-gray-500">Stripe</td>
+                              <td className="py-2 text-gray-500">2.90% + $0.30</td>
+                              <td className="text-right py-2 text-gray-500">$3.20</td>
+                              <td className="text-right py-2 text-gray-500">$96.80</td>
                             </tr>
                             <tr>
-                              <td className="py-2 text-swipes-pro-gray">PayPal</td>
-                              <td className="py-2 text-swipes-pro-gray">2.99% + $0.49</td>
-                              <td className="text-right py-2 text-swipes-pro-gray">$3.48</td>
-                              <td className="text-right py-2 text-swipes-pro-gray">$96.52</td>
+                              <td className="py-2 text-gray-500">PayPal</td>
+                              <td className="py-2 text-gray-500">2.99% + $0.49</td>
+                              <td className="text-right py-2 text-gray-500">$3.48</td>
+                              <td className="text-right py-2 text-gray-500">$96.52</td>
                             </tr>
                             <tr>
-                              <td className="py-2 text-swipes-pro-gray">Square</td>
-                              <td className="py-2 text-swipes-pro-gray">2.90% + $0.30</td>
-                              <td className="text-right py-2 text-swipes-pro-gray">$3.20</td>
-                              <td className="text-right py-2 text-swipes-pro-gray">$96.80</td>
+                              <td className="py-2 text-gray-500">Square</td>
+                              <td className="py-2 text-gray-500">2.90% + $0.30</td>
+                              <td className="text-right py-2 text-gray-500">$3.20</td>
+                              <td className="text-right py-2 text-gray-500">$96.80</td>
                             </tr>
                           </tbody>
                         </table>
@@ -811,12 +811,12 @@ export default function RateManagement() {
             </Dialog>
 
             {/* Status indicators */}
-            <div className="ml-auto flex items-center gap-4 text-xs text-swipes-pro-gray">
+            <div className="ml-auto flex items-center gap-4 text-xs text-gray-500">
               {draftSavedAt && (
                 <span>Draft saved: {new Date(draftSavedAt).toLocaleTimeString()}</span>
               )}
               {stagedRates.length > 0 && (
-                <Badge className="bg-swipes-gold text-black">{stagedRates.length} staged</Badge>
+                <Badge className="bg-yellow-500 text-black">{stagedRates.length} staged</Badge>
               )}
             </div>
           </div>
@@ -825,14 +825,14 @@ export default function RateManagement() {
 
       {/* Research Report Display */}
       {researchReport && (
-        <Card className="border-swipes-blue-deep/20">
+        <Card className="border-[#1844A6]/20">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-lg flex items-center gap-2">
-                <Search className="h-5 w-5 text-swipes-blue-deep" />
+                <Search className="h-5 w-5 text-[#1844A6]" />
                 Rate Research Report
               </CardTitle>
-              <span className="text-xs text-swipes-pro-gray">
+              <span className="text-xs text-gray-500">
                 Generated: {new Date(researchReport.timestamp).toLocaleString()}
               </span>
             </div>
@@ -843,19 +843,19 @@ export default function RateManagement() {
               <h4 className="font-medium mb-2">Your Costs</h4>
               <div className="grid grid-cols-4 gap-4 text-sm">
                 <div>
-                  <span className="text-swipes-pro-gray">Interchange Plus:</span>
+                  <span className="text-gray-500">Interchange Plus:</span>
                   <p className="font-mono">{researchReport.baseCosts.interchangePlus}</p>
                 </div>
                 <div>
-                  <span className="text-swipes-pro-gray">Per Transaction:</span>
+                  <span className="text-gray-500">Per Transaction:</span>
                   <p className="font-mono">{researchReport.baseCosts.perTransaction}</p>
                 </div>
                 <div>
-                  <span className="text-swipes-pro-gray">Target Margin:</span>
+                  <span className="text-gray-500">Target Margin:</span>
                   <p className="font-mono">{researchReport.baseCosts.targetMargin}</p>
                 </div>
                 <div>
-                  <span className="text-swipes-pro-gray">Minimum Rate:</span>
+                  <span className="text-gray-500">Minimum Rate:</span>
                   <p className="font-mono">{researchReport.baseCosts.minimumRateNeeded}</p>
                 </div>
               </div>
@@ -867,24 +867,24 @@ export default function RateManagement() {
               {researchReport.tierAnalysis.map((tier, i) => (
                 <div key={i} className="p-3 border rounded-lg flex items-center gap-4">
                   <div className="flex-shrink-0">
-                    {tier.status === "green" && <CheckCircle2 className="h-6 w-6 text-swipes-trusted-green" />}
-                    {tier.status === "yellow" && <AlertCircle className="h-6 w-6 text-swipes-gold" />}
-                    {tier.status === "red" && <XCircle className="h-6 w-6 text-swipes-muted-red" />}
+                    {tier.status === "green" && <CheckCircle2 className="h-6 w-6 text-green-600" />}
+                    {tier.status === "yellow" && <AlertCircle className="h-6 w-6 text-yellow-500" />}
+                    {tier.status === "red" && <XCircle className="h-6 w-6 text-red-600" />}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="font-medium">{tier.tierName}</span>
                       <Badge variant="secondary" className="text-xs">{tier.tierType}</Badge>
                     </div>
-                    <div className="text-sm text-swipes-pro-gray">
+                    <div className="text-sm text-gray-500">
                       Rate: {tier.yourRate} | Margin: {tier.margin} | Target: {tier.targetMargin}
                     </div>
                   </div>
                   <div className="text-right text-sm">
                     {tier.meetsTarget ? (
-                      <span className="text-swipes-trusted-green">Meets Target</span>
+                      <span className="text-green-600">Meets Target</span>
                     ) : (
-                      <span className="text-swipes-muted-red">Below Target</span>
+                      <span className="text-red-600">Below Target</span>
                     )}
                   </div>
                 </div>
@@ -893,13 +893,13 @@ export default function RateManagement() {
 
             {/* Summary */}
             <div className={`p-4 rounded-lg ${
-              researchReport.summary.readyToUpload ? "bg-swipes-trusted-green/10" : "bg-swipes-muted-red/10"
+              researchReport.summary.readyToUpload ? "bg-green-600/10" : "bg-red-600/10"
             }`}>
               <div className="flex items-center gap-2">
                 {researchReport.summary.readyToUpload ? (
-                  <CheckCircle2 className="h-5 w-5 text-swipes-trusted-green" />
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
                 ) : (
-                  <XCircle className="h-5 w-5 text-swipes-muted-red" />
+                  <XCircle className="h-5 w-5 text-red-600" />
                 )}
                 <span className="font-medium">{researchReport.summary.message}</span>
               </div>
@@ -935,7 +935,7 @@ export default function RateManagement() {
         <TabsContent value="ecommerce">
           {ecommerceRates.length === 0 ? (
             <Card>
-              <CardContent className="py-8 text-center text-swipes-pro-gray">
+              <CardContent className="py-8 text-center text-gray-500">
                 No e-commerce rates configured. Click "Add Rate" to create one.
               </CardContent>
             </Card>
@@ -951,7 +951,7 @@ export default function RateManagement() {
         <TabsContent value="developer">
           {developerRates.length === 0 ? (
             <Card>
-              <CardContent className="py-8 text-center text-swipes-pro-gray">
+              <CardContent className="py-8 text-center text-gray-500">
                 No developer rates configured. Click "Add Rate" to create one.
               </CardContent>
             </Card>
@@ -975,7 +975,7 @@ export default function RateManagement() {
             <CardContent>
               <div className="space-y-4">
                 {draftRates.length === 0 ? (
-                  <p className="text-swipes-pro-gray text-center py-4">
+                  <p className="text-gray-500 text-center py-4">
                     No draft rates. Active rates will be loaded automatically.
                   </p>
                 ) : (
@@ -1074,7 +1074,7 @@ export default function RateManagement() {
             </CardHeader>
             <CardContent>
               {costs.length === 0 ? (
-                <p className="text-swipes-pro-gray text-center py-4">
+                <p className="text-gray-500 text-center py-4">
                   No base costs configured yet.
                 </p>
               ) : (
@@ -1082,9 +1082,9 @@ export default function RateManagement() {
                   {costs.map((cost) => (
                     <div key={cost.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <div>
-                        <p className="font-medium text-swipes-black">{cost.name}</p>
+                        <p className="font-medium text-gray-900">{cost.name}</p>
                         {cost.description && (
-                          <p className="text-sm text-swipes-pro-gray">{cost.description}</p>
+                          <p className="text-sm text-gray-500">{cost.description}</p>
                         )}
                       </div>
                       <div className="text-right">
@@ -1095,7 +1095,7 @@ export default function RateManagement() {
                           <p className="text-sm">${parseFloat(cost.flatCost).toFixed(2)}</p>
                         )}
                         {cost.targetMarginPercent && (
-                          <p className="text-xs text-swipes-trusted-green">
+                          <p className="text-xs text-green-600">
                             Target: {parseFloat(cost.targetMarginPercent).toFixed(2)}% margin
                           </p>
                         )}
@@ -1118,7 +1118,7 @@ export default function RateManagement() {
             </CardHeader>
             <CardContent>
               {auditLogs.length === 0 ? (
-                <p className="text-swipes-pro-gray text-center py-4">
+                <p className="text-gray-500 text-center py-4">
                   No rate changes recorded yet.
                 </p>
               ) : (
@@ -1135,15 +1135,15 @@ export default function RateManagement() {
                           </Badge>
                           <span className="font-medium">{log.tableName}</span>
                         </div>
-                        <p className="text-swipes-pro-gray mt-1">
+                        <p className="text-gray-500 mt-1">
                           Record: {log.recordId.substring(0, 8)}...
                           {log.changedBy && ` by ${log.changedBy}`}
                         </p>
                         {log.reason && (
-                          <p className="text-xs text-swipes-pro-gray mt-1">{log.reason}</p>
+                          <p className="text-xs text-gray-500 mt-1">{log.reason}</p>
                         )}
                       </div>
-                      <span className="text-xs text-swipes-pro-gray">
+                      <span className="text-xs text-gray-500">
                         {new Date(log.createdAt).toLocaleString()}
                       </span>
                     </div>

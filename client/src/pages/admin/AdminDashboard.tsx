@@ -69,7 +69,7 @@ function StatCard({
           {trend && (
             <span
               className={`text-xs font-medium ${
-                trend.positive ? "text-swipes-trusted-green" : "text-swipes-muted-red"
+                trend.positive ? "text-green-600" : "text-red-600"
               }`}
               data-testid={`${testId}-trend`}
             >
@@ -254,21 +254,21 @@ export default function AdminDashboard() {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <CheckCircle2 className="h-4 w-4 text-swipes-trusted-green" />
+                <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <span className="text-sm font-medium">Active</span>
               </div>
               <span className="text-2xl font-bold" data-testid="text-merchants-active">{merchantStats.active}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <Clock className="h-4 w-4 text-swipes-gold" />
+                <Clock className="h-4 w-4 text-yellow-500" />
                 <span className="text-sm font-medium">Pending</span>
               </div>
               <span className="text-2xl font-bold" data-testid="text-merchants-pending">{merchantStats.pending}</span>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <XCircle className="h-4 w-4 text-swipes-muted-red" />
+                <XCircle className="h-4 w-4 text-red-600" />
                 <span className="text-sm font-medium">Suspended</span>
               </div>
               <span className="text-2xl font-bold" data-testid="text-merchants-suspended">{merchantStats.suspended}</span>

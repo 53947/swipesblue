@@ -1,9 +1,17 @@
-import { useState } from "react";
+import { useLocation } from "wouter";
 import { FileText, Plus, Eye, Edit, Send, DollarSign, Clock, CheckCircle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const tabs = [
+  { label: "All Invoices", href: "/dashboard/invoices" },
+  { label: "Draft", href: "/dashboard/invoices?tab=draft" },
+  { label: "Sent", href: "/dashboard/invoices?tab=sent" },
+  { label: "Paid", href: "/dashboard/invoices?tab=paid" },
+  { label: "Overdue", href: "/dashboard/invoices?tab=overdue" },
+];
 
 type InvoiceStatus = "draft" | "sent" | "paid" | "overdue";
 
@@ -29,82 +37,39 @@ const mockInvoices: Invoice[] = [
 ];
 
 const statusConfig: Record<InvoiceStatus, { label: string; className: string }> = {
-  draft: { label: "Draft", className: "bg-gray-100 text-gray-600 hover:bg-gray-100" },
-  sent: { label: "Sent", className: "bg-swipes-blue-deep text-white hover:bg-swipes-blue-deep" },
-  paid: { label: "Paid", className: "bg-swipes-trusted-green text-white hover:bg-swipes-trusted-green" },
-  overdue: { label: "Overdue", className: "bg-swipes-muted-red text-white hover:bg-swipes-muted-red" },
+  draft: { label: "Draft", className: "bg-gray-100 text-gray-600" },
+  sent: { label: "Sent", className: "bg-blue-100 text-blue-700" },
+  paid: { label: "Paid", className: "bg-green-100 text-green-700" },
+  overdue: { label: "Overdue", className: "bg-red-100 text-red-600" },
 };
 
-function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
-  return (
-    <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-gray-200 bg-gray-50">
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Invoice #</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Customer</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Amount</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Status</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Due Date</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {invoices.map((invoice) => (
-            <tr key={invoice.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-6 py-4 text-sm font-medium text-swipes-black">{invoice.id}</td>
-              <td className="px-6 py-4 text-sm text-swipes-pro-gray">{invoice.customer}</td>
-              <td className="px-6 py-4 text-sm font-medium text-swipes-black">{invoice.amount}</td>
-              <td className="px-6 py-4">
-                <Badge className={statusConfig[invoice.status].className}>
-                  {statusConfig[invoice.status].label}
-                </Badge>
-              </td>
-              <td className="px-6 py-4 text-sm text-swipes-pro-gray">{invoice.dueDate}</td>
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm" className="rounded-[7px]">
-                    <Eye className="h-3.5 w-3.5 mr-1" />
-                    View
-                  </Button>
-                  <Button variant="outline" size="sm" className="rounded-[7px]">
-                    <Edit className="h-3.5 w-3.5 mr-1" />
-                    Edit
-                  </Button>
-                  {invoice.status === "draft" && (
-                    <Button variant="outline" size="sm" className="rounded-[7px]">
-                      <Send className="h-3.5 w-3.5 mr-1" />
-                      Send
-                    </Button>
-                  )}
-                </div>
-              </td>
-            </tr>
-          ))}
-          {invoices.length === 0 && (
-            <tr>
-              <td colSpan={6} className="px-6 py-12 text-center text-sm text-swipes-pro-gray">
-                No invoices found.
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
-    </div>
-  );
-}
-
 export default function Invoicing() {
-  const [activeTab, setActiveTab] = useState("all");
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "all";
 
   const filteredInvoices = activeTab === "all"
     ? mockInvoices
     : mockInvoices.filter((inv) => inv.status === activeTab);
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8">
+      {/* Header Row */}
+      <div className="flex items-center justify-between mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Invoicing</h1>
+          <p className="text-gray-500 mt-1">Create, send, and track invoices for your customers</p>
+        </div>
+        <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+          <Plus className="h-4 w-4 mr-2" />
+          Create Invoice
+        </Button>
+      </div>
+
+      <SubNavTabs tabs={tabs} />
+
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Total Outstanding"
           value="$12,450.00"
@@ -114,7 +79,7 @@ export default function Invoicing() {
         />
         <MetricCard
           title="Total Overdue"
-          value="$3,200.00"
+          value="$4,325.00"
           change="2 invoices past due"
           changeType="negative"
           icon={AlertCircle}
@@ -135,43 +100,63 @@ export default function Invoicing() {
         />
       </div>
 
-      {/* Header Row */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-swipes-black">Invoicing</h1>
-          <p className="text-swipes-pro-gray">Create, send, and track invoices for your customers</p>
+      {/* Invoice Table */}
+      {filteredInvoices.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
+          <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No invoices found</h3>
+          <p className="text-gray-500 text-sm">No invoices match this filter.</p>
         </div>
-        <Button className="bg-swipes-blue-deep rounded-[7px] hover:bg-swipes-blue-deep/90">
-          <Plus className="h-4 w-4 mr-2" />
-          Create Invoice
-        </Button>
+      ) : (
+        <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Invoice #</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customer</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Due Date</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredInvoices.map((invoice) => (
+                <tr key={invoice.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm font-mono text-gray-900">{invoice.id}</td>
+                  <td className="px-4 py-3 text-sm text-gray-900">{invoice.customer}</td>
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900">{invoice.amount}</td>
+                  <td className="px-4 py-3">
+                    <Badge className={`text-xs rounded-full ${statusConfig[invoice.status].className}`}>
+                      {statusConfig[invoice.status].label}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-600">{invoice.dueDate}</td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="View">
+                        <Eye className="h-4 w-4 text-gray-500" />
+                      </Button>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit">
+                        <Edit className="h-4 w-4 text-gray-500" />
+                      </Button>
+                      {invoice.status === "draft" && (
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Send">
+                          <Send className="h-4 w-4 text-gray-500" />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+
+      <div className="mt-4 text-center">
+        <span className="text-xs text-gray-400">{filteredInvoices.length} invoices</span>
       </div>
-
-      {/* Tabs and Invoice Table */}
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-        <TabsList className="rounded-[7px]">
-          <TabsTrigger value="all" className="rounded-[7px]">
-            <FileText className="h-4 w-4 mr-2" />
-            All Invoices
-          </TabsTrigger>
-          <TabsTrigger value="draft" className="rounded-[7px]">
-            Draft
-          </TabsTrigger>
-          <TabsTrigger value="sent" className="rounded-[7px]">
-            Sent
-          </TabsTrigger>
-          <TabsTrigger value="paid" className="rounded-[7px]">
-            Paid
-          </TabsTrigger>
-          <TabsTrigger value="overdue" className="rounded-[7px]">
-            Overdue
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value={activeTab}>
-          <InvoiceTable invoices={filteredInvoices} />
-        </TabsContent>
-      </Tabs>
     </div>
   );
 }

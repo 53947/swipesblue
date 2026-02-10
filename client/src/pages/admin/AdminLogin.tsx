@@ -42,18 +42,18 @@ export default function AdminLogin() {
           <div className="flex justify-center mb-4">
             <Logo />
           </div>
-          <div className="flex items-center justify-center gap-2 text-swipes-black">
+          <div className="flex items-center justify-center gap-2 text-gray-900">
             <Lock className="h-5 w-5" />
             <h1 className="text-xl font-semibold">Admin Login</h1>
           </div>
-          <p className="text-sm text-swipes-pro-gray mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             Enter your credentials to access the admin panel
           </p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
-              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-[7px] text-swipes-muted-red text-sm">
+              <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-[7px] text-red-600 text-sm">
                 <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 <span>{error}</span>
               </div>
@@ -87,7 +87,7 @@ export default function AdminLogin() {
             
             <Button
               type="submit"
-              className="w-full bg-swipes-blue-deep text-white"
+              className="w-full bg-[#1844A6] text-white"
               disabled={isLoading}
               data-testid="button-admin-login"
             >

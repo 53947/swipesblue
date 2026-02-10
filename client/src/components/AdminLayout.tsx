@@ -67,10 +67,10 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         {/* Header with Logo */}
         <div className="h-16 flex items-center justify-between gap-2 px-6 border-b border-gray-200">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-swipes-blue-deep to-swipes-teal rounded-lg flex items-center justify-center">
+            <div className="w-8 h-8 bg-gradient-to-br from-[#1844A6] to-teal-600 rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-lg">S</span>
             </div>
-            <span className="font-semibold text-swipes-black" data-testid="text-logo">Admin</span>
+            <span className="font-semibold text-gray-900" data-testid="text-logo">Admin</span>
           </div>
           <Button
             variant="ghost"
@@ -87,7 +87,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         <div className="px-4 pt-4">
           <Link href="/">
             <div 
-              className="flex items-center gap-2 text-sm text-swipes-pro-gray hover:text-swipes-blue-deep cursor-pointer"
+              className="flex items-center gap-2 text-sm text-gray-500 hover:text-[#1844A6] cursor-pointer"
               data-testid="link-back-to-site"
             >
               <ArrowLeft className="h-4 w-4" />
@@ -108,8 +108,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-[7px] text-sm font-medium transition-colors cursor-pointer",
                     isActive
-                      ? "bg-swipes-blue-deep text-white"
-                      : "text-swipes-pro-gray hover:bg-gray-100"
+                      ? "bg-[#1844A6] text-white"
+                      : "text-gray-500 hover:bg-gray-100"
                   )}
                   onClick={() => setSidebarOpen(false)}
                   data-testid={`link-${item.name.toLowerCase().replace(/\s+/g, '-')}`}
@@ -126,7 +126,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
           {/* Platform Links */}
           <div>
-            <h4 className="text-xs font-semibold text-swipes-pro-gray uppercase tracking-wider mb-2 px-3">
+            <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-3">
               Platforms
             </h4>
             {platformLinks.map((link) => (
@@ -136,7 +136,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   href={link.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray hover:bg-gray-100 rounded-[7px] transition-colors"
+                  className="flex items-center gap-3 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-[7px] transition-colors"
                   data-testid={`link-platform-${link.name.toLowerCase().replace(/\./g, '-')}`}
                 >
                   <ExternalLink className="h-4 w-4" />
@@ -145,7 +145,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               ) : (
                 <Link key={link.name} href={link.href}>
                   <div
-                    className="flex items-center gap-3 px-3 py-2 text-sm text-swipes-pro-gray hover:bg-gray-100 rounded-[7px] transition-colors cursor-pointer"
+                    className="flex items-center gap-3 px-3 py-2 text-sm text-gray-500 hover:bg-gray-100 rounded-[7px] transition-colors cursor-pointer"
                     data-testid={`link-platform-${link.name.toLowerCase().replace(/\./g, '-')}`}
                   >
                     <ExternalLink className="h-4 w-4" />
@@ -162,14 +162,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           <Button
             variant="outline"
             size="sm"
-            className="w-full justify-start gap-2 text-swipes-pro-gray border-gray-200"
+            className="w-full justify-start gap-2 text-gray-500 border-gray-200"
             onClick={handleLogout}
             data-testid="button-admin-logout"
           >
             <LogOut className="h-4 w-4" />
             Sign Out
           </Button>
-          <div className="text-xs text-swipes-pro-gray space-y-1">
+          <div className="text-xs text-gray-500 space-y-1">
             <div>swipesblue admin</div>
             <div>Version 1.0.0</div>
           </div>
@@ -186,7 +186,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <span className="ml-3 font-semibold text-swipes-black">swipesblue admin</span>
+          <span className="ml-3 font-semibold text-gray-900">swipesblue admin</span>
         </div>
 
         <main className="p-6 lg:p-8" data-testid="main-content">

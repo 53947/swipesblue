@@ -105,7 +105,7 @@ export default function Login() {
                           <FormLabel>Password</FormLabel>
                           <Link 
                             href="/forgot-password"
-                            className="text-sm text-swipes-blue-deep underline"
+                            className="text-sm text-[#1844A6] underline"
                             data-testid="link-forgot-password"
                           >
                             Forgot password?
@@ -143,7 +143,7 @@ export default function Login() {
                   
                   <Button
                     type="submit"
-                    className="w-full bg-swipes-blue-deep text-white rounded-[7px]"
+                    className="w-full bg-[#1844A6] text-white rounded-[7px]"
                     disabled={loginMutation.isPending}
                     data-testid="button-login-submit"
                   >
@@ -164,7 +164,7 @@ export default function Login() {
                   Don't have an account?{" "}
                   <Link 
                     href="/register"
-                    className="text-swipes-blue-deep font-medium underline"
+                    className="text-[#1844A6] font-medium underline"
                     data-testid="link-register"
                   >
                     Create an account
@@ -176,11 +176,11 @@ export default function Login() {
 
           <p className="text-center text-xs text-gray-500 mt-6">
             By signing in, you agree to our{" "}
-            <Link href="/terms" className="text-swipes-blue-deep underline" data-testid="link-terms">
+            <Link href="/terms" className="text-[#1844A6] underline" data-testid="link-terms">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-swipes-blue-deep underline" data-testid="link-privacy">
+            <Link href="/privacy" className="text-[#1844A6] underline" data-testid="link-privacy">
               Privacy Policy
             </Link>
             .

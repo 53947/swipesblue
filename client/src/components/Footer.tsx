@@ -132,7 +132,7 @@ export default function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4">
           {/* Column 1: Products */}
           <div className="pr-8 border-r border-gray-200">
-            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               {footerSections.products.title}
             </h4>
             <ul>
@@ -140,7 +140,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                    className="text-sm text-gray-500 hover:text-[#1844A6] transition-colors block py-1"
                     data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {link.label}
@@ -152,7 +152,7 @@ export default function Footer() {
 
           {/* Column 2: Developers */}
           <div className="px-8 border-r border-gray-200">
-            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               {footerSections.developers.title}
             </h4>
             <ul>
@@ -160,7 +160,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                    className="text-sm text-gray-500 hover:text-[#1844A6] transition-colors block py-1"
                     data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {link.label}
@@ -172,7 +172,7 @@ export default function Footer() {
 
           {/* Column 3: Company + Resources */}
           <div className="px-8 border-r border-gray-200">
-            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               {footerSections.company.title}
             </h4>
             <ul>
@@ -181,7 +181,7 @@ export default function Footer() {
                   {link.href.startsWith("mailto:") ? (
                     <a
                       href={link.href}
-                      className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                      className="text-sm text-gray-500 hover:text-[#1844A6] transition-colors block py-1"
                       data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {link.label}
@@ -189,7 +189,7 @@ export default function Footer() {
                   ) : (
                     <Link
                       href={link.href}
-                      className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                      className="text-sm text-gray-500 hover:text-[#1844A6] transition-colors block py-1"
                       data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                     >
                       {link.label}
@@ -199,7 +199,7 @@ export default function Footer() {
               ))}
             </ul>
 
-            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4 mt-6">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4 mt-6">
               {footerSections.resources.title}
             </h4>
             <ul>
@@ -207,7 +207,7 @@ export default function Footer() {
                 <li key={link.label}>
                   <Link
                     href={link.href}
-                    className="text-sm text-swipes-pro-gray hover:text-swipes-blue-deep transition-colors block py-1"
+                    className="text-sm text-gray-500 hover:text-[#1844A6] transition-colors block py-1"
                     data-testid={`link-footer-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
                   >
                     {link.label}
@@ -219,7 +219,7 @@ export default function Footer() {
 
           {/* Column 4: TriadBlue Ecosystem */}
           <div className="pl-8">
-            <h4 className="text-sm font-semibold text-swipes-black uppercase tracking-wider mb-4">
+            <h4 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
               triadblue ecosystem
             </h4>
             <div className="flex flex-col gap-4">
@@ -256,23 +256,23 @@ export default function Footer() {
             © 2026 swipesblue, inc. all rights reserved.
           </span>
           <div className="flex items-center gap-1 text-xs text-gray-400">
-            <Link href="/terms" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-terms">
+            <Link href="/terms" className="hover:text-gray-500 transition-colors" data-testid="link-footer-terms">
               terms of service
             </Link>
             <span>·</span>
-            <Link href="/privacy" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-privacy">
+            <Link href="/privacy" className="hover:text-gray-500 transition-colors" data-testid="link-footer-privacy">
               privacy policy
             </Link>
             <span>·</span>
-            <Link href="/cookies" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-cookies">
+            <Link href="/cookies" className="hover:text-gray-500 transition-colors" data-testid="link-footer-cookies">
               cookie settings
             </Link>
             <span>·</span>
-            <Link href="/acceptable-use" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-acceptable-use">
+            <Link href="/acceptable-use" className="hover:text-gray-500 transition-colors" data-testid="link-footer-acceptable-use">
               acceptable use
             </Link>
             <span>·</span>
-            <Link href="/admin/login" className="hover:text-swipes-pro-gray transition-colors" data-testid="link-footer-admin-login">
+            <Link href="/admin/login" className="hover:text-gray-500 transition-colors" data-testid="link-footer-admin-login">
               admin login
             </Link>
           </div>

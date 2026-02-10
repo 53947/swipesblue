@@ -54,36 +54,36 @@ export default function SubscriptionSuccess() {
       <div className="max-w-lg mx-auto px-4 py-16">
         <Card className="rounded-[7px] shadow-sm text-center">
           <CardContent className="pt-8 pb-8">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-swipes-trusted-green/10 rounded-full mb-6">
-              <CheckCircle2 className="h-12 w-12 text-swipes-trusted-green" />
+            <div className="inline-flex items-center justify-center w-20 h-20 bg-green-600/10 rounded-full mb-6">
+              <CheckCircle2 className="h-12 w-12 text-green-600" />
             </div>
 
-            <h1 className="text-2xl font-bold text-swipes-black mb-2" data-testid="text-success-title">
+            <h1 className="text-2xl font-bold text-gray-900 mb-2" data-testid="text-success-title">
               {isFree ? "Account Created!" : "Subscription Activated!"}
             </h1>
 
             {addOn && (
               <div className="mb-4">
-                <p className="text-lg font-medium text-swipes-black">{addOn.name}</p>
-                <p className="text-sm text-swipes-pro-gray">{isFree ? "Free Plan" : "Full Access Plan"}</p>
+                <p className="text-lg font-medium text-gray-900">{addOn.name}</p>
+                <p className="text-sm text-gray-500">{isFree ? "Free Plan" : "Full Access Plan"}</p>
               </div>
             )}
 
             {!isFree && (
               <div className="bg-gray-50 rounded-[7px] p-4 mb-6">
-                <p className="text-2xl font-bold text-swipes-blue-deep" data-testid="text-price">${price.toFixed(2)}/year</p>
-                <p className="text-sm text-swipes-pro-gray">Next billing: {renewalDate}</p>
+                <p className="text-2xl font-bold text-[#1844A6]" data-testid="text-price">${price.toFixed(2)}/year</p>
+                <p className="text-sm text-gray-500">Next billing: {renewalDate}</p>
               </div>
             )}
 
-            <p className="text-swipes-pro-gray mb-6">
+            <p className="text-gray-500 mb-6">
               A confirmation email has been sent to your inbox.
             </p>
 
             <div className="space-y-3">
               <Link href="/dashboard">
                 <Button 
-                  className="w-full bg-swipes-blue-deep text-white rounded-[7px] group"
+                  className="w-full bg-[#1844A6] text-white rounded-[7px] group"
                   data-testid="button-go-to-dashboard"
                 >
                   <span className="flex items-center justify-center">
@@ -98,7 +98,7 @@ export default function SubscriptionSuccess() {
               <Link href={settingsPath}>
                 <Button 
                   variant="outline" 
-                  className="w-full border-swipes-blue-deep text-swipes-blue-deep rounded-[7px] group"
+                  className="w-full border-[#1844A6] text-[#1844A6] rounded-[7px] group"
                   data-testid="button-configure"
                 >
                   <span className="flex items-center justify-center">

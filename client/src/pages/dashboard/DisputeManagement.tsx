@@ -30,9 +30,9 @@ const mockDisputes: Dispute[] = [
 ];
 
 const statusConfig: Record<DisputeStatus, { label: string; className: string }> = {
-  needs_response: { label: "Needs Response", className: "bg-swipes-muted-red text-white hover:bg-swipes-muted-red" },
-  under_review: { label: "Under Review", className: "bg-swipes-gold text-black hover:bg-swipes-gold" },
-  won: { label: "Won", className: "bg-swipes-trusted-green text-white hover:bg-swipes-trusted-green" },
+  needs_response: { label: "Needs Response", className: "bg-red-600 text-white hover:bg-red-600" },
+  under_review: { label: "Under Review", className: "bg-yellow-500 text-black hover:bg-yellow-500" },
+  won: { label: "Won", className: "bg-green-600 text-white hover:bg-green-600" },
   lost: { label: "Lost", className: "bg-gray-100 text-gray-600 hover:bg-gray-100" },
 };
 
@@ -42,30 +42,30 @@ function DisputeTable({ disputes }: { disputes: Dispute[] }) {
       <table className="w-full">
         <thead>
           <tr className="border-b border-gray-200 bg-gray-50">
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Dispute ID</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Transaction ID</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Customer</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Amount</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Reason</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Status</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Deadline</th>
-            <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Actions</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Dispute ID</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Transaction ID</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Amount</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Reason</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Deadline</th>
+            <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
           {disputes.map((dispute) => (
             <tr key={dispute.id} className="hover:bg-gray-50 transition-colors">
-              <td className="px-6 py-4 text-sm font-medium text-swipes-black">{dispute.id}</td>
-              <td className="px-6 py-4 text-sm text-swipes-pro-gray">{dispute.transactionId}</td>
-              <td className="px-6 py-4 text-sm text-swipes-pro-gray">{dispute.customer}</td>
-              <td className="px-6 py-4 text-sm font-medium text-swipes-black">{dispute.amount}</td>
-              <td className="px-6 py-4 text-sm text-swipes-pro-gray">{dispute.reason}</td>
+              <td className="px-6 py-4 text-sm font-medium text-gray-900">{dispute.id}</td>
+              <td className="px-6 py-4 text-sm text-gray-500">{dispute.transactionId}</td>
+              <td className="px-6 py-4 text-sm text-gray-500">{dispute.customer}</td>
+              <td className="px-6 py-4 text-sm font-medium text-gray-900">{dispute.amount}</td>
+              <td className="px-6 py-4 text-sm text-gray-500">{dispute.reason}</td>
               <td className="px-6 py-4">
                 <Badge className={statusConfig[dispute.status].className}>
                   {statusConfig[dispute.status].label}
                 </Badge>
               </td>
-              <td className="px-6 py-4 text-sm text-swipes-pro-gray">{dispute.deadline}</td>
+              <td className="px-6 py-4 text-sm text-gray-500">{dispute.deadline}</td>
               <td className="px-6 py-4">
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" className="rounded-[7px]">
@@ -90,7 +90,7 @@ function DisputeTable({ disputes }: { disputes: Dispute[] }) {
           ))}
           {disputes.length === 0 && (
             <tr>
-              <td colSpan={8} className="px-6 py-12 text-center text-sm text-swipes-pro-gray">
+              <td colSpan={8} className="px-6 py-12 text-center text-sm text-gray-500">
                 No disputes found.
               </td>
             </tr>
@@ -145,10 +145,10 @@ export default function DisputeManagement() {
       {/* Header Row */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-swipes-black">Dispute Management</h1>
-          <p className="text-swipes-pro-gray">Track and respond to chargebacks and payment disputes</p>
+          <h1 className="text-2xl font-bold text-gray-900">Dispute Management</h1>
+          <p className="text-gray-500">Track and respond to chargebacks and payment disputes</p>
         </div>
-        <Button className="bg-swipes-blue-deep rounded-[7px] hover:bg-swipes-blue-deep/90">
+        <Button className="bg-[#1844A6] rounded-[7px] hover:bg-[#1844A6]/90">
           <Shield className="h-4 w-4 mr-2" />
           Dispute Prevention Tips
         </Button>

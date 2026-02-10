@@ -42,7 +42,7 @@ export default function Orders() {
   return (
     <div className="min-h-screen bg-white">
       {/* Demo Banner */}
-      <div className="bg-swipes-blue-deep text-white py-3 px-4">
+      <div className="bg-[#1844A6] text-white py-3 px-4">
         <div className="max-w-7xl mx-auto flex items-center justify-center gap-2 text-sm">
           <span className="bg-white/20 text-white px-2 py-0.5 rounded text-xs font-semibold">DEMO</span>
           <span>This is a live demo of the swipesblue order management</span>
@@ -51,8 +51,8 @@ export default function Orders() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-swipes-black">My Orders</h1>
-          <p className="text-swipes-gray">View your order history and track shipments</p>
+          <h1 className="text-4xl font-bold mb-2 text-gray-900">My Orders</h1>
+          <p className="text-gray-500">View your order history and track shipments</p>
         </div>
 
       {isLoading ? (

@@ -97,16 +97,16 @@ export default function Products() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Page Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold mb-2 text-swipes-black">Products</h1>
-          <p className="text-swipes-pro-gray">
+          <h1 className="text-4xl font-bold mb-2 text-gray-900">Products</h1>
+          <p className="text-gray-500">
             Everything you need to accept payments, manage customers, and grow your business.
           </p>
         </div>
 
         {/* ─── Section 1: Core Products ─── */}
         <section className="mb-16">
-          <h2 className="text-2xl font-bold text-swipes-black mb-1">Core Products</h2>
-          <p className="text-swipes-pro-gray mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Core Products</h2>
+          <p className="text-gray-500 mb-6">
             The building blocks of your swipesblue payment stack.
           </p>
 
@@ -121,19 +121,19 @@ export default function Products() {
                   <CardContent className="flex flex-col flex-1 p-6">
                     <div className="flex items-start gap-3 mb-3">
                       <div className="p-2.5 bg-gray-100 rounded-full shrink-0">
-                        <Icon className="h-5 w-5 text-swipes-blue-deep" />
+                        <Icon className="h-5 w-5 text-[#1844A6]" />
                       </div>
-                      <h3 className="font-semibold text-swipes-black text-base leading-tight pt-1">
+                      <h3 className="font-semibold text-gray-900 text-base leading-tight pt-1">
                         {product.name}
                       </h3>
                     </div>
 
-                    <p className="text-sm text-swipes-pro-gray mb-6 flex-1">
+                    <p className="text-sm text-gray-500 mb-6 flex-1">
                       {product.description}
                     </p>
 
                     <Link href={product.href}>
-                      <button className="w-full flex items-center justify-center gap-1 text-sm font-medium text-swipes-blue-deep hover:underline group">
+                      <button className="w-full flex items-center justify-center gap-1 text-sm font-medium text-[#1844A6] hover:underline group">
                         Learn More
                         <ArrowRight className="h-4 w-4 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
                       </button>
@@ -147,8 +147,8 @@ export default function Products() {
 
         {/* ─── Section 2: Enhancements ─── */}
         <section>
-          <h2 className="text-2xl font-bold text-swipes-black mb-1">Enhancements</h2>
-          <p className="text-swipes-pro-gray mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">Enhancements</h2>
+          <p className="text-gray-500 mb-6">
             Extend your swipesblue platform with powerful enhancements.
           </p>
 

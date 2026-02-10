@@ -11,10 +11,10 @@ export default function ProcessingFees() {
     <div className="min-h-screen bg-white">
       <section className="py-20">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold text-swipes-black mb-2">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Processing Fees
           </h1>
-          <p className="text-swipes-pro-gray mb-8">
+          <p className="text-gray-500 mb-8">
             Operational fees that may apply in addition to your plan's per-transaction rate.
           </p>
           <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
@@ -25,8 +25,8 @@ export default function ProcessingFees() {
                   idx % 2 === 1 ? "bg-gray-50" : "bg-white"
                 } ${idx > 0 ? "border-t border-gray-100" : ""}`}
               >
-                <span className="text-swipes-pro-gray">{fee.type}</span>
-                <span className="text-swipes-pro-gray font-medium">{fee.amount}</span>
+                <span className="text-gray-500">{fee.type}</span>
+                <span className="text-gray-500 font-medium">{fee.amount}</span>
               </div>
             ))}
           </div>

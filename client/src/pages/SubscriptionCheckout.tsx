@@ -109,7 +109,7 @@ export default function SubscriptionCheckout() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
-        <div className="animate-pulse text-swipes-pro-gray">Loading...</div>
+        <div className="animate-pulse text-gray-500">Loading...</div>
       </div>
     );
   }
@@ -142,7 +142,7 @@ export default function SubscriptionCheckout() {
           <Link href="/">
             <Logo />
           </Link>
-          <div className="flex items-center gap-2 text-sm text-swipes-pro-gray">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
             <Lock className="h-4 w-4" />
             Secure Checkout
           </div>
@@ -158,15 +158,15 @@ export default function SubscriptionCheckout() {
               </CardHeader>
               <CardContent>
                 <div className="mb-4">
-                  <h3 className="font-semibold text-swipes-black">{addOn.name}</h3>
-                  <p className="text-sm text-swipes-pro-gray">{isFree ? "Free Plan" : "Full Access Plan"}</p>
+                  <h3 className="font-semibold text-gray-900">{addOn.name}</h3>
+                  <p className="text-sm text-gray-500">{isFree ? "Free Plan" : "Full Access Plan"}</p>
                 </div>
 
                 <div className="bg-gray-50 rounded-[7px] p-4 mb-4">
                   <ul className="space-y-2">
                     {selectedFeatures.map((feature, i) => (
-                      <li key={i} className="flex items-start gap-2 text-sm text-swipes-black">
-                        <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
+                      <li key={i} className="flex items-start gap-2 text-sm text-gray-900">
+                        <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                         {feature}
                       </li>
                     ))}
@@ -175,15 +175,15 @@ export default function SubscriptionCheckout() {
 
                 <div className="border-t border-gray-200 pt-4">
                   <div className="flex justify-between text-sm mb-2">
-                    <span className="text-swipes-pro-gray">Subtotal</span>
+                    <span className="text-gray-500">Subtotal</span>
                     <span className="font-medium">${price.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between font-semibold text-lg">
                     <span>Total (billed annually)</span>
-                    <span className="text-swipes-blue-deep">${price.toFixed(2)}</span>
+                    <span className="text-[#1844A6]">${price.toFixed(2)}</span>
                   </div>
                   {!isFree && (
-                    <p className="text-sm text-swipes-pro-gray mt-2">Renews on {renewalDate}</p>
+                    <p className="text-sm text-gray-500 mt-2">Renews on {renewalDate}</p>
                   )}
                 </div>
 
@@ -338,7 +338,7 @@ export default function SubscriptionCheckout() {
                         onCheckedChange={(checked) => setFormData({ ...formData, agreeToTerms: checked as boolean })}
                         data-testid="checkbox-terms"
                       />
-                      <Label htmlFor="terms" className="text-sm text-swipes-pro-gray font-normal cursor-pointer">
+                      <Label htmlFor="terms" className="text-sm text-gray-500 font-normal cursor-pointer">
                         I agree to the Terms of Service and Privacy Policy
                       </Label>
                     </div>
@@ -348,7 +348,7 @@ export default function SubscriptionCheckout() {
                 <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full bg-swipes-blue-deep text-white rounded-[7px] py-6 text-lg font-semibold group"
+                  className="w-full bg-[#1844A6] text-white rounded-[7px] py-6 text-lg font-semibold group"
                   data-testid="button-subscribe"
                 >
                   <span className="flex items-center justify-center">
@@ -359,7 +359,7 @@ export default function SubscriptionCheckout() {
                   </span>
                 </Button>
 
-                <div className="flex items-center justify-center gap-2 text-sm text-swipes-pro-gray">
+                <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                   <Lock className="h-4 w-4" />
                   256-bit SSL encryption
                 </div>

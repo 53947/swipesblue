@@ -287,7 +287,7 @@ export default function ProductDetail() {
   return (
     <div className="min-h-screen bg-white">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <Link href="/products" className="inline-flex items-center text-swipes-blue-deep hover:underline mb-8" data-testid="link-back-to-products">
+        <Link href="/products" className="inline-flex items-center text-[#1844A6] hover:underline mb-8" data-testid="link-back-to-products">
           <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Products
         </Link>
@@ -296,26 +296,26 @@ export default function ProductDetail() {
           <div className="bg-gray-50 rounded-[7px] p-8 flex items-center justify-center min-h-[300px]">
             <div className="text-center">
               <div className="inline-flex p-6 bg-white rounded-2xl shadow-sm mb-4">
-                <IconComponent className="h-16 w-16 text-swipes-blue-deep" />
+                <IconComponent className="h-16 w-16 text-[#1844A6]" />
               </div>
-              <p className="text-sm text-swipes-pro-gray">Product Preview</p>
+              <p className="text-sm text-gray-500">Product Preview</p>
             </div>
           </div>
 
           <div>
-            <h1 className="text-3xl font-bold text-swipes-black mb-4" data-testid="text-product-title">{addOn.name}</h1>
-            <p className="text-swipes-pro-gray mb-6" data-testid="text-product-description">{addOn.description}</p>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4" data-testid="text-product-title">{addOn.name}</h1>
+            <p className="text-gray-500 mb-6" data-testid="text-product-description">{addOn.description}</p>
 
             {requiresProPlus && (
-              <Card className="border-2 border-swipes-gold bg-yellow-50 mb-6">
+              <Card className="border-2 border-yellow-500 bg-yellow-50 mb-6">
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="h-5 w-5 text-swipes-gold flex-shrink-0 mt-0.5" />
+                    <AlertTriangle className="h-5 w-5 text-yellow-500 flex-shrink-0 mt-0.5" />
                     <div>
-                      <p className="font-semibold text-swipes-black">Requires Scale or Enterprise Plan</p>
-                      <p className="text-sm text-swipes-pro-gray">This enhancement is only available for Scale ($79/mo) and Enterprise ($299/mo) subscribers.</p>
+                      <p className="font-semibold text-gray-900">Requires Scale or Enterprise Plan</p>
+                      <p className="text-sm text-gray-500">This enhancement is only available for Scale ($79/mo) and Enterprise ($299/mo) subscribers.</p>
                       <Link href="/pricing">
-                        <Button variant="ghost" className="text-swipes-blue-deep p-0 h-auto mt-2">
+                        <Button variant="ghost" className="text-[#1844A6] p-0 h-auto mt-2">
                           Upgrade to Scale
                           <ArrowRight className="h-4 w-4 ml-1" />
                         </Button>
@@ -327,23 +327,23 @@ export default function ProductDetail() {
             )}
 
             {hasFreeOption && (
-              <Card className="border-2 border-swipes-trusted-green rounded-[7px] mb-4">
+              <Card className="border-2 border-green-600 rounded-[7px] mb-4">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-4">
-                    <Badge className="bg-swipes-trusted-green text-white no-default-hover-elevate">FREE</Badge>
-                    <span className="text-2xl font-bold text-swipes-black">$0/year</span>
+                    <Badge className="bg-green-600 text-white no-default-hover-elevate">FREE</Badge>
+                    <span className="text-2xl font-bold text-gray-900">$0/year</span>
                   </div>
                   <ul className="space-y-2 mb-4">
                     {details.freeFeatures?.map((feature, i) => (
-                      <li key={i} className="flex items-center gap-2 text-sm text-swipes-pro-gray">
-                        <span className="text-swipes-trusted-green">•</span>
+                      <li key={i} className="flex items-center gap-2 text-sm text-gray-500">
+                        <span className="text-green-600">•</span>
                         {feature}
                       </li>
                     ))}
                   </ul>
                   <Link href={`/subscribe/${slug}?plan=free`}>
                     <Button 
-                      className="w-full bg-swipes-trusted-green text-white rounded-[7px] group"
+                      className="w-full bg-green-600 text-white rounded-[7px] group"
                       data-testid="button-start-free"
                     >
                       <span className="flex items-center justify-center">
@@ -358,27 +358,27 @@ export default function ProductDetail() {
               </Card>
             )}
 
-            <Card className="border-2 border-swipes-blue-deep rounded-[7px] bg-slate-50">
+            <Card className="border-2 border-[#1844A6] rounded-[7px] bg-slate-50">
               <CardContent className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <Badge className="bg-swipes-blue-deep text-white no-default-hover-elevate">
+                  <Badge className="bg-[#1844A6] text-white no-default-hover-elevate">
                     {hasFreeOption ? "FULL ACCESS" : "PAID"}
                   </Badge>
-                  <span className="text-2xl font-bold text-swipes-blue-deep" data-testid="text-product-price">
+                  <span className="text-2xl font-bold text-[#1844A6]" data-testid="text-product-price">
                     ${parseFloat(addOn.annualPrice || "0").toFixed(2)}/year
                   </span>
                 </div>
                 <ul className="space-y-2 mb-4">
                   {details.paidFeatures.map((feature, i) => (
-                    <li key={i} className="flex items-start gap-2 text-sm text-swipes-black">
-                      <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
+                    <li key={i} className="flex items-start gap-2 text-sm text-gray-900">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                       {feature}
                     </li>
                   ))}
                 </ul>
                 <Link href={`/subscribe/${slug}?plan=paid`}>
                   <Button 
-                    className="w-full bg-swipes-blue-deep text-white rounded-[7px] group"
+                    className="w-full bg-[#1844A6] text-white rounded-[7px] group"
                     disabled={requiresProPlus}
                     data-testid="button-subscribe"
                   >
@@ -396,16 +396,16 @@ export default function ProductDetail() {
         </div>
 
         <div className="border-t border-gray-200 pt-12 mb-12">
-          <h2 className="text-2xl font-semibold text-swipes-black mb-8">How It Works</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">How It Works</h2>
           <div className="grid md:grid-cols-3 gap-6">
             {details.howItWorks.map((step, i) => (
               <Card key={i} className="border border-gray-200 rounded-[7px]">
                 <CardContent className="p-6 text-center">
-                  <div className="inline-flex items-center justify-center w-10 h-10 bg-swipes-blue-deep text-white rounded-full mb-4 font-bold">
+                  <div className="inline-flex items-center justify-center w-10 h-10 bg-[#1844A6] text-white rounded-full mb-4 font-bold">
                     {i + 1}
                   </div>
-                  <h3 className="font-semibold text-swipes-black mb-2">{step.title}</h3>
-                  <p className="text-sm text-swipes-pro-gray">{step.description}</p>
+                  <h3 className="font-semibold text-gray-900 mb-2">{step.title}</h3>
+                  <p className="text-sm text-gray-500">{step.description}</p>
                 </CardContent>
               </Card>
             ))}
@@ -413,26 +413,26 @@ export default function ProductDetail() {
         </div>
 
         <div className="border-t border-gray-200 pt-12 mb-12">
-          <h2 className="text-2xl font-semibold text-swipes-black mb-8">Features Included</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">Features Included</h2>
           <div className="grid md:grid-cols-2 gap-6">
             {details.featuresInfo.map((feature, i) => (
               <div key={i}>
-                <h3 className="font-semibold text-swipes-black mb-2">{feature.title}</h3>
-                <p className="text-sm text-swipes-pro-gray">{feature.description}</p>
+                <h3 className="font-semibold text-gray-900 mb-2">{feature.title}</h3>
+                <p className="text-sm text-gray-500">{feature.description}</p>
               </div>
             ))}
           </div>
         </div>
 
         <div className="border-t border-gray-200 pt-12 mb-12">
-          <h2 className="text-2xl font-semibold text-swipes-black mb-8">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-8">Frequently Asked Questions</h2>
           <Accordion type="single" collapsible className="w-full">
             {details.faqs.map((faq, i) => (
               <AccordionItem key={i} value={`faq-${i}`} className="border-b border-gray-200">
-                <AccordionTrigger className="text-left font-medium text-swipes-black hover:no-underline" data-testid={`faq-trigger-${i}`}>
+                <AccordionTrigger className="text-left font-medium text-gray-900 hover:no-underline" data-testid={`faq-trigger-${i}`}>
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-swipes-pro-gray">
+                <AccordionContent className="text-gray-500">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -442,7 +442,7 @@ export default function ProductDetail() {
 
         <div className="border-t border-gray-200 pt-12">
           <div className="text-center">
-            <h2 className="text-2xl font-semibold text-swipes-black mb-4">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-4">
               Ready to get started with {addOn.name}?
             </h2>
             <div className="flex flex-wrap justify-center gap-4">
@@ -450,7 +450,7 @@ export default function ProductDetail() {
                 <Link href={`/subscribe/${slug}?plan=free`}>
                   <Button 
                     variant="outline" 
-                    className="border-swipes-blue-deep text-swipes-blue-deep rounded-[7px]"
+                    className="border-[#1844A6] text-[#1844A6] rounded-[7px]"
                     data-testid="button-cta-start-free"
                   >
                     Start Free
@@ -459,7 +459,7 @@ export default function ProductDetail() {
               )}
               <Link href={`/subscribe/${slug}?plan=paid`}>
                 <Button 
-                  className="bg-swipes-blue-deep text-white rounded-[7px] group"
+                  className="bg-[#1844A6] text-white rounded-[7px] group"
                   disabled={requiresProPlus}
                   data-testid="button-cta-subscribe"
                 >

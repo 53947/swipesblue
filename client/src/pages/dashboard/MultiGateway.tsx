@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   Layers,
   DollarSign,
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,15 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const basePath = "/dashboard/enhance/multi-gateway";
+
+const tabs = [
+  { label: "Gateways", href: basePath },
+  { label: "Routing Rules", href: `${basePath}?tab=routing` },
+  { label: "Performance", href: `${basePath}?tab=performance` },
+  { label: "Logs", href: `${basePath}?tab=logs` },
+];
 
 interface Gateway {
   id: string;
@@ -130,23 +132,23 @@ const logEntries: LogEntry[] = [
 function getGatewayStatusClasses(status: Gateway["status"]): string {
   switch (status) {
     case "Active":
-      return "bg-swipes-trusted-green text-white";
+      return "bg-green-600 text-white";
     case "Inactive":
       return "bg-gray-400 text-white";
     case "Error":
-      return "bg-swipes-muted-red text-white";
+      return "bg-red-600 text-white";
   }
 }
 
 function getResultClasses(result: string): string {
   switch (result) {
     case "Success":
-      return "bg-swipes-trusted-green text-white";
+      return "bg-green-600 text-white";
     case "Declined":
-      return "bg-swipes-gold text-white";
+      return "bg-yellow-500 text-white";
     case "Error":
     case "Failed":
-      return "bg-swipes-muted-red text-white";
+      return "bg-red-600 text-white";
     default:
       return "bg-gray-400 text-white";
   }
@@ -156,6 +158,9 @@ export default function MultiGateway() {
   const [showAddGateway, setShowAddGateway] = useState(false);
   const [logFilter, setLogFilter] = useState("all");
   const [logSearch, setLogSearch] = useState("");
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "gateways";
 
   const filteredLogs = logEntries.filter((entry) => {
     const matchesFilter =
@@ -171,16 +176,13 @@ export default function MultiGateway() {
   });
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Multi-Gateway</h1>
-        <p className="text-swipes-pro-gray">
-          Configure and manage multiple payment gateways with routing rules, failover, and per-gateway analytics
-        </p>
-      </div>
+    <div>
+      <p className="text-gray-500 mb-6">
+        Configure and manage multiple payment gateways with routing rules, failover, and per-gateway analytics
+      </p>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Active Gateways"
           value="2 of 3"
@@ -211,17 +213,11 @@ export default function MultiGateway() {
         />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="gateways" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="gateways">Gateways</TabsTrigger>
-          <TabsTrigger value="routing">Routing Rules</TabsTrigger>
-          <TabsTrigger value="performance">Performance</TabsTrigger>
-          <TabsTrigger value="logs">Logs</TabsTrigger>
-        </TabsList>
+      <SubNavTabs tabs={tabs} />
 
-        {/* Gateways Tab */}
-        <TabsContent value="gateways" className="space-y-6">
+      {/* Gateways Tab */}
+      {activeTab === "gateways" && (
+        <div className="space-y-6">
           {/* Gateway Cards */}
           <div className="space-y-4">
             {gateways.map((gw) => (
@@ -231,32 +227,32 @@ export default function MultiGateway() {
               >
                 <div className="flex items-start justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center">
-                      <Layers className="h-6 w-6 text-swipes-blue-deep" />
+                    <div className="w-12 h-12 rounded-[7px] bg-[#1844A6]/10 flex items-center justify-center">
+                      <Layers className="h-6 w-6 text-[#1844A6]" />
                     </div>
                     <div>
                       <div className="flex items-center gap-3 mb-1">
-                        <h3 className="text-lg font-semibold text-swipes-black">{gw.name}</h3>
-                        <Badge className={getGatewayStatusClasses(gw.status)}>{gw.status}</Badge>
-                        <Badge className="bg-swipes-blue-deep text-white">{gw.priority}</Badge>
+                        <h3 className="text-lg font-semibold text-gray-900">{gw.name}</h3>
+                        <Badge className={`rounded-full ${getGatewayStatusClasses(gw.status)}`}>{gw.status}</Badge>
+                        <Badge className="rounded-full bg-[#1844A6] text-white">{gw.priority}</Badge>
                         {gw.status === "Active" && (
                           <div className="flex items-center gap-1">
-                            <div className="w-2 h-2 rounded-full bg-swipes-trusted-green" />
-                            <span className="text-xs text-swipes-trusted-green">Connected</span>
+                            <div className="w-2 h-2 rounded-full bg-green-600" />
+                            <span className="text-xs text-green-600">Connected</span>
                           </div>
                         )}
                         {gw.status === "Inactive" && (
                           <div className="flex items-center gap-1">
                             <div className="w-2 h-2 rounded-full bg-gray-400" />
-                            <span className="text-xs text-swipes-pro-gray">Not configured</span>
+                            <span className="text-xs text-gray-500">Not configured</span>
                           </div>
                         )}
                       </div>
                       {gw.status === "Active" && (
-                        <div className="flex gap-6 mt-2 text-sm text-swipes-pro-gray">
-                          <span>Auth rate: <strong className="text-swipes-black">{gw.authRate}</strong></span>
-                          <span>Avg response: <strong className="text-swipes-black">{gw.avgResponse}</strong></span>
-                          <span>Today: <strong className="text-swipes-black">{gw.transactionsToday} transactions</strong></span>
+                        <div className="flex gap-6 mt-2 text-sm text-gray-500">
+                          <span>Auth rate: <strong className="text-gray-900">{gw.authRate}</strong></span>
+                          <span>Avg response: <strong className="text-gray-900">{gw.avgResponse}</strong></span>
+                          <span>Today: <strong className="text-gray-900">{gw.transactionsToday} transactions</strong></span>
                         </div>
                       )}
                     </div>
@@ -271,12 +267,12 @@ export default function MultiGateway() {
                       Test
                     </Button>
                     {gw.status === "Active" ? (
-                      <Button variant="outline" size="sm" className="rounded-[7px] text-swipes-muted-red border-swipes-muted-red">
+                      <Button variant="outline" size="sm" className="rounded-[7px] text-red-600 border-red-600">
                         <WifiOff className="h-4 w-4 mr-1" />
                         Disable
                       </Button>
                     ) : (
-                      <Button size="sm" className="bg-swipes-trusted-green hover:bg-swipes-trusted-green/90 text-white rounded-[7px]">
+                      <Button size="sm" className="bg-green-600 hover:bg-green-600/90 text-white rounded-[7px]">
                         Enable
                       </Button>
                     )}
@@ -289,7 +285,7 @@ export default function MultiGateway() {
           {/* Add Gateway */}
           <Button
             onClick={() => setShowAddGateway(!showAddGateway)}
-            className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]"
+            className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]"
           >
             <Plus className="h-4 w-4 mr-2" />
             Add Gateway
@@ -297,10 +293,10 @@ export default function MultiGateway() {
 
           {showAddGateway && (
             <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-              <h3 className="text-lg font-semibold text-swipes-black">Add New Gateway</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Add New Gateway</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-swipes-black">Gateway Type</Label>
+                  <Label className="text-sm font-medium text-gray-900">Gateway Type</Label>
                   <Select>
                     <SelectTrigger className="rounded-[7px]">
                       <SelectValue placeholder="Select gateway" />
@@ -318,25 +314,25 @@ export default function MultiGateway() {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-swipes-black">Label / Nickname</Label>
+                  <Label className="text-sm font-medium text-gray-900">Label / Nickname</Label>
                   <Input placeholder="e.g., My NMI Gateway" className="rounded-[7px]" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-swipes-black">API Key</Label>
+                  <Label className="text-sm font-medium text-gray-900">API Key</Label>
                   <Input type="password" placeholder="Enter API key" className="rounded-[7px]" />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-swipes-black">API Secret</Label>
+                  <Label className="text-sm font-medium text-gray-900">API Secret</Label>
                   <Input type="password" placeholder="Enter API secret" className="rounded-[7px]" />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Priority</Label>
+                <Label className="text-sm font-medium text-gray-900">Priority</Label>
                 <div className="flex gap-3">
                   {["Primary", "Fallback", "Disabled"].map((opt) => (
                     <button
                       key={opt}
-                      className="px-4 py-2 rounded-[7px] text-sm font-medium border border-gray-200 bg-white text-swipes-pro-gray hover:border-gray-300 transition-colors"
+                      className="px-4 py-2 rounded-[7px] text-sm font-medium border border-gray-200 bg-white text-gray-500 hover:border-gray-300 transition-colors"
                     >
                       {opt}
                     </button>
@@ -348,119 +344,123 @@ export default function MultiGateway() {
                   <Wifi className="h-4 w-4 mr-2" />
                   Test Connection
                 </Button>
-                <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+                <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
                   Save Gateway
                 </Button>
               </div>
             </div>
           )}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Routing Rules Tab */}
-        <TabsContent value="routing" className="space-y-6">
+      {/* Routing Rules Tab */}
+      {activeTab === "routing" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 flex items-center justify-between border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Routing Rules</h3>
-              <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+              <h3 className="text-lg font-semibold text-gray-900">Routing Rules</h3>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
                 <Plus className="h-4 w-4 mr-2" />
                 Add Rule
               </Button>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Rule Name</TableHead>
-                  <TableHead>Condition</TableHead>
-                  <TableHead>Gateway</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Rule Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Condition</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Gateway</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Priority</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {routingRules.map((rule) => (
-                  <TableRow key={rule.id}>
-                    <TableCell className="font-medium text-swipes-black">{rule.name}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{rule.condition}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-swipes-blue-deep text-white">{rule.gateway}</Badge>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray">#{rule.priority}</TableCell>
-                    <TableCell>
+                  <tr key={rule.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{rule.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{rule.condition}</td>
+                    <td className="px-4 py-3">
+                      <Badge className="rounded-full bg-[#1844A6] text-white">{rule.gateway}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">#{rule.priority}</td>
+                    <td className="px-4 py-3">
                       <Switch checked={rule.enabled} />
-                    </TableCell>
-                    <TableCell className="text-right">
+                    </td>
+                    <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button size="sm" variant="outline" className="rounded-[7px]">
                           <Settings className="h-4 w-4" />
                         </Button>
-                        <Button size="sm" variant="ghost" className="text-swipes-muted-red h-8 w-8 p-0">
+                        <Button size="sm" variant="ghost" className="text-red-600 h-8 w-8 p-0">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Performance Tab */}
-        <TabsContent value="performance" className="space-y-6">
+      {/* Performance Tab */}
+      {activeTab === "performance" && (
+        <div className="space-y-6">
           {/* Per-gateway Comparison */}
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Gateway Comparison</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Gateway Comparison</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Gateway</TableHead>
-                  <TableHead>Transactions</TableHead>
-                  <TableHead>Volume</TableHead>
-                  <TableHead>Auth Rate</TableHead>
-                  <TableHead>Avg Response</TableHead>
-                  <TableHead>Declines</TableHead>
-                  <TableHead>Errors</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Gateway</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transactions</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Volume</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Auth Rate</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Avg Response</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Declines</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Errors</th>
+                </tr>
+              </thead>
+              <tbody>
                 {performanceData.map((row) => (
-                  <TableRow key={row.gateway}>
-                    <TableCell className="font-medium text-swipes-black">{row.gateway}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{row.transactions}</TableCell>
-                    <TableCell className="text-swipes-black">{row.volume}</TableCell>
-                    <TableCell>
+                  <tr key={row.gateway} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.gateway}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{row.transactions}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{row.volume}</td>
+                    <td className="px-4 py-3">
                       {row.authRate !== "—" ? (
-                        <Badge className="bg-swipes-trusted-green text-white">{row.authRate}</Badge>
+                        <Badge className="rounded-full bg-green-600 text-white">{row.authRate}</Badge>
                       ) : (
-                        <span className="text-swipes-pro-gray">—</span>
+                        <span className="text-sm text-gray-500">—</span>
                       )}
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray">{row.avgResponse}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{row.declines}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{row.errors}</TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{row.avgResponse}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{row.declines}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{row.errors}</td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
 
           {/* Auth Rate Comparison */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">Authorization Rate</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Authorization Rate</h3>
               <div className="space-y-4">
                 {performanceData.filter((r) => r.authRate !== "—").map((row) => (
                   <div key={row.gateway} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-swipes-black">{row.gateway}</span>
-                      <span className="text-swipes-pro-gray">{row.authRate}</span>
+                      <span className="font-medium text-gray-900">{row.gateway}</span>
+                      <span className="text-gray-500">{row.authRate}</span>
                     </div>
                     <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-swipes-trusted-green rounded-full transition-all"
+                        className="h-full bg-green-600 rounded-full transition-all"
                         style={{ width: row.authRate }}
                       />
                     </div>
@@ -470,31 +470,31 @@ export default function MultiGateway() {
             </div>
 
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">Decline Code Breakdown</h3>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Decline Reason</TableHead>
-                    <TableHead>NMI</TableHead>
-                    <TableHead>Stripe</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Decline Code Breakdown</h3>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Decline Reason</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">NMI</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Stripe</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {declineBreakdown.map((row) => (
-                    <TableRow key={row.code}>
-                      <TableCell className="font-medium text-swipes-black">{row.code}</TableCell>
-                      <TableCell className="text-swipes-pro-gray">{row.nmi}</TableCell>
-                      <TableCell className="text-swipes-pro-gray">{row.stripe}</TableCell>
-                    </TableRow>
+                    <tr key={row.code} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.code}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{row.nmi}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{row.stripe}</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* Response Time */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">Response Time Distribution</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Response Time Distribution</h3>
             <div className="space-y-4">
               {[
                 { range: "< 200ms", nmi: 35, stripe: 52 },
@@ -503,28 +503,28 @@ export default function MultiGateway() {
                 { range: "> 500ms", nmi: 5, stripe: 2 },
               ].map((row) => (
                 <div key={row.range} className="space-y-2">
-                  <span className="text-sm font-medium text-swipes-black">{row.range}</span>
+                  <span className="text-sm font-medium text-gray-900">{row.range}</span>
                   <div className="flex gap-3">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-xs text-swipes-pro-gray w-12">NMI</span>
+                        <span className="text-xs text-gray-500 w-12">NMI</span>
                         <div className="flex-1 h-4 bg-gray-100 rounded-[4px] overflow-hidden">
                           <div
-                            className="h-full bg-swipes-blue-deep rounded-[4px]"
+                            className="h-full bg-[#1844A6] rounded-[4px]"
                             style={{ width: `${row.nmi}%` }}
                           />
                         </div>
-                        <span className="text-xs text-swipes-pro-gray w-8 text-right">{row.nmi}%</span>
+                        <span className="text-xs text-gray-500 w-8 text-right">{row.nmi}%</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-swipes-pro-gray w-12">Stripe</span>
+                        <span className="text-xs text-gray-500 w-12">Stripe</span>
                         <div className="flex-1 h-4 bg-gray-100 rounded-[4px] overflow-hidden">
                           <div
-                            className="h-full bg-swipes-trusted-green rounded-[4px]"
+                            className="h-full bg-green-600 rounded-[4px]"
                             style={{ width: `${row.stripe}%` }}
                           />
                         </div>
-                        <span className="text-xs text-swipes-pro-gray w-8 text-right">{row.stripe}%</span>
+                        <span className="text-xs text-gray-500 w-8 text-right">{row.stripe}%</span>
                       </div>
                     </div>
                   </div>
@@ -532,14 +532,16 @@ export default function MultiGateway() {
               ))}
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Logs Tab */}
-        <TabsContent value="logs" className="space-y-6">
+      {/* Logs Tab */}
+      {activeTab === "logs" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-gray-200">
               <div className="relative flex-1 w-full sm:max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-swipes-pro-gray" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Search by transaction ID or gateway..."
                   value={logSearch}
@@ -559,47 +561,47 @@ export default function MultiGateway() {
                 </SelectContent>
               </Select>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Transaction</TableHead>
-                  <TableHead>Amount</TableHead>
-                  <TableHead>Gateway</TableHead>
-                  <TableHead>Result</TableHead>
-                  <TableHead>Failover</TableHead>
-                  <TableHead>Final</TableHead>
-                  <TableHead>Time</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Time</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transaction</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Gateway</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Result</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Failover</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Final</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Time</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredLogs.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="text-swipes-pro-gray text-sm font-mono">{entry.timestamp}</TableCell>
-                    <TableCell className="font-medium text-swipes-black font-mono text-sm">{entry.transactionId}</TableCell>
-                    <TableCell className="text-swipes-black">{entry.amount}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{entry.initialGateway}</TableCell>
-                    <TableCell>
-                      <Badge className={getResultClasses(entry.result)}>{entry.result}</Badge>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray">
+                  <tr key={entry.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-500 font-mono">{entry.timestamp}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900 font-mono">{entry.transactionId}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{entry.amount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{entry.initialGateway}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`rounded-full ${getResultClasses(entry.result)}`}>{entry.result}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">
                       {entry.failoverGateway !== "—" ? (
-                        <Badge variant="outline">{entry.failoverGateway}</Badge>
+                        <Badge variant="outline" className="rounded-full">{entry.failoverGateway}</Badge>
                       ) : (
                         "—"
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getResultClasses(entry.finalResult)}>{entry.finalResult}</Badge>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray text-sm">{entry.totalTime}</TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge className={`rounded-full ${getResultClasses(entry.finalResult)}`}>{entry.finalResult}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{entry.totalTime}</td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

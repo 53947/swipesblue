@@ -29,33 +29,16 @@ import Webhooks from "@/pages/admin/Webhooks";
 import RateManagement from "@/pages/admin/RateManagement";
 import NotFound from "@/pages/not-found";
 import ProductDetail from "@/pages/ProductDetail";
-import VirtualTerminal from "@/pages/dashboard/VirtualTerminal";
-import Invoicing from "@/pages/dashboard/Invoicing";
-import RecurringBilling from "@/pages/dashboard/RecurringBilling";
-import FraudPrevention from "@/pages/dashboard/FraudPrevention";
-import CustomerVault from "@/pages/dashboard/CustomerVault";
-import PaymentLinks from "@/pages/dashboard/PaymentLinks";
-import DisputeManagement from "@/pages/dashboard/DisputeManagement";
-import SecurityDashboard from "@/pages/dashboard/SecurityDashboard";
-import AnalyticsDashboard from "@/pages/dashboard/AnalyticsDashboard";
-import SettingsPage from "@/pages/dashboard/SettingsPage";
-import Reporting from "@/pages/dashboard/Reporting";
-import CheckoutOptimizer from "@/pages/dashboard/CheckoutOptimizer";
-import CartSettings from "@/pages/dashboard/CartSettings";
-import MultiGateway from "@/pages/dashboard/MultiGateway";
-import CustomerPortal from "@/pages/dashboard/CustomerPortal";
 import SubscriptionCheckout from "@/pages/SubscriptionCheckout";
 import SubscriptionSuccess from "@/pages/SubscriptionSuccess";
-import MerchantProducts from "@/pages/dashboard/MerchantProducts";
-import ProductForm from "@/pages/dashboard/ProductForm";
-import BulkEditor from "@/pages/dashboard/BulkEditor";
-import ImportExport from "@/pages/dashboard/ImportExport";
 import TermsOfService from "@/pages/legal/TermsOfService";
 import PrivacyPolicy from "@/pages/legal/PrivacyPolicy";
 import CookiePolicy from "@/pages/legal/CookiePolicy";
 import AcceptableUsePolicy from "@/pages/legal/AcceptableUsePolicy";
 import About from "@/pages/About";
 import ProcessingFees from "@/pages/ProcessingFees";
+
+// Public product marketing pages
 import EcommerceSuite from "@/pages/products/EcommerceSuite";
 import ShoppingCartProduct from "@/pages/products/ShoppingCartProduct";
 import CheckoutProduct from "@/pages/products/CheckoutProduct";
@@ -65,25 +48,53 @@ import InvoicingProduct from "@/pages/products/InvoicingProduct";
 import RecurringBillingProduct from "@/pages/products/RecurringBillingProduct";
 import CustomerVaultProduct from "@/pages/products/CustomerVaultProduct";
 import FraudPreventionProduct from "@/pages/products/FraudPreventionProduct";
-import TierGate from "@/components/TierGate";
+
+// Dashboard pages — Workspace
+import CustomerList from "@/pages/dashboard/CustomerList";
+import OrdersDashboard from "@/pages/dashboard/OrdersDashboard";
+import TransactionsDashboard from "@/pages/dashboard/TransactionsDashboard";
+import Balances from "@/pages/dashboard/Balances";
+import MerchantProducts from "@/pages/dashboard/MerchantProducts";
+import ProductForm from "@/pages/dashboard/ProductForm";
+import BulkEditor from "@/pages/dashboard/BulkEditor";
+import ImportExport from "@/pages/dashboard/ImportExport";
+
+// Dashboard pages — Core Products
+import EcommerceSuiteDashboard from "@/pages/dashboard/EcommerceSuiteDashboard";
+import ShoppingCartDashboard from "@/pages/dashboard/ShoppingCartDashboard";
+import CheckoutDashboard from "@/pages/dashboard/CheckoutDashboard";
+import VirtualTerminal from "@/pages/dashboard/VirtualTerminal";
+import PaymentLinks from "@/pages/dashboard/PaymentLinks";
+import Invoicing from "@/pages/dashboard/Invoicing";
+import RecurringBilling from "@/pages/dashboard/RecurringBilling";
+import CustomerVault from "@/pages/dashboard/CustomerVault";
+import FraudPrevention from "@/pages/dashboard/FraudPrevention";
+
+// Dashboard pages — Enhancements
+import EnhancementDetail from "@/pages/dashboard/EnhancementDetail";
+
+// Dashboard pages — Other
+import Reporting from "@/pages/dashboard/Reporting";
+import SettingsPage from "@/pages/dashboard/SettingsPage";
+
 import { AdminAuthProvider, useAdminAuth } from "@/contexts/AdminAuthContext";
 import { ReactNode } from "react";
 
 function ProtectedAdminRoute({ children }: { children: ReactNode }) {
   const { isAuthenticated, isLoading } = useAdminAuth();
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#F6F9FC] flex items-center justify-center">
-        <div className="text-swipes-pro-gray">Loading...</div>
+        <div className="text-gray-500">Loading...</div>
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     return <Redirect to="/admin/login" />;
   }
-  
+
   return <>{children}</>;
 }
 
@@ -98,7 +109,7 @@ function Router() {
       <Route path="/processing-fees" component={ProcessingFees} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
-      
+
       {/* Public Product Marketing Pages */}
       <Route path="/products/ecommerce" component={EcommerceSuite} />
       <Route path="/products/cart" component={ShoppingCartProduct} />
@@ -128,7 +139,66 @@ function Router() {
       <Route path="/cookies" component={CookiePolicy} />
       <Route path="/acceptable-use" component={AcceptableUsePolicy} />
 
-      {/* Dashboard Routes - wrapped in DashboardLayout */}
+      {/* ════════════════════════════════════════════════════════════
+          BACKWARD COMPATIBILITY REDIRECTS — old routes → new routes
+          ════════════════════════════════════════════════════════════ */}
+      <Route path="/dashboard/virtual-terminal">
+        {() => <Redirect to="/dashboard/terminal" />}
+      </Route>
+      <Route path="/dashboard/customer-vault">
+        {() => <Redirect to="/dashboard/vault" />}
+      </Route>
+      <Route path="/dashboard/recurring-billing">
+        {() => <Redirect to="/dashboard/subscriptions" />}
+      </Route>
+      <Route path="/dashboard/invoicing">
+        {() => <Redirect to="/dashboard/invoices" />}
+      </Route>
+      <Route path="/dashboard/fraud-prevention">
+        {() => <Redirect to="/dashboard/fraud" />}
+      </Route>
+      <Route path="/dashboard/brand-studio">
+        {() => <Redirect to="/dashboard/settings" />}
+      </Route>
+      <Route path="/dashboard/products">
+        {() => <Redirect to="/dashboard/catalog" />}
+      </Route>
+      <Route path="/dashboard/abandoned-carts">
+        {() => <Redirect to="/dashboard/ecommerce/cart" />}
+      </Route>
+      <Route path="/dashboard/analytics">
+        {() => <Redirect to="/dashboard/enhance/advanced-analytics" />}
+      </Route>
+      <Route path="/dashboard/security">
+        {() => <Redirect to="/dashboard/enhance/security-suite" />}
+      </Route>
+      <Route path="/dashboard/checkout-optimizer">
+        {() => <Redirect to="/dashboard/enhance/checkout-optimizer" />}
+      </Route>
+      <Route path="/dashboard/cart-settings">
+        {() => <Redirect to="/dashboard/enhance/shopping-cart-pro" />}
+      </Route>
+      <Route path="/dashboard/gateways">
+        {() => <Redirect to="/dashboard/enhance/multi-gateway" />}
+      </Route>
+      <Route path="/dashboard/customer-portal">
+        {() => <Redirect to="/dashboard/enhance/customer-portal" />}
+      </Route>
+      <Route path="/dashboard/dispute-management">
+        {() => <Redirect to="/dashboard/transactions" />}
+      </Route>
+      <Route path="/dashboard/api-keys">
+        {() => <Redirect to="/dashboard/enhance/premium-api" />}
+      </Route>
+      <Route path="/dashboard/webhooks">
+        {() => <Redirect to="/dashboard/enhance/premium-api" />}
+      </Route>
+
+      {/* ════════════════════════════════════════════════════════════
+          DASHBOARD ROUTES — NEW STRUCTURE
+          ════════════════════════════════════════════════════════════ */}
+
+      {/* Overview */}
       <Route path="/dashboard">
         {() => (
           <DashboardLayout>
@@ -136,174 +206,38 @@ function Router() {
           </DashboardLayout>
         )}
       </Route>
-      <Route path="/dashboard/products">
+
+      {/* ── WORKSPACE ─────────────────────────────────────────── */}
+      <Route path="/dashboard/customers">
         {() => (
           <DashboardLayout>
-            <Products />
+            <CustomerList />
           </DashboardLayout>
         )}
       </Route>
       <Route path="/dashboard/orders">
         {() => (
           <DashboardLayout>
-            <Orders />
+            <OrdersDashboard />
           </DashboardLayout>
         )}
       </Route>
       <Route path="/dashboard/transactions">
         {() => (
           <DashboardLayout>
-            <Transactions />
+            <TransactionsDashboard />
           </DashboardLayout>
         )}
       </Route>
-      <Route path="/dashboard/virtual-terminal">
+      <Route path="/dashboard/balances">
         {() => (
           <DashboardLayout>
-            <VirtualTerminal />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/invoicing">
-        {() => (
-          <DashboardLayout>
-            <Invoicing />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/recurring-billing">
-        {() => (
-          <DashboardLayout>
-            <RecurringBilling />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/fraud-prevention">
-        {() => (
-          <DashboardLayout>
-            <FraudPrevention />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/customer-vault">
-        {() => (
-          <DashboardLayout>
-            <CustomerVault />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/payment-links">
-        {() => (
-          <DashboardLayout>
-            <PaymentLinks />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/dispute-management">
-        {() => (
-          <DashboardLayout>
-            <DisputeManagement />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/abandoned-carts">
-        {() => (
-          <DashboardLayout>
-            <TierGate
-              requiredTier="Scale"
-              featureName="Abandoned Carts"
-              featureDescription="Recover lost sales with automated email recovery campaigns."
-            >
-              <div className="p-8">
-                <h1 className="text-2xl font-bold text-swipes-black mb-2">Abandoned Carts</h1>
-                <p className="text-swipes-pro-gray">Recover lost sales with automated email recovery.</p>
-                <div className="mt-8 p-6 bg-white rounded-[7px] border border-gray-200">
-                  <p className="text-swipes-pro-gray">View and manage abandoned cart recovery campaigns.</p>
-                </div>
-              </div>
-            </TierGate>
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/brand-studio">
-        {() => (
-          <DashboardLayout>
-            <BrandStudio />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/analytics">
-        {() => (
-          <DashboardLayout>
-            <AnalyticsDashboard />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/security">
-        {() => (
-          <DashboardLayout>
-            <SecurityDashboard />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/reporting">
-        {() => (
-          <DashboardLayout>
-            <Reporting />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/settings">
-        {() => (
-          <DashboardLayout>
-            <SettingsPage />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/checkout-optimizer">
-        {() => (
-          <DashboardLayout>
-            <CheckoutOptimizer />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/cart-settings">
-        {() => (
-          <DashboardLayout>
-            <CartSettings />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/gateways">
-        {() => (
-          <DashboardLayout>
-            <MultiGateway />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/customer-portal">
-        {() => (
-          <DashboardLayout>
-            <CustomerPortal />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/api-keys">
-        {() => (
-          <DashboardLayout>
-            <ApiKeys />
-          </DashboardLayout>
-        )}
-      </Route>
-      <Route path="/dashboard/webhooks">
-        {() => (
-          <DashboardLayout>
-            <Webhooks />
+            <Balances />
           </DashboardLayout>
         )}
       </Route>
 
-      {/* Merchant Catalog Routes (Prompt 13) */}
+      {/* Product Catalog */}
       <Route path="/dashboard/catalog">
         {() => (
           <DashboardLayout>
@@ -339,6 +273,112 @@ function Router() {
           </DashboardLayout>
         )}
       </Route>
+
+      {/* ── CORE PRODUCTS ─────────────────────────────────────── */}
+
+      {/* E-Commerce Suite overview */}
+      <Route path="/dashboard/ecommerce">
+        {() => (
+          <DashboardLayout>
+            <EcommerceSuiteDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Suite-dependent: Shopping Cart */}
+      <Route path="/dashboard/ecommerce/cart">
+        {() => (
+          <DashboardLayout>
+            <ShoppingCartDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Suite-dependent: One-Page Checkout */}
+      <Route path="/dashboard/ecommerce/checkout">
+        {() => (
+          <DashboardLayout>
+            <CheckoutDashboard />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Standalone: Virtual Terminal */}
+      <Route path="/dashboard/terminal">
+        {() => (
+          <DashboardLayout>
+            <VirtualTerminal />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Standalone: Payment Links */}
+      <Route path="/dashboard/payment-links">
+        {() => (
+          <DashboardLayout>
+            <PaymentLinks />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Standalone: Invoicing */}
+      <Route path="/dashboard/invoices">
+        {() => (
+          <DashboardLayout>
+            <Invoicing />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Standalone: Recurring Billing */}
+      <Route path="/dashboard/subscriptions">
+        {() => (
+          <DashboardLayout>
+            <RecurringBilling />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Standalone: Customer Vault */}
+      <Route path="/dashboard/vault">
+        {() => (
+          <DashboardLayout>
+            <CustomerVault />
+          </DashboardLayout>
+        )}
+      </Route>
+      {/* Fraud Prevention */}
+      <Route path="/dashboard/fraud">
+        {() => (
+          <DashboardLayout>
+            <FraudPrevention />
+          </DashboardLayout>
+        )}
+      </Route>
+
+      {/* ── ENHANCEMENTS ──────────────────────────────────────── */}
+      <Route path="/dashboard/enhance/:slug">
+        {() => (
+          <DashboardLayout>
+            <EnhancementDetail />
+          </DashboardLayout>
+        )}
+      </Route>
+
+      {/* ── SETTINGS ──────────────────────────────────────────── */}
+      <Route path="/dashboard/settings/:tab?">
+        {() => (
+          <DashboardLayout>
+            <SettingsPage />
+          </DashboardLayout>
+        )}
+      </Route>
+
+      {/* ── REPORTING ─────────────────────────────────────────── */}
+      <Route path="/dashboard/reporting">
+        {() => (
+          <DashboardLayout>
+            <Reporting />
+          </DashboardLayout>
+        )}
+      </Route>
+
+      {/* ════════════════════════════════════════════════════════════
+          ADMIN ROUTES
+          ════════════════════════════════════════════════════════════ */}
 
       {/* Admin Login (public) */}
       <Route path="/admin/login" component={AdminLogin} />
@@ -409,7 +449,7 @@ function AppLayout() {
   const isAdminRoute = location.startsWith("/admin");
   const isDashboardRoute = location.startsWith("/dashboard");
   const isAuthPage = location === "/login" || location === "/register";
-  
+
   // Auth pages have their own layout
   if (isAuthPage) {
     return (
@@ -418,7 +458,7 @@ function AppLayout() {
       </div>
     );
   }
-  
+
   return (
     <div className="min-h-screen bg-[#F6F9FC]">
       <div className="max-w-[1400px] mx-auto bg-white min-h-screen flex flex-col border-x border-gray-200">

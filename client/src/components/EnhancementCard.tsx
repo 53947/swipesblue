@@ -33,14 +33,14 @@ export default function EnhancementCard({ addOn, isSubscribed = false }: Enhance
             <IconComponent className="h-5 w-5 text-gray-600" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="font-semibold text-swipes-black text-sm leading-tight">{addOn.name}</h3>
-            <p className="text-lg font-bold text-swipes-blue-deep mt-1">
-              ${price.toFixed(2)}<span className="text-xs font-normal text-swipes-pro-gray">/yr</span>
+            <h3 className="font-semibold text-gray-900 text-sm leading-tight">{addOn.name}</h3>
+            <p className="text-lg font-bold text-[#1844A6] mt-1">
+              ${price.toFixed(2)}<span className="text-xs font-normal text-gray-500">/yr</span>
             </p>
           </div>
         </div>
 
-        <p className="text-sm text-swipes-pro-gray mb-4 line-clamp-2 flex-1">
+        <p className="text-sm text-gray-500 mb-4 line-clamp-2 flex-1">
           {addOn.description}
         </p>
 
@@ -51,7 +51,7 @@ export default function EnhancementCard({ addOn, isSubscribed = false }: Enhance
             </Badge>
           )}
           {isSubscribed && (
-            <Badge className="text-xs bg-swipes-trusted-green text-white no-default-hover-elevate">
+            <Badge className="text-xs bg-green-600 text-white no-default-hover-elevate">
               Active
             </Badge>
           )}
@@ -61,7 +61,7 @@ export default function EnhancementCard({ addOn, isSubscribed = false }: Enhance
           <Link href={`/products/${addOn.slug}`}>
             <Button
               variant="outline"
-              className="w-full rounded-[7px] border-gray-300 text-swipes-pro-gray"
+              className="w-full rounded-[7px] border-gray-300 text-gray-500"
             >
               Manage
             </Button>
@@ -69,7 +69,7 @@ export default function EnhancementCard({ addOn, isSubscribed = false }: Enhance
         ) : (
           <Link href={`/products/${addOn.slug}`}>
             <Button
-              className="w-full bg-swipes-blue-deep text-white rounded-[7px] group"
+              className="w-full bg-[#1844A6] text-white rounded-[7px] group"
             >
               <span className="flex items-center justify-center">
                 Subscribe

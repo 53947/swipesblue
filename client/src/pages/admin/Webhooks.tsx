@@ -343,7 +343,7 @@ export default function Webhooks() {
                             disabled={deleteMutation.isPending}
                             data-testid={`button-delete-${webhook.id}`}
                           >
-                            <Trash2 className="h-4 w-4 text-swipes-muted-red" />
+                            <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
                         </div>
                       </TableCell>
@@ -435,10 +435,10 @@ export default function Webhooks() {
 
           {newWebhookResult && (
             <div className="space-y-4">
-              <div className="bg-swipes-gold/10 border border-swipes-gold/30 rounded-lg p-4">
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
                 <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-swipes-gold mt-0.5" />
-                  <div className="text-sm text-swipes-black dark:text-white">
+                  <CheckCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                  <div className="text-sm text-gray-900 dark:text-white">
                     <p className="font-medium">Important: Save this secret now</p>
                     <p className="mt-1">
                       Use this secret to verify webhook signatures. It will only be shown once.
@@ -551,7 +551,7 @@ export default function Webhooks() {
                           )}
                         </div>
                         {delivery.errorMessage && (
-                          <div className="mt-2 text-xs text-swipes-muted-red" data-testid={`text-error-${delivery.id}`}>
+                          <div className="mt-2 text-xs text-red-600" data-testid={`text-error-${delivery.id}`}>
                             {delivery.errorMessage}
                           </div>
                         )}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   FileText,
   Landmark,
@@ -22,14 +23,11 @@ import {
   Edit,
   RotateCcw,
   Loader2,
-  CheckCircle,
-  XCircle,
   ChevronRight,
   X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -40,6 +38,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const tabs = [
+  { label: "Available Reports", href: "/dashboard/reporting" },
+  { label: "Scheduled", href: "/dashboard/reporting?tab=scheduled" },
+  { label: "History", href: "/dashboard/reporting?tab=history" },
+  { label: "Custom Builder", href: "/dashboard/reporting?tab=builder" },
+];
 
 // Available reports data
 const availableReports = [
@@ -203,10 +210,13 @@ interface FilterRow {
 }
 
 export default function Reporting() {
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "available";
+
   const [dateRange, setDateRange] = useState("30 Days");
   const [customFrom, setCustomFrom] = useState("");
   const [customTo, setCustomTo] = useState("");
-  const [activeTab, setActiveTab] = useState("available");
 
   // History filters
   const [historyTypeFilter, setHistoryTypeFilter] = useState("all");
@@ -284,40 +294,27 @@ export default function Reporting() {
     return true;
   });
 
-  const historyStatusBadge = (status: "Ready" | "Processing" | "Failed") => {
-    if (status === "Ready") {
-      return (
-        <Badge className="bg-swipes-trusted-green text-white hover:bg-swipes-trusted-green">
-          <CheckCircle className="h-3 w-3 mr-1" />
-          Ready
-        </Badge>
-      );
-    }
-    if (status === "Processing") {
-      return (
-        <Badge className="bg-swipes-gold text-black hover:bg-swipes-gold">
-          <Loader2 className="h-3 w-3 mr-1 animate-spin" />
-          Processing
-        </Badge>
-      );
-    }
-    return (
-      <Badge className="bg-swipes-muted-red text-white hover:bg-swipes-muted-red">
-        <XCircle className="h-3 w-3 mr-1" />
-        Failed
-      </Badge>
-    );
+  const historyStatusColors: Record<string, string> = {
+    Ready: "bg-green-100 text-green-700",
+    Processing: "bg-yellow-100 text-yellow-700",
+    Failed: "bg-red-100 text-red-600",
+  };
+
+  const historyStatusIcons: Record<string, React.ReactNode> = {
+    Ready: <Download className="h-3 w-3 mr-1" />,
+    Processing: <Loader2 className="h-3 w-3 mr-1 animate-spin" />,
+    Failed: <X className="h-3 w-3 mr-1" />,
   };
 
   const currentFields = dataSourceFields[builderDataSource] || [];
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8">
       {/* Header */}
-      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+      <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-2xl font-bold mb-2 text-swipes-black">Reporting</h1>
-          <p className="text-swipes-pro-gray">Generate, schedule, and download reports for your business</p>
+          <h1 className="text-2xl font-bold text-gray-900">Reporting</h1>
+          <p className="text-gray-500 mt-1">Generate, schedule, and download reports for your business</p>
         </div>
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
           {/* Date range presets */}
@@ -328,8 +325,8 @@ export default function Reporting() {
                 onClick={() => setDateRange(preset)}
                 className={`px-3 py-1.5 text-sm rounded-[5px] transition-colors ${
                   dateRange === preset
-                    ? "bg-swipes-blue-deep text-white"
-                    : "text-swipes-pro-gray hover:bg-gray-100"
+                    ? "bg-[#1844A6] text-white"
+                    : "text-gray-500 hover:bg-gray-100"
                 }`}
               >
                 {preset}
@@ -348,7 +345,7 @@ export default function Reporting() {
               className="h-9 rounded-[7px] text-sm w-36"
               placeholder="From"
             />
-            <span className="text-swipes-pro-gray text-sm">to</span>
+            <span className="text-gray-500 text-sm">to</span>
             <Input
               type="date"
               value={customTo}
@@ -360,88 +357,77 @@ export default function Reporting() {
               placeholder="To"
             />
           </div>
-          <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+          <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
             <FileText className="h-4 w-4 mr-2" />
             Generate Report
           </Button>
         </div>
       </div>
 
+      <SubNavTabs tabs={tabs} />
+
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Reports Generated This Month", value: "47", icon: FileText },
-          { label: "Scheduled Reports", value: "5 active", icon: Calendar },
-          { label: "Last Generated", value: "2 hours ago", icon: Clock },
-          { label: "Data Export Size", value: "12.4 MB total", icon: HardDrive },
-        ].map((metric) => {
-          const Icon = metric.icon;
-          return (
-            <div key={metric.label} className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-swipes-pro-gray">{metric.label}</span>
-                <Icon className="h-5 w-5 text-swipes-blue-deep" />
-              </div>
-              <p className="text-2xl font-bold text-swipes-black">{metric.value}</p>
-            </div>
-          );
-        })}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <MetricCard
+          title="Reports Generated This Month"
+          value="47"
+          icon={FileText}
+        />
+        <MetricCard
+          title="Scheduled Reports"
+          value="5 active"
+          icon={Calendar}
+        />
+        <MetricCard
+          title="Last Generated"
+          value="2 hours ago"
+          icon={Clock}
+        />
+        <MetricCard
+          title="Data Export Size"
+          value="12.4 MB total"
+          icon={HardDrive}
+        />
       </div>
 
-      {/* Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="bg-white border border-gray-200 rounded-[7px] p-1">
-          <TabsTrigger value="available" className="rounded-[5px] data-[state=active]:bg-swipes-blue-deep data-[state=active]:text-white">
-            Available Reports
-          </TabsTrigger>
-          <TabsTrigger value="scheduled" className="rounded-[5px] data-[state=active]:bg-swipes-blue-deep data-[state=active]:text-white">
-            Scheduled
-          </TabsTrigger>
-          <TabsTrigger value="history" className="rounded-[5px] data-[state=active]:bg-swipes-blue-deep data-[state=active]:text-white">
-            History
-          </TabsTrigger>
-          <TabsTrigger value="builder" className="rounded-[5px] data-[state=active]:bg-swipes-blue-deep data-[state=active]:text-white">
-            Custom Builder
-          </TabsTrigger>
-        </TabsList>
-
-        {/* Available Reports Tab */}
-        <TabsContent value="available" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {availableReports.map((report) => {
-              const Icon = report.icon;
-              return (
-                <div key={report.name} className="bg-white rounded-[7px] border border-gray-200 p-6 flex gap-4">
-                  <div className="flex-shrink-0 w-10 h-10 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center">
-                    <Icon className="h-5 w-5 text-swipes-blue-deep" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-semibold text-swipes-black mb-1">{report.name}</h3>
-                    <p className="text-sm text-swipes-pro-gray mb-3">{report.description}</p>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        {report.formats.map((fmt) => (
-                          <Badge key={fmt} variant="outline" className="text-xs rounded-[5px] text-swipes-pro-gray">
-                            {fmt}
-                          </Badge>
-                        ))}
-                      </div>
-                      <Button size="sm" className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
-                        Generate
-                      </Button>
+      {/* Tab: Available Reports */}
+      {activeTab === "available" && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {availableReports.map((report) => {
+            const Icon = report.icon;
+            return (
+              <div key={report.name} className="bg-white rounded-[7px] border border-gray-200 p-6 flex gap-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-[7px] bg-[#1844A6]/10 flex items-center justify-center">
+                  <Icon className="h-5 w-5 text-[#1844A6]" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-gray-900 mb-1">{report.name}</h3>
+                  <p className="text-sm text-gray-500 mb-3">{report.description}</p>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      {report.formats.map((fmt) => (
+                        <Badge key={fmt} variant="outline" className="text-xs rounded-full text-gray-500">
+                          {fmt}
+                        </Badge>
+                      ))}
                     </div>
+                    <Button size="sm" className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+                      Generate
+                    </Button>
                   </div>
                 </div>
-              );
-            })}
-          </div>
-        </TabsContent>
+              </div>
+            );
+          })}
+        </div>
+      )}
 
-        {/* Scheduled Tab */}
-        <TabsContent value="scheduled" className="mt-6 space-y-4">
+      {/* Tab: Scheduled */}
+      {activeTab === "scheduled" && (
+        <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <p className="text-sm text-swipes-pro-gray">{mockScheduledReports.length} scheduled reports</p>
-            <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+            <p className="text-sm text-gray-500">{mockScheduledReports.length} scheduled reports</p>
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
               <Plus className="h-4 w-4 mr-2" />
               Schedule New Report
             </Button>
@@ -449,45 +435,45 @@ export default function Reporting() {
           <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Report Name</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Frequency</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Format</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Recipients</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Next Run</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Status</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Actions</th>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Report Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Frequency</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Format</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Recipients</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Next Run</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody>
                 {mockScheduledReports.map((report) => (
-                  <tr key={report.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-swipes-black">{report.name}</td>
-                    <td className="px-6 py-4 text-sm text-swipes-pro-gray">{report.frequency}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className="text-xs rounded-[5px]">{report.format}</Badge>
+                  <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{report.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{report.frequency}</td>
+                    <td className="px-4 py-3">
+                      <Badge variant="outline" className="text-xs rounded-full">{report.format}</Badge>
                     </td>
-                    <td className="px-6 py-4 text-sm text-swipes-pro-gray max-w-[200px] truncate">{report.recipients}</td>
-                    <td className="px-6 py-4 text-sm text-swipes-pro-gray">{report.nextRun}</td>
-                    <td className="px-6 py-4">
-                      <Badge className={
+                    <td className="px-4 py-3 text-sm text-gray-600 max-w-[200px] truncate">{report.recipients}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{report.nextRun}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`text-xs rounded-full ${
                         report.status === "Active"
-                          ? "bg-swipes-trusted-green text-white hover:bg-swipes-trusted-green"
-                          : "bg-gray-200 text-gray-600 hover:bg-gray-200"
-                      }>
+                          ? "bg-green-100 text-green-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}>
                         {report.status}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-[7px]" title="Edit">
-                          <Edit className="h-3.5 w-3.5" />
+                    <td className="px-4 py-3">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit">
+                          <Edit className="h-4 w-4 text-gray-500" />
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-[7px]" title={report.status === "Active" ? "Pause" : "Resume"}>
-                          {report.status === "Active" ? <Pause className="h-3.5 w-3.5" /> : <Play className="h-3.5 w-3.5" />}
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title={report.status === "Active" ? "Pause" : "Resume"}>
+                          {report.status === "Active" ? <Pause className="h-4 w-4 text-yellow-600" /> : <Play className="h-4 w-4 text-green-600" />}
                         </Button>
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-[7px] text-swipes-muted-red hover:text-swipes-muted-red" title="Delete">
-                          <Trash2 className="h-3.5 w-3.5" />
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-600" title="Delete">
+                          <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </td>
@@ -496,10 +482,12 @@ export default function Reporting() {
               </tbody>
             </table>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* History Tab */}
-        <TabsContent value="history" className="mt-6 space-y-4">
+      {/* Tab: History */}
+      {activeTab === "history" && (
+        <div className="space-y-4">
           {/* Filters */}
           <div className="flex flex-wrap items-center gap-3">
             <Select value={historyTypeFilter} onValueChange={setHistoryTypeFilter}>
@@ -524,388 +512,398 @@ export default function Reporting() {
                 <SelectItem value="Failed">Failed</SelectItem>
               </SelectContent>
             </Select>
-            <span className="text-sm text-swipes-pro-gray">{filteredHistory.length} reports</span>
+            <span className="text-sm text-gray-500">{filteredHistory.length} reports</span>
           </div>
-          <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Report Name</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Generated</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Date Range</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Format</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Size</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Status</th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {filteredHistory.map((report) => (
-                  <tr key={report.id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 text-sm font-medium text-swipes-black">{report.name}</td>
-                    <td className="px-6 py-4 text-sm text-swipes-pro-gray">{report.generatedDate}</td>
-                    <td className="px-6 py-4 text-sm text-swipes-pro-gray">{report.dateRange}</td>
-                    <td className="px-6 py-4">
-                      <Badge variant="outline" className="text-xs rounded-[5px]">{report.format}</Badge>
-                    </td>
-                    <td className="px-6 py-4 text-sm text-swipes-pro-gray">{report.size}</td>
-                    <td className="px-6 py-4">{historyStatusBadge(report.status)}</td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-1">
-                        {report.status === "Ready" && (
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-[7px]" title="Download">
-                            <Download className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                        {report.status === "Failed" && (
-                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-[7px]" title="Regenerate">
-                            <RotateCcw className="h-3.5 w-3.5" />
-                          </Button>
-                        )}
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0 rounded-[7px] text-swipes-muted-red hover:text-swipes-muted-red" title="Delete">
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredHistory.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className="px-6 py-12 text-center text-sm text-swipes-pro-gray">
-                      No reports match your filters.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
 
-        {/* Custom Builder Tab */}
-        <TabsContent value="builder" className="mt-6">
-          <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            {/* Step indicator */}
-            <div className="flex items-center gap-2 mb-8">
-              {[
-                { num: 1, label: "Data Source" },
-                { num: 2, label: "Columns" },
-                { num: 3, label: "Filters" },
-                { num: 4, label: "Format & Delivery" },
-              ].map((step, i) => (
-                <div key={step.num} className="flex items-center gap-2">
+          {filteredHistory.length === 0 ? (
+            <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
+              <FileText className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No reports found</h3>
+              <p className="text-gray-500 text-sm">No reports match your filters.</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Report Name</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Generated</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date Range</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Format</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Size</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredHistory.map((report) => (
+                    <tr key={report.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{report.name}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{report.generatedDate}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{report.dateRange}</td>
+                      <td className="px-4 py-3">
+                        <Badge variant="outline" className="text-xs rounded-full">{report.format}</Badge>
+                      </td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{report.size}</td>
+                      <td className="px-4 py-3">
+                        <Badge className={`text-xs rounded-full ${historyStatusColors[report.status]}`}>
+                          {historyStatusIcons[report.status]}
+                          {report.status}
+                        </Badge>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          {report.status === "Ready" && (
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Download">
+                              <Download className="h-4 w-4 text-gray-500" />
+                            </Button>
+                          )}
+                          {report.status === "Failed" && (
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Regenerate">
+                              <RotateCcw className="h-4 w-4 text-gray-500" />
+                            </Button>
+                          )}
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-red-600 hover:text-red-600" title="Delete">
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="text-center">
+            <span className="text-xs text-gray-400">{filteredHistory.length} reports</span>
+          </div>
+        </div>
+      )}
+
+      {/* Tab: Custom Builder */}
+      {activeTab === "builder" && (
+        <div className="bg-white rounded-[7px] border border-gray-200 p-6">
+          {/* Step indicator */}
+          <div className="flex items-center gap-2 mb-8">
+            {[
+              { num: 1, label: "Data Source" },
+              { num: 2, label: "Columns" },
+              { num: 3, label: "Filters" },
+              { num: 4, label: "Format & Delivery" },
+            ].map((step, i) => (
+              <div key={step.num} className="flex items-center gap-2">
+                <button
+                  onClick={() => setBuilderStep(step.num)}
+                  className={`flex items-center gap-2 px-3 py-1.5 rounded-[7px] text-sm font-medium transition-colors ${
+                    builderStep === step.num
+                      ? "bg-[#1844A6] text-white"
+                      : builderStep > step.num
+                      ? "bg-green-100 text-green-700"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
+                >
+                  <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
+                    builderStep === step.num
+                      ? "bg-white/20 text-white"
+                      : builderStep > step.num
+                      ? "bg-green-600 text-white"
+                      : "bg-gray-300 text-white"
+                  }`}>
+                    {builderStep > step.num ? "✓" : step.num}
+                  </span>
+                  {step.label}
+                </button>
+                {i < 3 && <ChevronRight className="h-4 w-4 text-gray-300" />}
+              </div>
+            ))}
+          </div>
+
+          {/* Step 1 — Data Source */}
+          {builderStep === 1 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">Step 1 — Select Data Source</h3>
+              <p className="text-sm text-gray-500">Choose the type of data you want to include in your report.</p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
+                {Object.keys(dataSourceFields).map((source) => (
                   <button
-                    onClick={() => setBuilderStep(step.num)}
-                    className={`flex items-center gap-2 px-3 py-1.5 rounded-[7px] text-sm font-medium transition-colors ${
-                      builderStep === step.num
-                        ? "bg-swipes-blue-deep text-white"
-                        : builderStep > step.num
-                        ? "bg-swipes-trusted-green/10 text-swipes-trusted-green"
-                        : "bg-gray-100 text-swipes-pro-gray"
+                    key={source}
+                    onClick={() => handleDataSourceChange(source)}
+                    className={`p-4 rounded-[7px] border-2 text-sm font-medium transition-colors text-center ${
+                      builderDataSource === source
+                        ? "border-[#1844A6] bg-[#1844A6]/5 text-[#1844A6]"
+                        : "border-gray-200 text-gray-500 hover:border-gray-300"
                     }`}
                   >
-                    <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold ${
-                      builderStep === step.num
-                        ? "bg-white/20 text-white"
-                        : builderStep > step.num
-                        ? "bg-swipes-trusted-green text-white"
-                        : "bg-gray-300 text-white"
-                    }`}>
-                      {builderStep > step.num ? "✓" : step.num}
-                    </span>
-                    {step.label}
+                    {source}
                   </button>
-                  {i < 3 && <ChevronRight className="h-4 w-4 text-gray-300" />}
-                </div>
-              ))}
-            </div>
-
-            {/* Step 1 — Data Source */}
-            {builderStep === 1 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-swipes-black">Step 1 — Select Data Source</h3>
-                <p className="text-sm text-swipes-pro-gray">Choose the type of data you want to include in your report.</p>
-                <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-3 mt-4">
-                  {Object.keys(dataSourceFields).map((source) => (
-                    <button
-                      key={source}
-                      onClick={() => handleDataSourceChange(source)}
-                      className={`p-4 rounded-[7px] border-2 text-sm font-medium transition-colors text-center ${
-                        builderDataSource === source
-                          ? "border-swipes-blue-deep bg-swipes-blue-deep/5 text-swipes-blue-deep"
-                          : "border-gray-200 text-swipes-pro-gray hover:border-gray-300"
-                      }`}
-                    >
-                      {source}
-                    </button>
-                  ))}
-                </div>
-                <div className="flex justify-end mt-6">
-                  <Button
-                    onClick={() => setBuilderStep(2)}
-                    className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]"
-                  >
-                    Next: Columns
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
+                ))}
               </div>
-            )}
-
-            {/* Step 2 — Columns */}
-            {builderStep === 2 && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-swipes-black">Step 2 — Select Columns</h3>
-                    <p className="text-sm text-swipes-pro-gray">Choose which fields to include for <span className="font-medium text-swipes-black">{builderDataSource}</span>.</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button variant="outline" size="sm" className="rounded-[7px]" onClick={selectAllColumns}>Select All</Button>
-                    <Button variant="outline" size="sm" className="rounded-[7px]" onClick={deselectAllColumns}>Deselect All</Button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-4">
-                  {currentFields.map((field) => (
-                    <label
-                      key={field.label}
-                      className={`flex items-center gap-3 p-3 rounded-[7px] border cursor-pointer transition-colors ${
-                        builderColumns[field.label]
-                          ? "border-swipes-blue-deep bg-swipes-blue-deep/5"
-                          : "border-gray-200 hover:border-gray-300"
-                      }`}
-                    >
-                      <Checkbox
-                        checked={builderColumns[field.label] || false}
-                        onCheckedChange={() => toggleColumn(field.label)}
-                      />
-                      <span className="text-sm text-swipes-black">{field.label}</span>
-                    </label>
-                  ))}
-                </div>
-                <div className="flex justify-between mt-6">
-                  <Button variant="outline" onClick={() => setBuilderStep(1)} className="rounded-[7px]">
-                    Back
-                  </Button>
-                  <Button
-                    onClick={() => setBuilderStep(3)}
-                    className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]"
-                  >
-                    Next: Filters
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
-                </div>
-              </div>
-            )}
-
-            {/* Step 3 — Filters */}
-            {builderStep === 3 && (
-              <div className="space-y-4">
-                <h3 className="text-lg font-semibold text-swipes-black">Step 3 — Add Filters</h3>
-                <p className="text-sm text-swipes-pro-gray">Narrow down the data included in your report. Filters are optional.</p>
-
-                {builderFilters.length > 1 && (
-                  <div className="flex items-center gap-2 mt-2">
-                    <Label className="text-sm text-swipes-pro-gray">Combine filters with:</Label>
-                    <div className="flex items-center gap-1 bg-white rounded-[7px] border border-gray-200 p-1">
-                      {(["AND", "OR"] as const).map((logic) => (
-                        <button
-                          key={logic}
-                          onClick={() => setBuilderFilterLogic(logic)}
-                          className={`px-3 py-1 text-sm rounded-[5px] transition-colors ${
-                            builderFilterLogic === logic
-                              ? "bg-swipes-blue-deep text-white"
-                              : "text-swipes-pro-gray hover:bg-gray-100"
-                          }`}
-                        >
-                          {logic}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="space-y-3 mt-4">
-                  {builderFilters.map((filter, idx) => (
-                    <div key={filter.id} className="flex items-center gap-3">
-                      {idx > 0 && (
-                        <span className="text-xs font-medium text-swipes-pro-gray w-8 text-center">{builderFilterLogic}</span>
-                      )}
-                      {idx === 0 && builderFilters.length > 1 && <div className="w-8" />}
-                      <Select value={filter.field} onValueChange={(v) => updateFilter(filter.id, "field", v)}>
-                        <SelectTrigger className="w-[180px] rounded-[7px]">
-                          <SelectValue placeholder="Select field" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {currentFields.map((f) => (
-                            <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <Select value={filter.operator} onValueChange={(v) => updateFilter(filter.id, "operator", v)}>
-                        <SelectTrigger className="w-[160px] rounded-[7px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="equals">Equals</SelectItem>
-                          <SelectItem value="contains">Contains</SelectItem>
-                          <SelectItem value="greater_than">Greater than</SelectItem>
-                          <SelectItem value="less_than">Less than</SelectItem>
-                          <SelectItem value="between">Between</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <Input
-                        value={filter.value}
-                        onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
-                        placeholder="Value"
-                        className="flex-1 rounded-[7px]"
-                      />
-                      {builderFilters.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-8 w-8 p-0 rounded-[7px] text-swipes-muted-red hover:text-swipes-muted-red"
-                          onClick={() => removeFilter(filter.id)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-                <Button variant="outline" size="sm" className="rounded-[7px]" onClick={addFilter}>
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Filter
+              <div className="flex justify-end mt-6">
+                <Button
+                  onClick={() => setBuilderStep(2)}
+                  className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]"
+                >
+                  Next: Columns
+                  <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
-                <div className="flex justify-between mt-6">
-                  <Button variant="outline" onClick={() => setBuilderStep(2)} className="rounded-[7px]">
-                    Back
-                  </Button>
-                  <Button
-                    onClick={() => setBuilderStep(4)}
-                    className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]"
-                  >
-                    Next: Format & Delivery
-                    <ChevronRight className="h-4 w-4 ml-1" />
-                  </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 2 — Columns */}
+          {builderStep === 2 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Step 2 — Select Columns</h3>
+                  <p className="text-sm text-gray-500">Choose which fields to include for <span className="font-medium text-gray-900">{builderDataSource}</span>.</p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" size="sm" className="rounded-[7px]" onClick={selectAllColumns}>Select All</Button>
+                  <Button variant="outline" size="sm" className="rounded-[7px]" onClick={deselectAllColumns}>Deselect All</Button>
                 </div>
               </div>
-            )}
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mt-4">
+                {currentFields.map((field) => (
+                  <label
+                    key={field.label}
+                    className={`flex items-center gap-3 p-3 rounded-[7px] border cursor-pointer transition-colors ${
+                      builderColumns[field.label]
+                        ? "border-[#1844A6] bg-[#1844A6]/5"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                  >
+                    <Checkbox
+                      checked={builderColumns[field.label] || false}
+                      onCheckedChange={() => toggleColumn(field.label)}
+                    />
+                    <span className="text-sm text-gray-900">{field.label}</span>
+                  </label>
+                ))}
+              </div>
+              <div className="flex justify-between mt-6">
+                <Button variant="outline" onClick={() => setBuilderStep(1)} className="rounded-[7px]">
+                  Back
+                </Button>
+                <Button
+                  onClick={() => setBuilderStep(3)}
+                  className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]"
+                >
+                  Next: Filters
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
 
-            {/* Step 4 — Format & Delivery */}
-            {builderStep === 4 && (
-              <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-swipes-black">Step 4 — Format & Delivery</h3>
-                <p className="text-sm text-swipes-pro-gray">Choose how you want your report formatted and delivered.</p>
+          {/* Step 3 — Filters */}
+          {builderStep === 3 && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900">Step 3 — Add Filters</h3>
+              <p className="text-sm text-gray-500">Narrow down the data included in your report. Filters are optional.</p>
 
-                {/* Format */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium text-swipes-black">Format</Label>
-                  <div className="flex items-center gap-3">
-                    {["CSV", "XLSX", "PDF"].map((fmt) => (
+              {builderFilters.length > 1 && (
+                <div className="flex items-center gap-2 mt-2">
+                  <Label className="text-sm text-gray-500">Combine filters with:</Label>
+                  <div className="flex items-center gap-1 bg-white rounded-[7px] border border-gray-200 p-1">
+                    {(["AND", "OR"] as const).map((logic) => (
                       <button
-                        key={fmt}
-                        onClick={() => setBuilderFormat(fmt)}
-                        className={`px-4 py-2 rounded-[7px] border-2 text-sm font-medium transition-colors ${
-                          builderFormat === fmt
-                            ? "border-swipes-blue-deep bg-swipes-blue-deep/5 text-swipes-blue-deep"
-                            : "border-gray-200 text-swipes-pro-gray hover:border-gray-300"
+                        key={logic}
+                        onClick={() => setBuilderFilterLogic(logic)}
+                        className={`px-3 py-1 text-sm rounded-[5px] transition-colors ${
+                          builderFilterLogic === logic
+                            ? "bg-[#1844A6] text-white"
+                            : "text-gray-500 hover:bg-gray-100"
                         }`}
                       >
-                        {fmt}
+                        {logic}
                       </button>
                     ))}
                   </div>
                 </div>
+              )}
 
-                {/* Delivery */}
-                <div className="space-y-3">
-                  <Label className="text-sm font-medium text-swipes-black">Delivery</Label>
-                  <div className="space-y-3">
-                    {[
-                      { value: "download", label: "Download now" },
-                      { value: "email", label: "Email to" },
-                      { value: "schedule", label: "Schedule" },
-                    ].map((option) => (
-                      <label
-                        key={option.value}
-                        className={`flex items-start gap-3 p-4 rounded-[7px] border-2 cursor-pointer transition-colors ${
-                          builderDelivery === option.value
-                            ? "border-swipes-blue-deep bg-swipes-blue-deep/5"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
+              <div className="space-y-3 mt-4">
+                {builderFilters.map((filter, idx) => (
+                  <div key={filter.id} className="flex items-center gap-3">
+                    {idx > 0 && (
+                      <span className="text-xs font-medium text-gray-500 w-8 text-center">{builderFilterLogic}</span>
+                    )}
+                    {idx === 0 && builderFilters.length > 1 && <div className="w-8" />}
+                    <Select value={filter.field} onValueChange={(v) => updateFilter(filter.id, "field", v)}>
+                      <SelectTrigger className="w-[180px] rounded-[7px]">
+                        <SelectValue placeholder="Select field" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {currentFields.map((f) => (
+                          <SelectItem key={f.label} value={f.label}>{f.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <Select value={filter.operator} onValueChange={(v) => updateFilter(filter.id, "operator", v)}>
+                      <SelectTrigger className="w-[160px] rounded-[7px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="equals">Equals</SelectItem>
+                        <SelectItem value="contains">Contains</SelectItem>
+                        <SelectItem value="greater_than">Greater than</SelectItem>
+                        <SelectItem value="less_than">Less than</SelectItem>
+                        <SelectItem value="between">Between</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Input
+                      value={filter.value}
+                      onChange={(e) => updateFilter(filter.id, "value", e.target.value)}
+                      placeholder="Value"
+                      className="flex-1 rounded-[7px]"
+                    />
+                    {builderFilters.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-600"
+                        onClick={() => removeFilter(filter.id)}
                       >
-                        <input
-                          type="radio"
-                          name="delivery"
-                          value={option.value}
-                          checked={builderDelivery === option.value}
-                          onChange={(e) => setBuilderDelivery(e.target.value)}
-                          className="mt-0.5 accent-[#1844A6]"
-                        />
-                        <div className="flex-1">
-                          <span className="text-sm font-medium text-swipes-black">{option.label}</span>
-                          {option.value === "email" && builderDelivery === "email" && (
-                            <Input
-                              value={builderEmail}
-                              onChange={(e) => setBuilderEmail(e.target.value)}
-                              placeholder="recipient@example.com"
-                              className="mt-2 rounded-[7px]"
-                              onClick={(e) => e.stopPropagation()}
-                            />
-                          )}
-                          {option.value === "schedule" && builderDelivery === "schedule" && (
-                            <Select value={builderFrequency} onValueChange={setBuilderFrequency}>
-                              <SelectTrigger className="w-[200px] mt-2 rounded-[7px]" onClick={(e) => e.stopPropagation()}>
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                <SelectItem value="daily">Daily</SelectItem>
-                                <SelectItem value="weekly">Weekly</SelectItem>
-                                <SelectItem value="monthly">Monthly</SelectItem>
-                              </SelectContent>
-                            </Select>
-                          )}
-                        </div>
-                      </label>
-                    ))}
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
-                </div>
+                ))}
+              </div>
+              <Button variant="outline" size="sm" className="rounded-[7px]" onClick={addFilter}>
+                <Plus className="h-4 w-4 mr-1" />
+                Add Filter
+              </Button>
+              <div className="flex justify-between mt-6">
+                <Button variant="outline" onClick={() => setBuilderStep(2)} className="rounded-[7px]">
+                  Back
+                </Button>
+                <Button
+                  onClick={() => setBuilderStep(4)}
+                  className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]"
+                >
+                  Next: Format & Delivery
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
 
-                {/* Summary */}
-                <div className="bg-gray-50 rounded-[7px] p-4 space-y-2">
-                  <h4 className="text-sm font-semibold text-swipes-black">Report Summary</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <span className="text-swipes-pro-gray">Data Source:</span>
-                    <span className="text-swipes-black font-medium">{builderDataSource}</span>
-                    <span className="text-swipes-pro-gray">Columns:</span>
-                    <span className="text-swipes-black font-medium">
-                      {Object.values(builderColumns).filter(Boolean).length} selected
-                    </span>
-                    <span className="text-swipes-pro-gray">Filters:</span>
-                    <span className="text-swipes-black font-medium">
-                      {builderFilters.filter((f) => f.field && f.value).length} active
-                    </span>
-                    <span className="text-swipes-pro-gray">Format:</span>
-                    <span className="text-swipes-black font-medium">{builderFormat}</span>
-                    <span className="text-swipes-pro-gray">Delivery:</span>
-                    <span className="text-swipes-black font-medium capitalize">{builderDelivery === "email" ? `Email to ${builderEmail || "..."}` : builderDelivery === "schedule" ? `Scheduled (${builderFrequency})` : "Download now"}</span>
-                  </div>
-                </div>
+          {/* Step 4 — Format & Delivery */}
+          {builderStep === 4 && (
+            <div className="space-y-6">
+              <h3 className="text-lg font-semibold text-gray-900">Step 4 — Format & Delivery</h3>
+              <p className="text-sm text-gray-500">Choose how you want your report formatted and delivered.</p>
 
-                <div className="flex justify-between">
-                  <Button variant="outline" onClick={() => setBuilderStep(3)} className="rounded-[7px]">
-                    Back
-                  </Button>
-                  <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
-                    <FileText className="h-4 w-4 mr-2" />
-                    Generate Report
-                  </Button>
+              {/* Format */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-900">Format</Label>
+                <div className="flex items-center gap-3">
+                  {["CSV", "XLSX", "PDF"].map((fmt) => (
+                    <button
+                      key={fmt}
+                      onClick={() => setBuilderFormat(fmt)}
+                      className={`px-4 py-2 rounded-[7px] border-2 text-sm font-medium transition-colors ${
+                        builderFormat === fmt
+                          ? "border-[#1844A6] bg-[#1844A6]/5 text-[#1844A6]"
+                          : "border-gray-200 text-gray-500 hover:border-gray-300"
+                      }`}
+                    >
+                      {fmt}
+                    </button>
+                  ))}
                 </div>
               </div>
-            )}
-          </div>
-        </TabsContent>
-      </Tabs>
+
+              {/* Delivery */}
+              <div className="space-y-3">
+                <Label className="text-sm font-medium text-gray-900">Delivery</Label>
+                <div className="space-y-3">
+                  {[
+                    { value: "download", label: "Download now" },
+                    { value: "email", label: "Email to" },
+                    { value: "schedule", label: "Schedule" },
+                  ].map((option) => (
+                    <label
+                      key={option.value}
+                      className={`flex items-start gap-3 p-4 rounded-[7px] border-2 cursor-pointer transition-colors ${
+                        builderDelivery === option.value
+                          ? "border-[#1844A6] bg-[#1844A6]/5"
+                          : "border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="delivery"
+                        value={option.value}
+                        checked={builderDelivery === option.value}
+                        onChange={(e) => setBuilderDelivery(e.target.value)}
+                        className="mt-0.5 accent-[#1844A6]"
+                      />
+                      <div className="flex-1">
+                        <span className="text-sm font-medium text-gray-900">{option.label}</span>
+                        {option.value === "email" && builderDelivery === "email" && (
+                          <Input
+                            value={builderEmail}
+                            onChange={(e) => setBuilderEmail(e.target.value)}
+                            placeholder="recipient@example.com"
+                            className="mt-2 rounded-[7px]"
+                            onClick={(e) => e.stopPropagation()}
+                          />
+                        )}
+                        {option.value === "schedule" && builderDelivery === "schedule" && (
+                          <Select value={builderFrequency} onValueChange={setBuilderFrequency}>
+                            <SelectTrigger className="w-[200px] mt-2 rounded-[7px]" onClick={(e) => e.stopPropagation()}>
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="daily">Daily</SelectItem>
+                              <SelectItem value="weekly">Weekly</SelectItem>
+                              <SelectItem value="monthly">Monthly</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              {/* Summary */}
+              <div className="bg-gray-50 rounded-[7px] p-4 space-y-2">
+                <h4 className="text-sm font-semibold text-gray-900">Report Summary</h4>
+                <div className="grid grid-cols-2 gap-2 text-sm">
+                  <span className="text-gray-500">Data Source:</span>
+                  <span className="text-gray-900 font-medium">{builderDataSource}</span>
+                  <span className="text-gray-500">Columns:</span>
+                  <span className="text-gray-900 font-medium">
+                    {Object.values(builderColumns).filter(Boolean).length} selected
+                  </span>
+                  <span className="text-gray-500">Filters:</span>
+                  <span className="text-gray-900 font-medium">
+                    {builderFilters.filter((f) => f.field && f.value).length} active
+                  </span>
+                  <span className="text-gray-500">Format:</span>
+                  <span className="text-gray-900 font-medium">{builderFormat}</span>
+                  <span className="text-gray-500">Delivery:</span>
+                  <span className="text-gray-900 font-medium capitalize">{builderDelivery === "email" ? `Email to ${builderEmail || "..."}` : builderDelivery === "schedule" ? `Scheduled (${builderFrequency})` : "Download now"}</span>
+                </div>
+              </div>
+
+              <div className="flex justify-between">
+                <Button variant="outline" onClick={() => setBuilderStep(3)} className="rounded-[7px]">
+                  Back
+                </Button>
+                <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+                  <FileText className="h-4 w-4 mr-2" />
+                  Generate Report
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

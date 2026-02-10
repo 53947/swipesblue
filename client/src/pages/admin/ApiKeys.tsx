@@ -285,7 +285,7 @@ export default function ApiKeys() {
                             disabled={deactivateMutation.isPending}
                             data-testid={`button-deactivate-${key.id}`}
                           >
-                            <Trash2 className="h-4 w-4 text-swipes-muted-red" />
+                            <Trash2 className="h-4 w-4 text-red-600" />
                           </Button>
                         )}
                       </TableCell>
@@ -377,10 +377,10 @@ export default function ApiKeys() {
 
           {newKeyResult && (
             <div className="space-y-4">
-              <div className="bg-swipes-gold/10 border border-swipes-gold/30 rounded-lg p-4">
+              <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4">
                 <div className="flex items-start gap-2">
-                  <CheckCircle className="h-5 w-5 text-swipes-gold mt-0.5" />
-                  <div className="text-sm text-swipes-black dark:text-white">
+                  <CheckCircle className="h-5 w-5 text-yellow-500 mt-0.5" />
+                  <div className="text-sm text-gray-900 dark:text-white">
                     <p className="font-medium">Important: Save these credentials now</p>
                     <p className="mt-1">
                       The API secret will only be shown once. Store it securely.

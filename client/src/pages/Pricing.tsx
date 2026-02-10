@@ -35,7 +35,7 @@ const tiers = [
     cta: "Get Started Free",
     ctaLink: "/register",
     popular: false,
-    ctaStyle: "border-2 border-swipes-blue-deep text-swipes-blue-deep bg-transparent hover:bg-swipes-blue-deep/5",
+    ctaStyle: "border-2 border-[#1844A6] text-[#1844A6] bg-transparent hover:bg-[#1844A6]/5",
   },
   {
     name: "Growth",
@@ -54,7 +54,7 @@ const tiers = [
     cta: "Start Free Trial",
     ctaLink: "/register",
     popular: false,
-    ctaStyle: "border-2 border-swipes-blue-deep text-swipes-blue-deep bg-transparent hover:bg-swipes-blue-deep/5",
+    ctaStyle: "border-2 border-[#1844A6] text-[#1844A6] bg-transparent hover:bg-[#1844A6]/5",
   },
   {
     name: "Scale",
@@ -75,7 +75,7 @@ const tiers = [
     cta: "Start Free Trial",
     ctaLink: "/register",
     popular: true,
-    ctaStyle: "bg-swipes-blue-deep text-white hover:bg-swipes-blue-deep/90",
+    ctaStyle: "bg-[#1844A6] text-white hover:bg-[#1844A6]/90",
   },
   {
     name: "Enterprise",
@@ -95,7 +95,7 @@ const tiers = [
     cta: "Contact Sales",
     ctaLink: "/",
     popular: false,
-    ctaStyle: "border-2 border-swipes-teal text-swipes-teal bg-transparent hover:bg-swipes-teal/5",
+    ctaStyle: "border-2 border-teal-600 text-teal-600 bg-transparent hover:bg-teal-600/5",
   },
 ];
 
@@ -192,12 +192,12 @@ const faqs = [
 
 function CellValue({ value }: { value: boolean | string }) {
   if (value === true) {
-    return <CheckCircle className="h-5 w-5 text-swipes-trusted-green mx-auto" />;
+    return <CheckCircle className="h-5 w-5 text-green-600 mx-auto" />;
   }
   if (value === false) {
     return <X className="h-5 w-5 text-gray-300 mx-auto" />;
   }
-  return <span className="text-sm text-swipes-pro-gray">{value}</span>;
+  return <span className="text-sm text-gray-500">{value}</span>;
 }
 
 function formatRate(rates: RateData[] | undefined, tierKey: string): string {
@@ -233,10 +233,10 @@ export default function Pricing() {
       {/* Hero */}
       <section className="bg-white py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="text-4xl font-bold text-swipes-black">
+          <h1 className="text-4xl font-bold text-gray-900">
             Simple, transparent pricing
           </h1>
-          <p className="text-lg text-swipes-pro-gray mt-4">
+          <p className="text-lg text-gray-500 mt-4">
             No hidden fees. No surprises. Scale with plans that fit your business.
           </p>
         </div>
@@ -245,13 +245,13 @@ export default function Pricing() {
       {/* Toggle */}
       <section className="bg-white pb-8">
         <div className="flex items-center justify-center gap-3">
-          <span className={`text-sm font-medium ${!annual ? "text-swipes-black" : "text-swipes-pro-gray"}`}>
+          <span className={`text-sm font-medium ${!annual ? "text-gray-900" : "text-gray-500"}`}>
             Monthly
           </span>
           <button
             onClick={() => setAnnual(!annual)}
             className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors ${
-              annual ? "bg-swipes-blue-deep" : "bg-gray-300"
+              annual ? "bg-[#1844A6]" : "bg-gray-300"
             }`}
             role="switch"
             aria-checked={annual}
@@ -262,11 +262,11 @@ export default function Pricing() {
               }`}
             />
           </button>
-          <span className={`text-sm font-medium ${annual ? "text-swipes-black" : "text-swipes-pro-gray"}`}>
+          <span className={`text-sm font-medium ${annual ? "text-gray-900" : "text-gray-500"}`}>
             Annual
           </span>
           {annual && (
-            <span className="text-xs font-semibold text-swipes-trusted-green bg-swipes-trusted-green/10 px-2 py-0.5 rounded-[7px]">
+            <span className="text-xs font-semibold text-green-600 bg-green-600/10 px-2 py-0.5 rounded-[7px]">
               2 months free
             </span>
           )}
@@ -282,37 +282,37 @@ export default function Pricing() {
                 key={tier.name}
                 className={`bg-white rounded-[7px] p-8 relative ${
                   tier.popular
-                    ? "border-2 border-swipes-blue-deep shadow-card-hover"
+                    ? "border-2 border-[#1844A6] shadow-card-hover"
                     : "border border-gray-200"
                 }`}
               >
                 {tier.popular && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <span className="bg-swipes-gold text-black text-xs font-bold px-2 py-0.5 rounded-[7px]">
+                    <span className="bg-yellow-500 text-black text-xs font-bold px-2 py-0.5 rounded-[7px]">
                       POPULAR
                     </span>
                   </div>
                 )}
                 <div className="text-center mb-6">
-                  <h3 className="text-xl font-semibold text-swipes-black mb-4">
+                  <h3 className="text-xl font-semibold text-gray-900 mb-4">
                     {tier.name}
                   </h3>
                   <div>
-                    <span className="text-4xl font-bold text-swipes-black">
+                    <span className="text-4xl font-bold text-gray-900">
                       ${annual ? tier.annual : tier.monthly}
                     </span>
-                    <span className="text-swipes-pro-gray">
+                    <span className="text-gray-500">
                       /{annual ? "yr" : "mo"}
                     </span>
                   </div>
-                  <p className="text-sm text-swipes-pro-gray mt-2">
-                    <span className="font-semibold text-swipes-blue-deep">{formatRate(rates, tier.rateKey)}</span> per transaction
+                  <p className="text-sm text-gray-500 mt-2">
+                    <span className="font-semibold text-[#1844A6]">{formatRate(rates, tier.rateKey)}</span> per transaction
                   </p>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {tier.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-2 text-sm text-swipes-pro-gray">
-                      <Check className="h-4 w-4 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
+                    <li key={feature} className="flex items-start gap-2 text-sm text-gray-500">
+                      <Check className="h-4 w-4 text-green-600 flex-shrink-0 mt-0.5" />
                       <span>{feature}</span>
                     </li>
                   ))}
@@ -333,18 +333,18 @@ export default function Pricing() {
       {/* Feature Comparison Table */}
       <section className="py-20 bg-[#F6F9FC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black text-center mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-12">
             Compare plans
           </h2>
           <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
             {/* Table Header */}
             <div className="grid grid-cols-5 bg-gray-50">
-              <div className="p-4 text-sm font-semibold text-swipes-black" />
+              <div className="p-4 text-sm font-semibold text-gray-900" />
               {tiers.map((tier) => (
                 <div
                   key={tier.name}
-                  className={`p-4 text-center text-sm font-semibold text-swipes-black ${
-                    tier.popular ? "bg-swipes-blue-deep/5" : ""
+                  className={`p-4 text-center text-sm font-semibold text-gray-900 ${
+                    tier.popular ? "bg-[#1844A6]/5" : ""
                   }`}
                 >
                   {tier.name}
@@ -357,7 +357,7 @@ export default function Pricing() {
               <div key={category.name}>
                 {/* Category Header */}
                 <div className="grid grid-cols-5 bg-gray-50 border-t border-gray-200">
-                  <div className="p-4 text-sm font-semibold text-swipes-black col-span-5">
+                  <div className="p-4 text-sm font-semibold text-gray-900 col-span-5">
                     {category.name}
                   </div>
                 </div>
@@ -369,14 +369,14 @@ export default function Pricing() {
                       idx % 2 === 1 ? "bg-gray-50" : "bg-white"
                     }`}
                   >
-                    <div className="p-4 text-sm text-swipes-pro-gray">
+                    <div className="p-4 text-sm text-gray-500">
                       {feature.name}
                     </div>
                     {feature.values.map((value, i) => (
                       <div
                         key={i}
                         className={`p-4 text-center ${
-                          i === 2 ? "bg-swipes-blue-deep/5" : ""
+                          i === 2 ? "bg-[#1844A6]/5" : ""
                         }`}
                       >
                         <CellValue value={value} />
@@ -393,7 +393,7 @@ export default function Pricing() {
       {/* FAQ */}
       <section className="py-20 bg-[#F6F9FC]">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black text-center mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 text-center mb-12">
             Frequently asked questions
           </h2>
           <Accordion type="single" collapsible className="space-y-3">
@@ -403,10 +403,10 @@ export default function Pricing() {
                 value={`faq-${idx}`}
                 className="bg-white rounded-[7px] border border-gray-200 px-6"
               >
-                <AccordionTrigger className="text-sm font-semibold text-swipes-black hover:no-underline">
+                <AccordionTrigger className="text-sm font-semibold text-gray-900 hover:no-underline">
                   {faq.question}
                 </AccordionTrigger>
-                <AccordionContent className="text-sm text-swipes-pro-gray">
+                <AccordionContent className="text-sm text-gray-500">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>
@@ -418,16 +418,16 @@ export default function Pricing() {
       {/* Bottom CTA */}
       <section className="py-20 bg-[#F6F9FC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-swipes-black mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Ready to get started?
           </h2>
-          <p className="text-lg text-swipes-pro-gray mb-8">
+          <p className="text-lg text-gray-500 mb-8">
             Start processing payments in minutes.
           </p>
           <Link href="/register">
             <Button
               size="lg"
-              className="bg-swipes-blue-deep text-white rounded-[7px] hover:bg-swipes-blue-deep/90"
+              className="bg-[#1844A6] text-white rounded-[7px] hover:bg-[#1844A6]/90"
             >
               Get Started Free
             </Button>

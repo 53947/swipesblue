@@ -125,11 +125,11 @@ const webhookFeatures = [
 ];
 
 const testCards = [
-  { card: "Visa (success)", number: "4111 1111 1111 1111", result: "Approved", resultColor: "text-swipes-trusted-green" },
-  { card: "Visa (decline)", number: "4000 0000 0000 0002", result: "Declined", resultColor: "text-swipes-muted-red" },
-  { card: "Mastercard", number: "5500 0000 0000 0004", result: "Approved", resultColor: "text-swipes-trusted-green" },
-  { card: "Amex", number: "3400 0000 0000 009", result: "Approved", resultColor: "text-swipes-trusted-green" },
-  { card: "Insufficient funds", number: "4000 0000 0000 9995", result: "Declined", resultColor: "text-swipes-muted-red" },
+  { card: "Visa (success)", number: "4111 1111 1111 1111", result: "Approved", resultColor: "text-green-600" },
+  { card: "Visa (decline)", number: "4000 0000 0000 0002", result: "Declined", resultColor: "text-red-600" },
+  { card: "Mastercard", number: "5500 0000 0000 0004", result: "Approved", resultColor: "text-green-600" },
+  { card: "Amex", number: "3400 0000 0000 009", result: "Approved", resultColor: "text-green-600" },
+  { card: "Insufficient funds", number: "4000 0000 0000 9995", result: "Declined", resultColor: "text-red-600" },
 ];
 
 const webhookPayload = `{
@@ -151,19 +151,19 @@ export default function Developers() {
       <section className="bg-white py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1
-            className="text-4xl font-bold text-swipes-black"
+            className="text-4xl font-bold text-gray-900"
             data-testid="text-developers-title"
           >
             Built for developers
           </h1>
-          <p className="text-lg text-swipes-pro-gray mt-4 max-w-2xl">
+          <p className="text-lg text-gray-500 mt-4 max-w-2xl">
             Clean REST APIs, comprehensive documentation, and SDKs in every
             major language. Get your first integration running in minutes.
           </p>
           <div className="flex flex-wrap gap-4 mt-8">
             <a href="#quick-start">
               <Button
-                className="bg-swipes-blue-deep text-white rounded-[7px] px-6 py-3"
+                className="bg-[#1844A6] text-white rounded-[7px] px-6 py-3"
                 data-testid="button-quick-start"
               >
                 Quick Start Guide
@@ -172,7 +172,7 @@ export default function Developers() {
             <Link href="/dashboard/api-keys">
               <Button
                 variant="outline"
-                className="border-2 border-swipes-teal text-swipes-teal rounded-[7px] px-6 py-3"
+                className="border-2 border-teal-600 text-teal-600 rounded-[7px] px-6 py-3"
                 data-testid="button-get-api-keys"
               >
                 Get API Keys
@@ -185,7 +185,7 @@ export default function Developers() {
       {/* Quick Start */}
       <section id="quick-start" className="py-20 bg-[#F6F9FC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black mb-12">
+          <h2 className="text-2xl font-bold text-gray-900 mb-12">
             Get started in 3 steps
           </h2>
           <div className="grid md:grid-cols-3 gap-6">
@@ -197,15 +197,15 @@ export default function Developers() {
                   className="bg-white rounded-[7px] border border-gray-200 p-6"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-swipes-blue-deep text-white text-sm font-bold">
+                    <span className="flex items-center justify-center w-8 h-8 rounded-full bg-[#1844A6] text-white text-sm font-bold">
                       {step.number}
                     </span>
-                    <Icon className="h-5 w-5 text-swipes-blue-deep" />
+                    <Icon className="h-5 w-5 text-[#1844A6]" />
                   </div>
-                  <h3 className="text-lg font-semibold text-swipes-black mb-2">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
                     {step.title}
                   </h3>
-                  <p className="text-sm text-swipes-pro-gray">
+                  <p className="text-sm text-gray-500">
                     {step.description}
                   </p>
                   <div className="bg-[#1a1a2e] text-gray-100 rounded-[7px] p-4 font-mono text-sm mt-4 overflow-x-auto">
@@ -221,10 +221,10 @@ export default function Developers() {
       {/* API Reference */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             API Reference
           </h2>
-          <p className="text-swipes-pro-gray mb-12 max-w-2xl">
+          <p className="text-gray-500 mb-12 max-w-2xl">
             RESTful API with consistent patterns, predictable responses, and
             comprehensive error handling.
           </p>
@@ -237,8 +237,8 @@ export default function Developers() {
                   className="bg-white rounded-[7px] border border-gray-200 p-6"
                 >
                   <div className="flex items-center gap-3 mb-4">
-                    <Icon className="h-5 w-5 text-swipes-blue-deep" />
-                    <h3 className="text-lg font-semibold text-swipes-black">
+                    <Icon className="h-5 w-5 text-[#1844A6]" />
+                    <h3 className="text-lg font-semibold text-gray-900">
                       {cat.title}
                     </h3>
                   </div>
@@ -246,9 +246,9 @@ export default function Developers() {
                     {cat.endpoints.map((ep) => (
                       <div
                         key={ep.method + ep.path}
-                        className="flex items-baseline gap-2 font-mono text-sm text-swipes-pro-gray"
+                        className="flex items-baseline gap-2 font-mono text-sm text-gray-500"
                       >
-                        <span className="font-semibold text-swipes-blue-deep w-16 flex-shrink-0">
+                        <span className="font-semibold text-[#1844A6] w-16 flex-shrink-0">
                           {ep.method}
                         </span>
                         <span>{ep.path}</span>
@@ -273,10 +273,10 @@ export default function Developers() {
       {/* SDKs & Libraries */}
       <section className="py-20 bg-[#F6F9FC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             SDKs & Libraries
           </h2>
-          <p className="text-swipes-pro-gray mb-12">
+          <p className="text-gray-500 mb-12">
             Official libraries in every major language.
           </p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -291,7 +291,7 @@ export default function Developers() {
                   >
                     {sdk.language.charAt(0)}
                   </span>
-                  <span className="font-semibold text-swipes-black">
+                  <span className="font-semibold text-gray-900">
                     {sdk.language}
                   </span>
                 </div>
@@ -307,10 +307,10 @@ export default function Developers() {
       {/* Webhooks */}
       <section className="py-20 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Real-time Webhooks
           </h2>
-          <p className="text-swipes-pro-gray mb-12 max-w-2xl">
+          <p className="text-gray-500 mb-12 max-w-2xl">
             Get instant notifications for every event in your payment lifecycle.
           </p>
           <div className="grid lg:grid-cols-2 gap-8">
@@ -319,9 +319,9 @@ export default function Developers() {
                 {webhookFeatures.map((feature) => (
                   <li
                     key={feature}
-                    className="flex items-center gap-3 text-swipes-pro-gray"
+                    className="flex items-center gap-3 text-gray-500"
                   >
-                    <Zap className="h-4 w-4 text-swipes-blue-deep flex-shrink-0" />
+                    <Zap className="h-4 w-4 text-[#1844A6] flex-shrink-0" />
                     <span>{feature}</span>
                   </li>
                 ))}
@@ -337,23 +337,23 @@ export default function Developers() {
       {/* Sandbox / Testing */}
       <section className="py-20 bg-[#F6F9FC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold text-swipes-black mb-2">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Test before you launch
           </h2>
-          <p className="text-swipes-pro-gray mb-12">
+          <p className="text-gray-500 mb-12">
             Full sandbox environment with test cards and simulated responses.
           </p>
           <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
             <table className="w-full text-left">
               <thead>
                 <tr className="border-b border-gray-200 bg-gray-50">
-                  <th className="px-6 py-3 text-sm font-semibold text-swipes-black">
+                  <th className="px-6 py-3 text-sm font-semibold text-gray-900">
                     Card
                   </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-swipes-black">
+                  <th className="px-6 py-3 text-sm font-semibold text-gray-900">
                     Number
                   </th>
-                  <th className="px-6 py-3 text-sm font-semibold text-swipes-black">
+                  <th className="px-6 py-3 text-sm font-semibold text-gray-900">
                     Result
                   </th>
                 </tr>
@@ -364,10 +364,10 @@ export default function Developers() {
                     key={tc.number}
                     className="border-b border-gray-100 last:border-0"
                   >
-                    <td className="px-6 py-3 text-sm text-swipes-pro-gray">
+                    <td className="px-6 py-3 text-sm text-gray-500">
                       {tc.card}
                     </td>
-                    <td className="px-6 py-3 font-mono text-sm text-swipes-black">
+                    <td className="px-6 py-3 font-mono text-sm text-gray-900">
                       {tc.number}
                     </td>
                     <td className={`px-6 py-3 text-sm font-semibold ${tc.resultColor}`}>
@@ -384,16 +384,16 @@ export default function Developers() {
       {/* Bottom CTA */}
       <section className="py-20 bg-[#F6F9FC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl font-bold text-swipes-black mb-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-4">
             Ready to integrate?
           </h2>
-          <p className="text-lg text-swipes-pro-gray mb-8 max-w-xl mx-auto">
+          <p className="text-lg text-gray-500 mb-8 max-w-xl mx-auto">
             Create your account and start building in minutes.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/dashboard/api-keys">
               <Button
-                className="bg-swipes-blue-deep text-white rounded-[7px] px-6 py-3"
+                className="bg-[#1844A6] text-white rounded-[7px] px-6 py-3"
                 data-testid="button-cta-get-api-keys"
               >
                 <span className="flex items-center">
@@ -405,7 +405,7 @@ export default function Developers() {
             <Link href="/developers">
               <Button
                 variant="outline"
-                className="border-2 border-swipes-teal text-swipes-teal rounded-[7px] px-6 py-3"
+                className="border-2 border-teal-600 text-teal-600 rounded-[7px] px-6 py-3"
                 data-testid="button-cta-view-docs"
               >
                 View Full Docs

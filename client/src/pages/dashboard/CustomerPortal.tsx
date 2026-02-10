@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   Users,
   Zap,
@@ -26,7 +27,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -38,16 +38,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const basePath = "/dashboard/enhance/customer-portal";
+
+const tabs = [
+  { label: "Portal Settings", href: basePath },
+  { label: "Branding", href: `${basePath}?tab=branding` },
+  { label: "Features", href: `${basePath}?tab=features` },
+  { label: "Activity", href: `${basePath}?tab=activity` },
+];
 
 interface PortalFeature {
   id: string;
@@ -95,12 +97,12 @@ const activityEntries: ActivityEntry[] = [
 ];
 
 function getActionBadgeClasses(action: string): string {
-  if (action.includes("Logged in")) return "bg-swipes-blue-deep text-white";
-  if (action.includes("Updated card")) return "bg-swipes-trusted-green text-white";
-  if (action.includes("Viewed invoice")) return "bg-swipes-blue-deep/70 text-white";
-  if (action.includes("Downloaded")) return "bg-swipes-gold text-white";
-  if (action.includes("Cancelled")) return "bg-swipes-muted-red text-white";
-  if (action.includes("Submitted")) return "bg-swipes-teal text-white";
+  if (action.includes("Logged in")) return "bg-[#1844A6] text-white";
+  if (action.includes("Updated card")) return "bg-green-600 text-white";
+  if (action.includes("Viewed invoice")) return "bg-[#1844A6]/70 text-white";
+  if (action.includes("Downloaded")) return "bg-yellow-500 text-white";
+  if (action.includes("Cancelled")) return "bg-red-600 text-white";
+  if (action.includes("Submitted")) return "bg-teal-600 text-white";
   return "bg-gray-400 text-white";
 }
 
@@ -126,6 +128,9 @@ export default function CustomerPortal() {
   const [customDomain, setCustomDomain] = useState("");
   const [activityFilter, setActivityFilter] = useState("all");
   const [activitySearch, setActivitySearch] = useState("");
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "portal-settings";
 
   const toggleFeature = (featureId: string) => {
     setFeatures((prev) =>
@@ -146,16 +151,13 @@ export default function CustomerPortal() {
   });
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Customer Portal</h1>
-        <p className="text-swipes-pro-gray">
-          Self-service portal settings for your customers — payment method management, invoice viewing, and subscription management
-        </p>
-      </div>
+    <div>
+      <p className="text-gray-500 mb-6">
+        Self-service portal settings for your customers — payment method management, invoice viewing, and subscription management
+      </p>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Portal Visitors This Month"
           value="234"
@@ -186,29 +188,23 @@ export default function CustomerPortal() {
         />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="portal-settings" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="portal-settings">Portal Settings</TabsTrigger>
-          <TabsTrigger value="branding">Branding</TabsTrigger>
-          <TabsTrigger value="features">Features</TabsTrigger>
-          <TabsTrigger value="activity">Activity</TabsTrigger>
-        </TabsList>
+      <SubNavTabs tabs={tabs} />
 
-        {/* Portal Settings Tab */}
-        <TabsContent value="portal-settings" className="space-y-6">
+      {/* Portal Settings Tab */}
+      {activeTab === "portal-settings" && (
+        <div className="space-y-6">
           {/* General */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">General</h3>
+            <h3 className="text-lg font-semibold text-gray-900">General</h3>
             <div className="flex items-center justify-between py-2">
               <div>
-                <Label className="text-sm font-medium text-swipes-black">Enable Customer Portal</Label>
-                <p className="text-sm text-swipes-pro-gray">Allow customers to access the self-service portal</p>
+                <Label className="text-sm font-medium text-gray-900">Enable Customer Portal</Label>
+                <p className="text-sm text-gray-500">Allow customers to access the self-service portal</p>
               </div>
               <Switch checked={portalEnabled} onCheckedChange={setPortalEnabled} />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Portal URL</Label>
+              <Label className="text-sm font-medium text-gray-900">Portal URL</Label>
               <div className="flex gap-2">
                 <Input
                   value="https://pay.swipesblue.com/portal/merchant-id"
@@ -221,11 +217,11 @@ export default function CustomerPortal() {
               </div>
             </div>
             <div className="flex items-center justify-between py-2">
-              <Label className="text-sm text-swipes-black">Require login</Label>
+              <Label className="text-sm text-gray-900">Require login</Label>
               <Switch checked={requireLogin} onCheckedChange={setRequireLogin} />
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Session Timeout</Label>
+              <Label className="text-sm font-medium text-gray-900">Session Timeout</Label>
               <Select value={sessionTimeout} onValueChange={setSessionTimeout}>
                 <SelectTrigger className="w-[200px] rounded-[7px]">
                   <SelectValue />
@@ -242,9 +238,9 @@ export default function CustomerPortal() {
 
           {/* Authentication */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Authentication</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Authentication</h3>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Login Method</Label>
+              <Label className="text-sm font-medium text-gray-900">Login Method</Label>
               <div className="flex gap-3">
                 {[
                   { value: "email-password", label: "Email + Password" },
@@ -256,8 +252,8 @@ export default function CustomerPortal() {
                     onClick={() => setLoginMethod(option.value)}
                     className={`px-4 py-2 rounded-[7px] text-sm font-medium border transition-colors ${
                       loginMethod === option.value
-                        ? "bg-swipes-blue-deep text-white border-swipes-blue-deep"
-                        : "bg-white text-swipes-pro-gray border-gray-200 hover:border-gray-300"
+                        ? "bg-[#1844A6] text-white border-[#1844A6]"
+                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     {option.label}
@@ -266,12 +262,12 @@ export default function CustomerPortal() {
               </div>
             </div>
             <div className="flex items-center justify-between py-2">
-              <Label className="text-sm text-swipes-black">Enable 2FA for customers</Label>
+              <Label className="text-sm text-gray-900">Enable 2FA for customers</Label>
               <Switch checked={enable2FA} onCheckedChange={setEnable2FA} />
             </div>
             <div className="space-y-3">
               <div className="flex items-center justify-between py-2">
-                <Label className="text-sm text-swipes-black">Allow social login</Label>
+                <Label className="text-sm text-gray-900">Allow social login</Label>
                 <Switch checked={allowSocialLogin} onCheckedChange={setAllowSocialLogin} />
               </div>
               {allowSocialLogin && (
@@ -281,14 +277,14 @@ export default function CustomerPortal() {
                       checked={socialGoogle}
                       onCheckedChange={(checked) => setSocialGoogle(checked as boolean)}
                     />
-                    <Label className="text-sm text-swipes-pro-gray">Google</Label>
+                    <Label className="text-sm text-gray-500">Google</Label>
                   </div>
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={socialApple}
                       onCheckedChange={(checked) => setSocialApple(checked as boolean)}
                     />
-                    <Label className="text-sm text-swipes-pro-gray">Apple</Label>
+                    <Label className="text-sm text-gray-500">Apple</Label>
                   </div>
                 </div>
               )}
@@ -297,7 +293,7 @@ export default function CustomerPortal() {
 
           {/* Access */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
-            <h3 className="text-lg font-semibold text-swipes-black">Access Permissions</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Access Permissions</h3>
             {[
               { label: "Allow customers to update payment methods", checked: allowUpdatePayment, onChange: setAllowUpdatePayment },
               { label: "Allow customers to view invoices", checked: allowViewInvoices, onChange: setAllowViewInvoices },
@@ -307,27 +303,29 @@ export default function CustomerPortal() {
               { label: "Allow customers to update billing address", checked: allowUpdateAddress, onChange: setAllowUpdateAddress },
             ].map((toggle) => (
               <div key={toggle.label} className="flex items-center justify-between py-2">
-                <Label className="text-sm text-swipes-black">{toggle.label}</Label>
+                <Label className="text-sm text-gray-900">{toggle.label}</Label>
                 <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
               </div>
             ))}
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Branding Tab */}
-        <TabsContent value="branding" className="space-y-6">
+      {/* Branding Tab */}
+      {activeTab === "branding" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Portal Branding</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Portal Branding</h3>
 
             {/* Logo Upload */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Portal Logo</Label>
-              <div className="border-2 border-dashed border-gray-300 rounded-[7px] p-8 text-center hover:border-swipes-blue-deep transition-colors">
-                <Upload className="h-8 w-8 text-swipes-pro-gray mx-auto mb-2" />
-                <p className="text-sm text-swipes-pro-gray">
+              <Label className="text-sm font-medium text-gray-900">Portal Logo</Label>
+              <div className="border-2 border-dashed border-gray-300 rounded-[7px] p-8 text-center hover:border-[#1844A6] transition-colors">
+                <Upload className="h-8 w-8 text-gray-500 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">
                   Drag and drop your logo here, or click to browse
                 </p>
-                <p className="text-xs text-swipes-pro-gray mt-1">PNG, JPG, or SVG — max 2MB</p>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG, or SVG — max 2MB</p>
                 <Button variant="outline" className="mt-3 rounded-[7px]">
                   Choose File
                 </Button>
@@ -336,7 +334,7 @@ export default function CustomerPortal() {
 
             {/* Brand Color */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Primary Brand Color</Label>
+              <Label className="text-sm font-medium text-gray-900">Primary Brand Color</Label>
               <div className="flex items-center gap-3">
                 <input
                   type="color"
@@ -354,19 +352,19 @@ export default function CustomerPortal() {
 
             {/* Custom Domain */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Custom Domain</Label>
+              <Label className="text-sm font-medium text-gray-900">Custom Domain</Label>
               <Input
                 placeholder="e.g., billing.merchantsite.com"
                 value={customDomain}
                 onChange={(e) => setCustomDomain(e.target.value)}
                 className="rounded-[7px]"
               />
-              <p className="text-xs text-swipes-pro-gray">Point a CNAME record to portal.swipesblue.com</p>
+              <p className="text-xs text-gray-500">Point a CNAME record to portal.swipesblue.com</p>
             </div>
 
             {/* Welcome Message */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Welcome Message</Label>
+              <Label className="text-sm font-medium text-gray-900">Welcome Message</Label>
               <Textarea
                 value={welcomeMessage}
                 onChange={(e) => setWelcomeMessage(e.target.value)}
@@ -377,7 +375,7 @@ export default function CustomerPortal() {
 
             {/* Footer Text */}
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Footer Text</Label>
+              <Label className="text-sm font-medium text-gray-900">Footer Text</Label>
               <Textarea
                 value={footerText}
                 onChange={(e) => setFooterText(e.target.value)}
@@ -395,41 +393,43 @@ export default function CustomerPortal() {
 
           {/* Portal Preview Card */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">Portal Preview</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Portal Preview</h3>
             <div className="border border-gray-200 rounded-[7px] overflow-hidden">
               <div className="p-4" style={{ backgroundColor: brandColor }}>
                 <h4 className="text-white font-semibold">Your Brand</h4>
               </div>
               <div className="p-6 bg-gray-50 space-y-4">
-                <p className="text-sm text-swipes-pro-gray">{welcomeMessage}</p>
+                <p className="text-sm text-gray-500">{welcomeMessage}</p>
                 <div className="grid grid-cols-2 gap-3">
                   <div className="p-3 bg-white rounded-[7px] border border-gray-200">
                     <CreditCard className="h-5 w-5 mb-2" style={{ color: brandColor }} />
-                    <p className="text-sm font-medium text-swipes-black">Payment Methods</p>
+                    <p className="text-sm font-medium text-gray-900">Payment Methods</p>
                   </div>
                   <div className="p-3 bg-white rounded-[7px] border border-gray-200">
                     <FileText className="h-5 w-5 mb-2" style={{ color: brandColor }} />
-                    <p className="text-sm font-medium text-swipes-black">Invoices</p>
+                    <p className="text-sm font-medium text-gray-900">Invoices</p>
                   </div>
                   <div className="p-3 bg-white rounded-[7px] border border-gray-200">
                     <RefreshCw className="h-5 w-5 mb-2" style={{ color: brandColor }} />
-                    <p className="text-sm font-medium text-swipes-black">Subscriptions</p>
+                    <p className="text-sm font-medium text-gray-900">Subscriptions</p>
                   </div>
                   <div className="p-3 bg-white rounded-[7px] border border-gray-200">
                     <Clock className="h-5 w-5 mb-2" style={{ color: brandColor }} />
-                    <p className="text-sm font-medium text-swipes-black">History</p>
+                    <p className="text-sm font-medium text-gray-900">History</p>
                   </div>
                 </div>
               </div>
               <div className="p-3 border-t border-gray-200 bg-gray-50">
-                <p className="text-xs text-swipes-pro-gray text-center">{footerText}</p>
+                <p className="text-xs text-gray-500 text-center">{footerText}</p>
               </div>
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Features Tab */}
-        <TabsContent value="features" className="space-y-4">
+      {/* Features Tab */}
+      {activeTab === "features" && (
+        <div className="space-y-4">
           {features.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -438,25 +438,25 @@ export default function CustomerPortal() {
                 className="bg-white rounded-[7px] border border-gray-200 p-6 flex items-center justify-between gap-4"
               >
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5 text-swipes-blue-deep" />
+                  <div className="w-10 h-10 rounded-[7px] bg-[#1844A6]/10 flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5 text-[#1844A6]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-base font-semibold text-swipes-black">
+                      <h3 className="text-base font-semibold text-gray-900">
                         {feature.name}
                       </h3>
                       <Badge
-                        className={
+                        className={`rounded-full ${
                           feature.enabled
-                            ? "bg-swipes-trusted-green text-white"
+                            ? "bg-green-600 text-white"
                             : "bg-gray-400 text-white"
-                        }
+                        }`}
                       >
                         {feature.enabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
-                    <p className="text-sm text-swipes-pro-gray">{feature.description}</p>
+                    <p className="text-sm text-gray-500">{feature.description}</p>
                   </div>
                 </div>
                 <Switch
@@ -466,14 +466,16 @@ export default function CustomerPortal() {
               </div>
             );
           })}
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Activity Tab */}
-        <TabsContent value="activity" className="space-y-6">
+      {/* Activity Tab */}
+      {activeTab === "activity" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-gray-200">
               <div className="relative flex-1 w-full sm:max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-swipes-pro-gray" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Search customers or actions..."
                   value={activitySearch}
@@ -496,33 +498,33 @@ export default function CustomerPortal() {
                 </SelectContent>
               </Select>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Details</TableHead>
-                  <TableHead>IP Address</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Timestamp</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customer</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Action</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Details</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">IP Address</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredActivity.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="text-swipes-pro-gray text-sm">{entry.timestamp}</TableCell>
-                    <TableCell className="font-medium text-swipes-black">{entry.customer}</TableCell>
-                    <TableCell>
-                      <Badge className={getActionBadgeClasses(entry.action)}>{entry.action}</Badge>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray text-sm">{entry.details}</TableCell>
-                    <TableCell className="text-swipes-pro-gray font-mono text-sm">{entry.ipAddress}</TableCell>
-                  </TableRow>
+                  <tr key={entry.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-500">{entry.timestamp}</td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{entry.customer}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`rounded-full ${getActionBadgeClasses(entry.action)}`}>{entry.action}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{entry.details}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 font-mono">{entry.ipAddress}</td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   ShoppingCart,
   AlertTriangle,
@@ -12,7 +13,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -23,15 +23,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const basePath = "/dashboard/enhance/shopping-cart-pro";
+
+const tabs = [
+  { label: "Cart Settings", href: basePath },
+  { label: "Abandoned Cart Recovery", href: `${basePath}?tab=recovery` },
+  { label: "Cart Analytics", href: `${basePath}?tab=analytics` },
+];
 
 const recoveredCarts = [
   { id: "rc-1", customer: "john@example.com", cartValue: "$142.50", emailNumber: "Email 1", recoveredDate: "Oct 24, 2025", discount: "None" },
@@ -91,18 +92,18 @@ export default function CartSettings() {
   const [email1Discount, setEmail1Discount] = useState(false);
   const [email2Discount, setEmail2Discount] = useState(true);
   const [email3Discount, setEmail3Discount] = useState(true);
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "cart-settings";
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Cart Pro</h1>
-        <p className="text-swipes-pro-gray">
-          Advanced shopping cart configuration, cart recovery, and cart analytics
-        </p>
-      </div>
+    <div>
+      <p className="text-gray-500 mb-6">
+        Advanced shopping cart configuration, cart recovery, and cart analytics
+      </p>
 
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Active Carts"
           value="142"
@@ -133,22 +134,17 @@ export default function CartSettings() {
         />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="cart-settings" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="cart-settings">Cart Settings</TabsTrigger>
-          <TabsTrigger value="recovery">Abandoned Cart Recovery</TabsTrigger>
-          <TabsTrigger value="analytics">Cart Analytics</TabsTrigger>
-        </TabsList>
+      <SubNavTabs tabs={tabs} />
 
-        {/* Cart Settings Tab */}
-        <TabsContent value="cart-settings" className="space-y-6">
+      {/* Cart Settings Tab */}
+      {activeTab === "cart-settings" && (
+        <div className="space-y-6">
           {/* Cart Behavior */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Cart Behavior</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Cart Behavior</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Cart Expiration</Label>
+                <Label className="text-sm font-medium text-gray-900">Cart Expiration</Label>
                 <Select value={cartExpiration} onValueChange={setCartExpiration}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -164,7 +160,7 @@ export default function CartSettings() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Maximum Items Per Cart</Label>
+                <Label className="text-sm font-medium text-gray-900">Maximum Items Per Cart</Label>
                 <Input
                   type="number"
                   value={maxItems}
@@ -181,7 +177,7 @@ export default function CartSettings() {
                 { label: "Auto-apply coupons", checked: autoApplyCoupons, onChange: setAutoApplyCoupons },
               ].map((toggle) => (
                 <div key={toggle.label} className="flex items-center justify-between py-2">
-                  <Label className="text-sm text-swipes-black">{toggle.label}</Label>
+                  <Label className="text-sm text-gray-900">{toggle.label}</Label>
                   <Switch checked={toggle.checked} onCheckedChange={toggle.onChange} />
                 </div>
               ))}
@@ -190,10 +186,10 @@ export default function CartSettings() {
 
           {/* Tax & Shipping */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Tax & Shipping</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Tax & Shipping</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Tax Calculation</Label>
+                <Label className="text-sm font-medium text-gray-900">Tax Calculation</Label>
                 <Select value={taxCalculation} onValueChange={setTaxCalculation}>
                   <SelectTrigger className="rounded-[7px]">
                     <SelectValue />
@@ -207,7 +203,7 @@ export default function CartSettings() {
               </div>
               {taxCalculation === "fixed" && (
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium text-swipes-black">Fixed Tax Rate (%)</Label>
+                  <Label className="text-sm font-medium text-gray-900">Fixed Tax Rate (%)</Label>
                   <Input
                     type="number"
                     value={fixedTaxRate}
@@ -218,7 +214,7 @@ export default function CartSettings() {
                 </div>
               )}
               <div className="space-y-2">
-                <Label className="text-sm font-medium text-swipes-black">Free Shipping Threshold ($)</Label>
+                <Label className="text-sm font-medium text-gray-900">Free Shipping Threshold ($)</Label>
                 <Input
                   type="number"
                   value={freeShippingThreshold}
@@ -228,16 +224,16 @@ export default function CartSettings() {
               </div>
             </div>
             <div className="flex items-center justify-between py-2">
-              <Label className="text-sm text-swipes-black">Show estimated shipping in cart</Label>
+              <Label className="text-sm text-gray-900">Show estimated shipping in cart</Label>
               <Switch checked={showEstimatedShipping} onCheckedChange={setShowEstimatedShipping} />
             </div>
           </div>
 
           {/* Design */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
-            <h3 className="text-lg font-semibold text-swipes-black">Design</h3>
+            <h3 className="text-lg font-semibold text-gray-900">Design</h3>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Cart Style</Label>
+              <Label className="text-sm font-medium text-gray-900">Cart Style</Label>
               <div className="flex gap-3">
                 {[
                   { value: "sidebar", label: "Slide-out Sidebar" },
@@ -249,8 +245,8 @@ export default function CartSettings() {
                     onClick={() => setCartStyle(option.value)}
                     className={`px-4 py-2 rounded-[7px] text-sm font-medium border transition-colors ${
                       cartStyle === option.value
-                        ? "bg-swipes-blue-deep text-white border-swipes-blue-deep"
-                        : "bg-white text-swipes-pro-gray border-gray-200 hover:border-gray-300"
+                        ? "bg-[#1844A6] text-white border-[#1844A6]"
+                        : "bg-white text-gray-500 border-gray-200 hover:border-gray-300"
                     }`}
                   >
                     {option.label}
@@ -260,16 +256,16 @@ export default function CartSettings() {
             </div>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-2">
-                <Label className="text-sm text-swipes-black">Show product thumbnails</Label>
+                <Label className="text-sm text-gray-900">Show product thumbnails</Label>
                 <Switch checked={showThumbnails} onCheckedChange={setShowThumbnails} />
               </div>
               <div className="flex items-center justify-between py-2">
-                <Label className="text-sm text-swipes-black">Show "Continue Shopping" button</Label>
+                <Label className="text-sm text-gray-900">Show "Continue Shopping" button</Label>
                 <Switch checked={showContinueShopping} onCheckedChange={setShowContinueShopping} />
               </div>
             </div>
             <div className="space-y-2">
-              <Label className="text-sm font-medium text-swipes-black">Cart Empty State Message</Label>
+              <Label className="text-sm font-medium text-gray-900">Cart Empty State Message</Label>
               <Input
                 value={emptyMessage}
                 onChange={(e) => setEmptyMessage(e.target.value)}
@@ -277,21 +273,23 @@ export default function CartSettings() {
               />
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Abandoned Cart Recovery Tab */}
-        <TabsContent value="recovery" className="space-y-6">
+      {/* Abandoned Cart Recovery Tab */}
+      {activeTab === "recovery" && (
+        <div className="space-y-6">
           {/* Recovery Automation */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-swipes-black">Recovery Automation</h3>
-                <p className="text-sm text-swipes-pro-gray mt-1">
+                <h3 className="text-lg font-semibold text-gray-900">Recovery Automation</h3>
+                <p className="text-sm text-gray-500 mt-1">
                   Configure automated email sequences for abandoned cart recovery.
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <Label className="text-sm text-swipes-black">Enable abandoned cart emails</Label>
+                <Label className="text-sm text-gray-900">Enable abandoned cart emails</Label>
                 <Switch checked={enableRecoveryEmails} onCheckedChange={setEnableRecoveryEmails} />
               </div>
             </div>
@@ -301,28 +299,28 @@ export default function CartSettings() {
                 {/* Email 1 */}
                 <div className="p-4 bg-gray-50 rounded-[7px] space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-swipes-blue-deep text-white flex items-center justify-center text-sm font-bold">1</div>
-                    <h4 className="font-medium text-swipes-black">First Reminder</h4>
+                    <div className="w-8 h-8 rounded-full bg-[#1844A6] text-white flex items-center justify-center text-sm font-bold">1</div>
+                    <h4 className="font-medium text-gray-900">First Reminder</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-11">
                     <div className="space-y-2">
-                      <Label className="text-sm text-swipes-pro-gray">Time Delay</Label>
+                      <Label className="text-sm text-gray-500">Time Delay</Label>
                       <Input defaultValue="1 hour" className="rounded-[7px]" readOnly />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm text-swipes-pro-gray">Subject Line</Label>
+                      <Label className="text-sm text-gray-500">Subject Line</Label>
                       <Input defaultValue="You left something behind!" className="rounded-[7px]" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between pl-11">
                     <div className="flex items-center gap-3">
-                      <Label className="text-sm text-swipes-black">Include discount</Label>
+                      <Label className="text-sm text-gray-900">Include discount</Label>
                       <Switch checked={email1Discount} onCheckedChange={setEmail1Discount} />
                     </div>
-                    <div className="flex gap-4 text-sm text-swipes-pro-gray">
-                      <span>Open: <strong className="text-swipes-black">42%</strong></span>
-                      <span>Click: <strong className="text-swipes-black">18%</strong></span>
-                      <span>Recovery: <strong className="text-swipes-black">8.2%</strong></span>
+                    <div className="flex gap-4 text-sm text-gray-500">
+                      <span>Open: <strong className="text-gray-900">42%</strong></span>
+                      <span>Click: <strong className="text-gray-900">18%</strong></span>
+                      <span>Recovery: <strong className="text-gray-900">8.2%</strong></span>
                     </div>
                   </div>
                 </div>
@@ -330,34 +328,34 @@ export default function CartSettings() {
                 {/* Email 2 */}
                 <div className="p-4 bg-gray-50 rounded-[7px] space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-swipes-blue-deep text-white flex items-center justify-center text-sm font-bold">2</div>
-                    <h4 className="font-medium text-swipes-black">Second Reminder</h4>
+                    <div className="w-8 h-8 rounded-full bg-[#1844A6] text-white flex items-center justify-center text-sm font-bold">2</div>
+                    <h4 className="font-medium text-gray-900">Second Reminder</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-11">
                     <div className="space-y-2">
-                      <Label className="text-sm text-swipes-pro-gray">Time Delay</Label>
+                      <Label className="text-sm text-gray-500">Time Delay</Label>
                       <Input defaultValue="24 hours" className="rounded-[7px]" readOnly />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm text-swipes-pro-gray">Subject Line</Label>
+                      <Label className="text-sm text-gray-500">Subject Line</Label>
                       <Input defaultValue="Your cart is waiting for you" className="rounded-[7px]" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between pl-11">
                     <div className="flex items-center gap-3">
-                      <Label className="text-sm text-swipes-black">Include discount</Label>
+                      <Label className="text-sm text-gray-900">Include discount</Label>
                       <Switch checked={email2Discount} onCheckedChange={setEmail2Discount} />
                       {email2Discount && (
                         <div className="flex items-center gap-1">
                           <Input defaultValue="10" className="w-16 rounded-[7px]" />
-                          <span className="text-sm text-swipes-pro-gray">%</span>
+                          <span className="text-sm text-gray-500">%</span>
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-4 text-sm text-swipes-pro-gray">
-                      <span>Open: <strong className="text-swipes-black">35%</strong></span>
-                      <span>Click: <strong className="text-swipes-black">12%</strong></span>
-                      <span>Recovery: <strong className="text-swipes-black">5.8%</strong></span>
+                    <div className="flex gap-4 text-sm text-gray-500">
+                      <span>Open: <strong className="text-gray-900">35%</strong></span>
+                      <span>Click: <strong className="text-gray-900">12%</strong></span>
+                      <span>Recovery: <strong className="text-gray-900">5.8%</strong></span>
                     </div>
                   </div>
                 </div>
@@ -365,34 +363,34 @@ export default function CartSettings() {
                 {/* Email 3 */}
                 <div className="p-4 bg-gray-50 rounded-[7px] space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-swipes-blue-deep text-white flex items-center justify-center text-sm font-bold">3</div>
-                    <h4 className="font-medium text-swipes-black">Final Reminder</h4>
+                    <div className="w-8 h-8 rounded-full bg-[#1844A6] text-white flex items-center justify-center text-sm font-bold">3</div>
+                    <h4 className="font-medium text-gray-900">Final Reminder</h4>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pl-11">
                     <div className="space-y-2">
-                      <Label className="text-sm text-swipes-pro-gray">Time Delay</Label>
+                      <Label className="text-sm text-gray-500">Time Delay</Label>
                       <Input defaultValue="72 hours" className="rounded-[7px]" readOnly />
                     </div>
                     <div className="space-y-2">
-                      <Label className="text-sm text-swipes-pro-gray">Subject Line</Label>
+                      <Label className="text-sm text-gray-500">Subject Line</Label>
                       <Input defaultValue="Last chance — your items are selling fast!" className="rounded-[7px]" />
                     </div>
                   </div>
                   <div className="flex items-center justify-between pl-11">
                     <div className="flex items-center gap-3">
-                      <Label className="text-sm text-swipes-black">Include discount</Label>
+                      <Label className="text-sm text-gray-900">Include discount</Label>
                       <Switch checked={email3Discount} onCheckedChange={setEmail3Discount} />
                       {email3Discount && (
                         <div className="flex items-center gap-1">
                           <Input defaultValue="15" className="w-16 rounded-[7px]" />
-                          <span className="text-sm text-swipes-pro-gray">%</span>
+                          <span className="text-sm text-gray-500">%</span>
                         </div>
                       )}
                     </div>
-                    <div className="flex gap-4 text-sm text-swipes-pro-gray">
-                      <span>Open: <strong className="text-swipes-black">28%</strong></span>
-                      <span>Click: <strong className="text-swipes-black">9%</strong></span>
-                      <span>Recovery: <strong className="text-swipes-black">4.5%</strong></span>
+                    <div className="flex gap-4 text-sm text-gray-500">
+                      <span>Open: <strong className="text-gray-900">28%</strong></span>
+                      <span>Click: <strong className="text-gray-900">9%</strong></span>
+                      <span>Recovery: <strong className="text-gray-900">4.5%</strong></span>
                     </div>
                   </div>
                 </div>
@@ -403,66 +401,68 @@ export default function CartSettings() {
           {/* Recovered Carts Table */}
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Recently Recovered Carts</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Recently Recovered Carts</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Cart Value</TableHead>
-                  <TableHead>Recovery Email</TableHead>
-                  <TableHead>Recovered Date</TableHead>
-                  <TableHead>Discount Applied</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customer</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Cart Value</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Recovery Email</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Recovered Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Discount Applied</th>
+                </tr>
+              </thead>
+              <tbody>
                 {recoveredCarts.map((cart) => (
-                  <TableRow key={cart.id}>
-                    <TableCell className="font-medium text-swipes-black">{cart.customer}</TableCell>
-                    <TableCell className="text-swipes-black">{cart.cartValue}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-swipes-blue-deep text-white">{cart.emailNumber}</Badge>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray">{cart.recoveredDate}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{cart.discount}</TableCell>
-                  </TableRow>
+                  <tr key={cart.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{cart.customer}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{cart.cartValue}</td>
+                    <td className="px-4 py-3">
+                      <Badge className="rounded-full bg-[#1844A6] text-white">{cart.emailNumber}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{cart.recoveredDate}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{cart.discount}</td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Cart Analytics Tab */}
-        <TabsContent value="analytics" className="space-y-6">
+      {/* Cart Analytics Tab */}
+      {activeTab === "analytics" && (
+        <div className="space-y-6">
           {/* Quick Stats */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">Cart Metrics</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Cart Metrics</h3>
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm text-swipes-pro-gray">Average Cart Value</p>
-                  <p className="text-3xl font-bold text-swipes-blue-deep mt-1">$67.42</p>
+                  <p className="text-sm text-gray-500">Average Cart Value</p>
+                  <p className="text-3xl font-bold text-[#1844A6] mt-1">$67.42</p>
                 </div>
                 <div>
-                  <p className="text-sm text-swipes-pro-gray">Average Items Per Cart</p>
-                  <p className="text-3xl font-bold text-swipes-blue-deep mt-1">2.3</p>
+                  <p className="text-sm text-gray-500">Average Items Per Cart</p>
+                  <p className="text-3xl font-bold text-[#1844A6] mt-1">2.3</p>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
                 Cart-to-Checkout Conversion by Day
               </h3>
               <div className="flex items-end gap-3 h-32">
                 {dayOfWeekConversion.map((item) => (
                   <div key={item.day} className="flex-1 flex flex-col items-center gap-2">
-                    <span className="text-xs text-swipes-pro-gray font-medium">{item.rate}%</span>
+                    <span className="text-xs text-gray-500 font-medium">{item.rate}%</span>
                     <div
-                      className="w-full bg-swipes-blue-deep rounded-t-[4px] transition-all"
+                      className="w-full bg-[#1844A6] rounded-t-[4px] transition-all"
                       style={{ height: `${(item.rate / maxRate) * 100}px` }}
                     />
-                    <span className="text-xs text-swipes-pro-gray">{item.day}</span>
+                    <span className="text-xs text-gray-500">{item.day}</span>
                   </div>
                 ))}
               </div>
@@ -472,52 +472,52 @@ export default function CartSettings() {
           {/* Most Abandoned Products */}
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Most Abandoned Products</h3>
+              <h3 className="text-lg font-semibold text-gray-900">Most Abandoned Products</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Product Name</TableHead>
-                  <TableHead>Times Abandoned</TableHead>
-                  <TableHead>Cart Value</TableHead>
-                  <TableHead>Abandonment Rate</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Product Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Times Abandoned</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Cart Value</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Abandonment Rate</th>
+                </tr>
+              </thead>
+              <tbody>
                 {abandonedProducts.map((product) => (
-                  <TableRow key={product.name}>
-                    <TableCell className="font-medium text-swipes-black">
+                  <tr key={product.name} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">
                       <div className="flex items-center gap-2">
-                        <Package className="h-4 w-4 text-swipes-blue-deep" />
+                        <Package className="h-4 w-4 text-[#1844A6]" />
                         {product.name}
                       </div>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray">{product.timesAbandoned}</TableCell>
-                    <TableCell className="text-swipes-black">{product.cartValue}</TableCell>
-                    <TableCell>
-                      <Badge className="bg-swipes-muted-red text-white">{product.abandonmentRate}</Badge>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{product.timesAbandoned}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{product.cartValue}</td>
+                    <td className="px-4 py-3">
+                      <Badge className="rounded-full bg-red-600 text-white">{product.abandonmentRate}</Badge>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
 
           {/* Top Abandonment Pages */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Top Cart Abandonment Pages
             </h3>
             <div className="space-y-3">
               {abandonmentPages.map((page) => (
                 <div key={page.page} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-swipes-black">{page.page}</span>
-                    <span className="text-swipes-pro-gray">{page.dropoffs} drop-offs ({page.percent}%)</span>
+                    <span className="font-medium text-gray-900">{page.page}</span>
+                    <span className="text-gray-500">{page.dropoffs} drop-offs ({page.percent}%)</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-swipes-muted-red rounded-full transition-all"
+                      className="h-full bg-red-600 rounded-full transition-all"
                       style={{ width: `${page.percent}%` }}
                     />
                   </div>
@@ -525,8 +525,8 @@ export default function CartSettings() {
               ))}
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

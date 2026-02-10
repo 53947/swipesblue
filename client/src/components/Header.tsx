@@ -185,11 +185,11 @@ export default function Header() {
   const getBadgeStyles = (badge: string) => {
     switch (badge) {
       case "FREE":
-        return "bg-swipes-trusted-green text-white";
+        return "bg-green-600 text-white";
       case "NEW":
-        return "bg-swipes-gold text-black";
+        return "bg-yellow-500 text-black";
       case "PRO":
-        return "bg-swipes-blue-deep text-white";
+        return "bg-[#1844A6] text-white";
       default:
         return "";
     }
@@ -230,7 +230,7 @@ export default function Header() {
                 variant="ghost"
                 size="sm"
                 className={`gap-1 text-[15px] font-medium rounded-[7px] ${
-                  activeMenu === 'products' ? "text-swipes-blue-deep bg-gray-50" : "text-gray-600"
+                  activeMenu === 'products' ? "text-[#1844A6] bg-gray-50" : "text-gray-600"
                 }`}
                 data-testid="button-nav-products"
               >
@@ -250,7 +250,7 @@ export default function Header() {
               variant="ghost"
               size="sm"
               className={`gap-1 text-[15px] font-medium rounded-[7px] ${
-                activeMenu === 'developers' ? "text-swipes-blue-deep bg-gray-50" : "text-gray-600"
+                activeMenu === 'developers' ? "text-[#1844A6] bg-gray-50" : "text-gray-600"
               }`}
               data-testid="button-nav-developers"
             >
@@ -265,7 +265,7 @@ export default function Header() {
               variant="ghost"
               size="sm"
               className={`text-[15px] font-medium rounded-[7px] ${
-                location === '/pricing' ? "text-swipes-blue-deep bg-gray-50" : "text-gray-600"
+                location === '/pricing' ? "text-[#1844A6] bg-gray-50" : "text-gray-600"
               }`}
               data-testid="button-nav-pricing"
             >
@@ -283,7 +283,7 @@ export default function Header() {
               variant="ghost"
               size="sm"
               className={`gap-1 text-[15px] font-medium rounded-[7px] ${
-                activeMenu === 'resources' ? "text-swipes-blue-deep bg-gray-50" : "text-gray-600"
+                activeMenu === 'resources' ? "text-[#1844A6] bg-gray-50" : "text-gray-600"
               }`}
               data-testid="button-nav-resources"
             >
@@ -305,7 +305,7 @@ export default function Header() {
           <Link href="/dashboard" className="flex items-center" data-testid="link-dashboard">
             <Button 
               variant="outline"
-              className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]"
+              className="border-2 border-teal-600 text-teal-600 rounded-[7px]"
               data-testid="button-dashboard"
             >
               Dashboard
@@ -313,7 +313,7 @@ export default function Header() {
           </Link>
           <Link href="/shoppingcart" className="flex items-center" data-testid="link-get-started">
             <Button 
-              className="bg-swipes-blue-deep text-white rounded-[7px]"
+              className="bg-[#1844A6] text-white rounded-[7px]"
               data-testid="button-get-started"
             >
               Get Started
@@ -360,8 +360,8 @@ export default function Header() {
                         <li key={itemIndex}>
                           <Link href={item.href} onClick={() => setActiveMenu(null)} data-testid={`link-mega-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
                             <div className="flex items-start gap-3 p-3 rounded-[7px] cursor-pointer">
-                              <div className="flex-shrink-0 w-10 h-10 rounded-[7px] bg-swipes-blue-deep/5 flex items-center justify-center">
-                                <Icon className="h-5 w-5 text-swipes-blue-deep" />
+                              <div className="flex-shrink-0 w-10 h-10 rounded-[7px] bg-[#1844A6]/5 flex items-center justify-center">
+                                <Icon className="h-5 w-5 text-[#1844A6]" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2">
@@ -386,7 +386,7 @@ export default function Header() {
                   </ul>
                   {column.ctaLabel && column.ctaHref && (
                     <Link href={column.ctaHref} onClick={() => setActiveMenu(null)} data-testid={`link-mega-menu-cta-${column.title.toLowerCase().replace(/\s+/g, '-')}`}>
-                      <span className="inline-flex items-center text-sm font-medium text-swipes-blue-deep underline mt-4">
+                      <span className="inline-flex items-center text-sm font-medium text-[#1844A6] underline mt-4">
                         {column.ctaLabel}
                         <ArrowRight className="ml-1 h-4 w-4" />
                       </span>
@@ -421,7 +421,7 @@ export default function Header() {
                 <span className="block py-3 px-4 text-[15px] font-medium text-gray-600">Sign in</span>
               </Link>
               <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-get-started">
-                <Button className="w-full bg-swipes-blue-deep text-white rounded-[7px]" data-testid="button-mobile-get-started">
+                <Button className="w-full bg-[#1844A6] text-white rounded-[7px]" data-testid="button-mobile-get-started">
                   Get Started
                 </Button>
               </Link>

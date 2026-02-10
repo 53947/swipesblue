@@ -1,9 +1,16 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Users, CreditCard, Search, Plus, ChevronDown, ChevronUp, DollarSign, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const tabs = [
+  { label: "All Customers", href: "/dashboard/vault" },
+  { label: "Recent Activity", href: "/dashboard/vault?tab=activity" },
+];
 
 interface StoredCard {
   last4: string;
@@ -191,12 +198,31 @@ const mockCustomers: Customer[] = [
 ];
 
 const statusConfig: Record<string, { label: string; className: string }> = {
-  success: { label: "Success", className: "bg-swipes-trusted-green text-white hover:bg-swipes-trusted-green" },
-  failed: { label: "Failed", className: "bg-swipes-muted-red text-white hover:bg-swipes-muted-red" },
+  success: { label: "Success", className: "bg-green-600 text-white hover:bg-green-600" },
+  failed: { label: "Failed", className: "bg-red-600 text-white hover:bg-red-600" },
   pending: { label: "Pending", className: "bg-yellow-500 text-white hover:bg-yellow-500" },
 };
 
+// Flatten all customer transactions for the activity tab
+const allTransactions = mockCustomers.flatMap((customer) =>
+  customer.transactions.map((txn) => ({
+    ...txn,
+    customerName: customer.name,
+    customerEmail: customer.email,
+  }))
+).sort((a, b) => b.date.localeCompare(a.date));
+
+const activityStatusColors: Record<string, string> = {
+  success: "bg-green-100 text-green-700",
+  failed: "bg-red-100 text-red-600",
+  pending: "bg-yellow-100 text-yellow-700",
+};
+
 export default function CustomerVault() {
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "customers";
+
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
 
@@ -213,9 +239,23 @@ export default function CustomerVault() {
   };
 
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Customer Vault</h1>
+          <p className="text-gray-500 mt-1">Securely store customer payment methods, profiles, and transaction history</p>
+        </div>
+        <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+          <Plus className="h-4 w-4 mr-2" />
+          Add Customer
+        </Button>
+      </div>
+
+      <SubNavTabs tabs={tabs} />
+
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="Total Customers"
           value="573"
@@ -246,62 +286,105 @@ export default function CustomerVault() {
         />
       </div>
 
-      {/* Header Row */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold text-swipes-black">Customer Vault</h1>
-          <p className="text-swipes-pro-gray">Securely store customer payment methods, profiles, and transaction history</p>
-        </div>
-        <div className="flex items-center gap-3 w-full sm:w-auto">
-          <div className="relative flex-1 sm:flex-initial">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-swipes-pro-gray" />
-            <Input
-              placeholder="Search by name or email..."
-              className="pl-10 rounded-[7px] w-full sm:w-72"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          <Button className="bg-swipes-blue-deep rounded-[7px] hover:bg-swipes-blue-deep/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Customer
-          </Button>
-        </div>
-      </div>
-
-      {/* Customer Table */}
-      <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Customer ID</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Name</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Email</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Stored Cards</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Total Spent</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Last Transaction</th>
-              <th className="text-left px-6 py-3 text-xs font-medium text-swipes-pro-gray uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200">
-            {filteredCustomers.map((customer) => (
-              <CustomerRow
-                key={customer.id}
-                customer={customer}
-                isExpanded={expandedId === customer.id}
-                onToggle={() => toggleExpanded(customer.id)}
+      {/* Tab: All Customers */}
+      {activeTab === "customers" && (
+        <>
+          {/* Search Bar */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="relative flex-1 max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Search by name or email..."
+                className="pl-10 rounded-[7px]"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
-            ))}
-            {filteredCustomers.length === 0 && (
-              <tr>
-                <td colSpan={7} className="px-6 py-12 text-center text-sm text-swipes-pro-gray">
-                  No customers found matching your search.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+            </div>
+          </div>
+
+          {/* Customer Table */}
+          {filteredCustomers.length === 0 ? (
+            <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
+              <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No customers found</h3>
+              <p className="text-gray-500 text-sm">No customers match your search.</p>
+            </div>
+          ) : (
+            <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customer ID</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Name</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Stored Cards</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Total Spent</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Last Transaction</th>
+                    <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredCustomers.map((customer) => (
+                    <CustomerRow
+                      key={customer.id}
+                      customer={customer}
+                      isExpanded={expandedId === customer.id}
+                      onToggle={() => toggleExpanded(customer.id)}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          <div className="mt-4 text-center">
+            <span className="text-xs text-gray-400">{filteredCustomers.length} customers</span>
+          </div>
+        </>
+      )}
+
+      {/* Tab: Recent Activity */}
+      {activeTab === "activity" && (
+        <>
+          <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transaction ID</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customer</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Amount</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Card</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {allTransactions.map((txn) => (
+                  <tr key={txn.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-mono text-gray-900">{txn.id}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{txn.date}</td>
+                    <td className="px-4 py-3">
+                      <div>
+                        <span className="text-sm font-medium text-gray-900 block">{txn.customerName}</span>
+                        <span className="text-xs text-gray-400">{txn.customerEmail}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{txn.amount}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{txn.card}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`text-xs rounded-full ${activityStatusColors[txn.status]}`}>
+                        {txn.status === "success" ? "Success" : txn.status === "pending" ? "Pending" : "Failed"}
+                      </Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <div className="mt-4 text-center">
+            <span className="text-xs text-gray-400">{allTransactions.length} transactions</span>
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -318,47 +401,49 @@ function CustomerRow({
   return (
     <>
       <tr
-        className="hover:bg-gray-50 transition-colors cursor-pointer"
+        className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
         onClick={onToggle}
       >
-        <td className="px-6 py-4 text-sm font-medium text-swipes-black">{customer.id}</td>
-        <td className="px-6 py-4 text-sm font-medium text-swipes-black">{customer.name}</td>
-        <td className="px-6 py-4 text-sm text-swipes-pro-gray">{customer.email}</td>
-        <td className="px-6 py-4">
-          <Badge className="bg-swipes-blue-deep text-white hover:bg-swipes-blue-deep">
+        <td className="px-4 py-3 text-sm font-mono text-gray-900">{customer.id}</td>
+        <td className="px-4 py-3 text-sm font-medium text-gray-900">{customer.name}</td>
+        <td className="px-4 py-3 text-sm text-gray-600">{customer.email}</td>
+        <td className="px-4 py-3">
+          <Badge className="bg-blue-100 text-blue-700 text-xs rounded-full">
             {customer.cards.length} {customer.cards.length === 1 ? "card" : "cards"}
           </Badge>
         </td>
-        <td className="px-6 py-4 text-sm font-medium text-swipes-black">{customer.totalSpent}</td>
-        <td className="px-6 py-4 text-sm text-swipes-pro-gray">{customer.lastTransaction}</td>
-        <td className="px-6 py-4">
-          <Button
-            variant="outline"
-            size="sm"
-            className="rounded-[7px]"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggle();
-            }}
-          >
-            {isExpanded ? (
-              <ChevronUp className="h-3.5 w-3.5 mr-1" />
-            ) : (
-              <ChevronDown className="h-3.5 w-3.5 mr-1" />
-            )}
-            View
-          </Button>
+        <td className="px-4 py-3 text-sm font-medium text-gray-900">{customer.totalSpent}</td>
+        <td className="px-4 py-3 text-sm text-gray-600">{customer.lastTransaction}</td>
+        <td className="px-4 py-3">
+          <div className="flex items-center justify-end">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-xs"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+            >
+              {isExpanded ? (
+                <ChevronUp className="h-3.5 w-3.5 mr-1" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5 mr-1" />
+              )}
+              Details
+            </Button>
+          </div>
         </td>
       </tr>
 
       {isExpanded && (
         <tr>
-          <td colSpan={7} className="px-6 py-6 bg-gray-50 border-t border-gray-100">
+          <td colSpan={7} className="px-4 py-6 bg-gray-50 border-b border-gray-100">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Stored Payment Methods */}
               <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-                <h3 className="text-sm font-semibold text-swipes-black mb-4 flex items-center gap-2">
-                  <CreditCard className="h-4 w-4 text-swipes-blue-deep" />
+                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <CreditCard className="h-4 w-4 text-[#1844A6]" />
                   Stored Payment Methods
                 </h3>
                 <div className="space-y-3">
@@ -368,15 +453,15 @@ function CustomerRow({
                       className="flex items-center justify-between p-3 rounded-[7px] border border-gray-200 bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
-                        <CreditCard className="h-5 w-5 text-swipes-pro-gray" />
+                        <CreditCard className="h-5 w-5 text-gray-400" />
                         <div>
-                          <p className="text-sm font-medium text-swipes-black">
+                          <p className="text-sm font-medium text-gray-900">
                             {card.brand} ****{card.last4}
                           </p>
-                          <p className="text-xs text-swipes-pro-gray">Expires {card.expiry}</p>
+                          <p className="text-xs text-gray-500">Expires {card.expiry}</p>
                         </div>
                       </div>
-                      <Badge variant="outline" className="rounded-[7px] text-swipes-pro-gray">
+                      <Badge variant="outline" className="rounded-full text-xs text-gray-500">
                         {card.brand}
                       </Badge>
                     </div>
@@ -386,8 +471,8 @@ function CustomerRow({
 
               {/* Recent Transactions */}
               <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-                <h3 className="text-sm font-semibold text-swipes-black mb-4 flex items-center gap-2">
-                  <DollarSign className="h-4 w-4 text-swipes-blue-deep" />
+                <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <DollarSign className="h-4 w-4 text-[#1844A6]" />
                   Recent Transactions
                 </h3>
                 <div className="space-y-3">
@@ -397,8 +482,8 @@ function CustomerRow({
                       className="flex items-center justify-between p-3 rounded-[7px] border border-gray-200 bg-gray-50"
                     >
                       <div>
-                        <p className="text-sm font-medium text-swipes-black">{txn.amount}</p>
-                        <p className="text-xs text-swipes-pro-gray">
+                        <p className="text-sm font-medium text-gray-900">{txn.amount}</p>
+                        <p className="text-xs text-gray-500">
                           {txn.date} &middot; {txn.card}
                         </p>
                       </div>

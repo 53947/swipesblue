@@ -201,7 +201,7 @@ export default function Register() {
                             <div key={req.id} className="flex items-center gap-2">
                               <Check 
                                 className={`h-3 w-3 ${
-                                  req.test(watchedPassword) ? "text-swipes-trusted-green" : "text-gray-300"
+                                  req.test(watchedPassword) ? "text-green-600" : "text-gray-300"
                                 }`} 
                               />
                               <span className={`text-xs ${
@@ -242,7 +242,7 @@ export default function Register() {
                   
                   <Button
                     type="submit"
-                    className="w-full bg-swipes-blue-deep text-white rounded-[7px] mt-2"
+                    className="w-full bg-[#1844A6] text-white rounded-[7px] mt-2"
                     disabled={registerMutation.isPending}
                     data-testid="button-register-submit"
                   >
@@ -263,7 +263,7 @@ export default function Register() {
                   Already have an account?{" "}
                   <Link 
                     href="/login"
-                    className="text-swipes-blue-deep font-medium underline"
+                    className="text-[#1844A6] font-medium underline"
                     data-testid="link-login"
                   >
                     Sign in
@@ -275,19 +275,19 @@ export default function Register() {
 
           <p className="text-center text-xs text-gray-500 mt-6">
             By creating an account, you agree to our{" "}
-            <Link href="/terms" className="text-swipes-blue-deep underline" data-testid="link-terms">
+            <Link href="/terms" className="text-[#1844A6] underline" data-testid="link-terms">
               Terms of Service
             </Link>{" "}
             and{" "}
-            <Link href="/privacy" className="text-swipes-blue-deep underline" data-testid="link-privacy">
+            <Link href="/privacy" className="text-[#1844A6] underline" data-testid="link-privacy">
               Privacy Policy
             </Link>
             .
           </p>
 
           <div className="mt-8 text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-swipes-blue-deep/5 rounded-lg">
-              <span className="text-lg font-bold text-swipes-blue-deep">2.70% + $0.30</span>
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-[#1844A6]/5 rounded-lg">
+              <span className="text-lg font-bold text-[#1844A6]">2.70% + $0.30</span>
               <span className="text-sm text-gray-500">per transaction</span>
             </div>
           </div>

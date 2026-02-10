@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   DollarSign,
   TrendingUp,
@@ -11,7 +12,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -19,17 +19,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
 
 type DateRange = "today" | "7d" | "30d" | "90d";
+
+const basePath = "/dashboard/enhance/advanced-analytics";
+const tabs = [
+  { label: "Revenue", href: basePath },
+  { label: "Transactions", href: `${basePath}?tab=transactions` },
+  { label: "Customers", href: `${basePath}?tab=customers` },
+  { label: "Reports", href: `${basePath}?tab=reports` },
+];
 
 const revenueByMethod = [
   { method: "Visa", amount: "$48,320.00", percent: 42 },
@@ -100,7 +101,6 @@ const reports = [
 
 const maxHourly = Math.max(...hourlyDistribution.map((h) => h.count));
 
-// Mock chart bar data for Revenue Over Time
 const revenueChartBars = [
   { label: "Mon", value: 65 },
   { label: "Tue", value: 78 },
@@ -125,17 +125,19 @@ const maxRevenue = Math.max(...revenueChartBars.map((b) => b.value));
 const maxVolume = Math.max(...volumeChartBars.map((b) => b.value));
 
 export default function AnalyticsDashboard() {
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "revenue";
+
   const [dateRange, setDateRange] = useState<DateRange>("30d");
 
   return (
-    <div className="p-8 space-y-8">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold mb-2 text-swipes-black">Analytics</h1>
-          <p className="text-swipes-pro-gray">
-            Revenue analytics, transaction trends, customer insights, and performance reporting
-          </p>
-        </div>
+    <div>
+      {/* Description + Date Range */}
+      <div className="flex items-center justify-between mb-6">
+        <p className="text-gray-500">
+          Revenue analytics, transaction trends, customer insights, and performance reporting
+        </p>
         <Select value={dateRange} onValueChange={(v) => setDateRange(v as DateRange)}>
           <SelectTrigger className="w-[140px] rounded-[7px]">
             <Calendar className="h-4 w-4 mr-2" />
@@ -150,192 +152,135 @@ export default function AnalyticsDashboard() {
         </Select>
       </div>
 
+      <SubNavTabs tabs={tabs} />
+
       {/* Summary Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Gross Revenue"
-          value="$115,000"
-          change="+12.5% from last period"
-          changeType="positive"
-          icon={DollarSign}
-        />
-        <MetricCard
-          title="Net Revenue"
-          value="$108,450"
-          change="+11.8% from last period"
-          changeType="positive"
-          icon={TrendingUp}
-        />
-        <MetricCard
-          title="Total Transactions"
-          value="2,975"
-          change="+8.3% from last period"
-          changeType="positive"
-          icon={CreditCard}
-        />
-        <MetricCard
-          title="Avg Transaction Value"
-          value="$38.66"
-          change="+3.9% from last period"
-          changeType="positive"
-          icon={BarChart3}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <MetricCard title="Gross Revenue" value="$115,000" change="+12.5% from last period" changeType="positive" icon={DollarSign} />
+        <MetricCard title="Net Revenue" value="$108,450" change="+11.8% from last period" changeType="positive" icon={TrendingUp} />
+        <MetricCard title="Total Transactions" value="2,975" change="+8.3% from last period" changeType="positive" icon={CreditCard} />
+        <MetricCard title="Avg Transaction Value" value="$38.66" change="+3.9% from last period" changeType="positive" icon={BarChart3} />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="revenue" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="revenue">Revenue</TabsTrigger>
-          <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="customers">Customers</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-        </TabsList>
-
-        {/* Revenue Tab */}
-        <TabsContent value="revenue" className="space-y-6">
-          {/* Revenue Chart */}
+      {/* Tab: Revenue */}
+      {activeTab === "revenue" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-6">Revenue Over Time</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Revenue Over Time</h3>
             <div className="flex items-end gap-3 h-48">
               {revenueChartBars.map((bar) => (
                 <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-xs text-swipes-pro-gray font-medium">
-                    ${(bar.value * 100).toLocaleString()}
-                  </span>
-                  <div
-                    className="w-full bg-swipes-blue-deep rounded-t-[4px] transition-all"
-                    style={{ height: `${(bar.value / maxRevenue) * 160}px` }}
-                  />
-                  <span className="text-xs text-swipes-pro-gray">{bar.label}</span>
+                  <span className="text-xs text-gray-500 font-medium">${(bar.value * 100).toLocaleString()}</span>
+                  <div className="w-full bg-[#1844A6] rounded-t-[4px] transition-all" style={{ height: `${(bar.value / maxRevenue) * 160}px` }} />
+                  <span className="text-xs text-gray-500">{bar.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Revenue by Payment Method */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">
-              Revenue by Payment Method
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Revenue by Payment Method</h3>
             <div className="space-y-4">
               {revenueByMethod.map((item) => (
                 <div key={item.method} className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-swipes-black">{item.method}</span>
-                    <span className="text-swipes-pro-gray">
-                      {item.amount} ({item.percent}%)
-                    </span>
+                    <span className="font-medium text-gray-900">{item.method}</span>
+                    <span className="text-gray-500">{item.amount} ({item.percent}%)</span>
                   </div>
                   <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-swipes-blue-deep rounded-full transition-all"
-                      style={{ width: `${item.percent}%` }}
-                    />
+                    <div className="h-full bg-[#1844A6] rounded-full transition-all" style={{ width: `${item.percent}%` }} />
                   </div>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Revenue by Plan + Top Revenue Days */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="bg-white rounded-[7px] border border-gray-200">
+            <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
               <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-swipes-black">Revenue by Product/Plan</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Revenue by Product/Plan</h3>
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Plan</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Customers</TableHead>
-                    <TableHead>Avg Order</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Plan</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Revenue</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Customers</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Avg Order</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {revenueByPlan.map((row) => (
-                    <TableRow key={row.plan}>
-                      <TableCell className="font-medium text-swipes-black">{row.plan}</TableCell>
-                      <TableCell className="text-swipes-black">{row.revenue}</TableCell>
-                      <TableCell className="text-swipes-pro-gray">{row.customers}</TableCell>
-                      <TableCell className="text-swipes-pro-gray">{row.avgOrder}</TableCell>
-                    </TableRow>
+                    <tr key={row.plan} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.plan}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.revenue}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{row.customers}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{row.avgOrder}</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
 
-            <div className="bg-white rounded-[7px] border border-gray-200">
+            <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
               <div className="p-4 border-b border-gray-200">
-                <h3 className="text-lg font-semibold text-swipes-black">Top 10 Revenue Days</h3>
+                <h3 className="text-sm font-semibold text-gray-900">Top 10 Revenue Days</h3>
               </div>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Revenue</TableHead>
-                    <TableHead>Transactions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Date</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Revenue</th>
+                    <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transactions</th>
+                  </tr>
+                </thead>
+                <tbody>
                   {topRevenueDays.map((row) => (
-                    <TableRow key={row.date}>
-                      <TableCell className="text-swipes-black">{row.date}</TableCell>
-                      <TableCell className="font-medium text-swipes-black">{row.revenue}</TableCell>
-                      <TableCell className="text-swipes-pro-gray">{row.transactions}</TableCell>
-                    </TableRow>
+                    <tr key={row.date} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-900">{row.date}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{row.revenue}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{row.transactions}</td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
+                </tbody>
+              </table>
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Transactions Tab */}
-        <TabsContent value="transactions" className="space-y-6">
-          {/* Volume Chart */}
+      {/* Tab: Transactions */}
+      {activeTab === "transactions" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-6">
-              Transaction Volume
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-6">Transaction Volume</h3>
             <div className="flex items-end gap-3 h-48">
               {volumeChartBars.map((bar) => (
                 <div key={bar.label} className="flex-1 flex flex-col items-center gap-2">
-                  <span className="text-xs text-swipes-pro-gray font-medium">{bar.value}</span>
-                  <div
-                    className="w-full bg-swipes-trusted-green rounded-t-[4px] transition-all"
-                    style={{ height: `${(bar.value / maxVolume) * 160}px` }}
-                  />
-                  <span className="text-xs text-swipes-pro-gray">{bar.label}</span>
+                  <span className="text-xs text-gray-500 font-medium">{bar.value}</span>
+                  <div className="w-full bg-green-600 rounded-t-[4px] transition-all" style={{ height: `${(bar.value / maxVolume) * 160}px` }} />
+                  <span className="text-xs text-gray-500">{bar.label}</span>
                 </div>
               ))}
             </div>
           </div>
 
-          {/* Transaction Breakdown + Processing Time */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">
-                Transaction Status Breakdown
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Transaction Status Breakdown</h3>
               <div className="space-y-4">
                 {[
-                  { label: "Successful", count: 2831, percent: 95.2, color: "bg-swipes-trusted-green" },
-                  { label: "Failed", count: 89, percent: 3.0, color: "bg-swipes-muted-red" },
-                  { label: "Pending", count: 55, percent: 1.8, color: "bg-swipes-gold" },
+                  { label: "Successful", count: 2831, percent: 95.2, color: "bg-green-600" },
+                  { label: "Failed", count: 89, percent: 3.0, color: "bg-red-600" },
+                  { label: "Pending", count: 55, percent: 1.8, color: "bg-yellow-500" },
                 ].map((item) => (
                   <div key={item.label} className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium text-swipes-black">{item.label}</span>
-                      <span className="text-swipes-pro-gray">
-                        {item.count.toLocaleString()} ({item.percent}%)
-                      </span>
+                      <span className="font-medium text-gray-900">{item.label}</span>
+                      <span className="text-gray-500">{item.count.toLocaleString()} ({item.percent}%)</span>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className={`h-full ${item.color} rounded-full transition-all`}
-                        style={{ width: `${item.percent}%` }}
-                      />
+                      <div className={`h-full ${item.color} rounded-full transition-all`} style={{ width: `${item.percent}%` }} />
                     </div>
                   </div>
                 ))}
@@ -343,215 +288,181 @@ export default function AnalyticsDashboard() {
             </div>
 
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">Processing Metrics</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Processing Metrics</h3>
               <div className="space-y-6">
                 <div>
-                  <p className="text-sm text-swipes-pro-gray">Average Processing Time</p>
-                  <p className="text-3xl font-bold text-swipes-blue-deep mt-1">1.2s</p>
+                  <p className="text-sm text-gray-500">Average Processing Time</p>
+                  <p className="text-3xl font-bold text-[#1844A6] mt-1">1.2s</p>
                 </div>
                 <div>
-                  <p className="text-sm text-swipes-pro-gray">Success Rate</p>
-                  <p className="text-3xl font-bold text-swipes-trusted-green mt-1">95.2%</p>
+                  <p className="text-sm text-gray-500">Success Rate</p>
+                  <p className="text-3xl font-bold text-green-600 mt-1">95.2%</p>
                 </div>
                 <div>
-                  <p className="text-sm text-swipes-pro-gray">Payment Method Distribution</p>
+                  <p className="text-sm text-gray-500">Payment Method Distribution</p>
                   <div className="flex gap-2 mt-2 flex-wrap">
-                    <Badge className="bg-swipes-blue-deep text-white">Visa 42%</Badge>
-                    <Badge className="bg-swipes-blue-deep/80 text-white">MC 27%</Badge>
-                    <Badge className="bg-swipes-blue-deep/60 text-white">Amex 20%</Badge>
-                    <Badge className="bg-swipes-blue-deep/40 text-white">Discover 11%</Badge>
+                    <Badge className="bg-[#1844A6] text-white rounded-full">Visa 42%</Badge>
+                    <Badge className="bg-[#1844A6]/80 text-white rounded-full">MC 27%</Badge>
+                    <Badge className="bg-[#1844A6]/60 text-white rounded-full">Amex 20%</Badge>
+                    <Badge className="bg-[#1844A6]/40 text-white rounded-full">Discover 11%</Badge>
                   </div>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Hourly Distribution */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">
-              Transactions by Hour of Day
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Transactions by Hour of Day</h3>
             <div className="space-y-2">
               {hourlyDistribution.map((item) => (
                 <div key={item.hour} className="flex items-center gap-3">
-                  <span className="text-xs text-swipes-pro-gray w-12 text-right shrink-0">
-                    {item.hour}
-                  </span>
+                  <span className="text-xs text-gray-500 w-12 text-right shrink-0">{item.hour}</span>
                   <div className="flex-1 h-5 bg-gray-100 rounded-[4px] overflow-hidden">
-                    <div
-                      className="h-full bg-swipes-blue-deep rounded-[4px] transition-all"
-                      style={{ width: `${(item.count / maxHourly) * 100}%` }}
-                    />
+                    <div className="h-full bg-[#1844A6] rounded-[4px] transition-all" style={{ width: `${(item.count / maxHourly) * 100}%` }} />
                   </div>
-                  <span className="text-xs text-swipes-pro-gray w-8 shrink-0">{item.count}</span>
+                  <span className="text-xs text-gray-500 w-8 shrink-0">{item.count}</span>
                 </div>
               ))}
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Customers Tab */}
-        <TabsContent value="customers" className="space-y-6">
-          {/* New vs Returning */}
+      {/* Tab: Customers */}
+      {activeTab === "customers" && (
+        <div className="space-y-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">
-                New vs Returning Customers
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">New vs Returning Customers</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-swipes-black">New Customers</span>
-                    <span className="text-swipes-pro-gray">847 (38%)</span>
+                    <span className="font-medium text-gray-900">New Customers</span>
+                    <span className="text-gray-500">847 (38%)</span>
                   </div>
                   <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-swipes-blue-deep rounded-full" style={{ width: "38%" }} />
+                    <div className="h-full bg-[#1844A6] rounded-full" style={{ width: "38%" }} />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium text-swipes-black">Returning Customers</span>
-                    <span className="text-swipes-pro-gray">1,385 (62%)</span>
+                    <span className="font-medium text-gray-900">Returning Customers</span>
+                    <span className="text-gray-500">1,385 (62%)</span>
                   </div>
                   <div className="h-3 bg-gray-100 rounded-full overflow-hidden">
-                    <div className="h-full bg-swipes-trusted-green rounded-full" style={{ width: "62%" }} />
+                    <div className="h-full bg-green-600 rounded-full" style={{ width: "62%" }} />
                   </div>
                 </div>
               </div>
             </div>
 
             <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-swipes-black mb-4">
-                Customer Acquisition Trend
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Acquisition Trend</h3>
               <div className="flex items-end gap-2 h-32">
                 {[28, 35, 42, 38, 52, 48, 55, 60, 45, 62, 58, 68].map((val, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                    <div
-                      className="w-full bg-swipes-blue-deep/70 rounded-t-[3px]"
-                      style={{ height: `${(val / 68) * 100}px` }}
-                    />
+                    <div className="w-full bg-[#1844A6]/70 rounded-t-[3px]" style={{ height: `${(val / 68) * 100}px` }} />
                   </div>
                 ))}
               </div>
               <div className="flex justify-between mt-2">
-                <span className="text-xs text-swipes-pro-gray">Jan</span>
-                <span className="text-xs text-swipes-pro-gray">Jun</span>
-                <span className="text-xs text-swipes-pro-gray">Dec</span>
+                <span className="text-xs text-gray-500">Jan</span>
+                <span className="text-xs text-gray-500">Jun</span>
+                <span className="text-xs text-gray-500">Dec</span>
               </div>
             </div>
           </div>
 
-          {/* Top Customers Table */}
-          <div className="bg-white rounded-[7px] border border-gray-200">
+          <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
             <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Top Customers</h3>
+              <h3 className="text-sm font-semibold text-gray-900">Top Customers</h3>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Total Spent</TableHead>
-                  <TableHead>Transactions</TableHead>
-                  <TableHead>Avg Order</TableHead>
-                  <TableHead>Last Purchase</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Total Spent</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Transactions</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Avg Order</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Last Purchase</th>
+                </tr>
+              </thead>
+              <tbody>
                 {topCustomers.map((customer) => (
-                  <TableRow key={customer.name}>
-                    <TableCell className="font-medium text-swipes-black">{customer.name}</TableCell>
-                    <TableCell className="text-swipes-black">{customer.totalSpent}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{customer.transactions}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{customer.avgOrder}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{customer.lastPurchase}</TableCell>
-                  </TableRow>
+                  <tr key={customer.name} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{customer.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{customer.totalSpent}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{customer.transactions}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{customer.avgOrder}</td>
+                    <td className="px-4 py-3 text-sm text-gray-600">{customer.lastPurchase}</td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
 
-          {/* Geographic Distribution */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-swipes-black mb-4">
-              Geographic Distribution
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Geographic Distribution</h3>
             <div className="space-y-3">
               {geoDistribution.map((item) => (
                 <div key={item.region} className="flex items-center gap-3">
-                  <span className="text-sm font-medium text-swipes-black w-36 shrink-0">
-                    {item.region}
-                  </span>
+                  <span className="text-sm font-medium text-gray-900 w-36 shrink-0">{item.region}</span>
                   <div className="flex-1 h-5 bg-gray-100 rounded-[4px] overflow-hidden">
-                    <div
-                      className="h-full bg-swipes-blue-deep rounded-[4px] transition-all"
-                      style={{ width: `${item.percent}%` }}
-                    />
+                    <div className="h-full bg-[#1844A6] rounded-[4px] transition-all" style={{ width: `${item.percent}%` }} />
                   </div>
-                  <span className="text-xs text-swipes-pro-gray w-20 text-right shrink-0">
-                    {item.count.toLocaleString()} ({item.percent}%)
-                  </span>
+                  <span className="text-xs text-gray-500 w-20 text-right shrink-0">{item.count.toLocaleString()} ({item.percent}%)</span>
                 </div>
               ))}
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Reports Tab */}
-        <TabsContent value="reports" className="space-y-6">
-          <div className="bg-white rounded-[7px] border border-gray-200">
-            <div className="p-4 border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Available Reports</h3>
-              <p className="text-sm text-swipes-pro-gray mt-1">
-                Generate and download reports for your records.
-              </p>
-            </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Report</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead>Frequency</TableHead>
-                  <TableHead>Format</TableHead>
-                  <TableHead className="text-right">Action</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reports.map((report) => (
-                  <TableRow key={report.name}>
-                    <TableCell className="font-medium text-swipes-black">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-4 w-4 text-swipes-blue-deep" />
-                        {report.name}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray text-sm">
-                      {report.description}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className="text-xs">
-                        {report.frequency}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge className="bg-swipes-blue-deep text-white">{report.format}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="sm"
-                        className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]"
-                      >
-                        <Download className="h-4 w-4 mr-1" />
-                        Generate
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+      {/* Tab: Reports */}
+      {activeTab === "reports" && (
+        <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden">
+          <div className="p-4 border-b border-gray-200">
+            <h3 className="text-sm font-semibold text-gray-900">Available Reports</h3>
+            <p className="text-sm text-gray-500 mt-1">Generate and download reports for your records.</p>
           </div>
-        </TabsContent>
-      </Tabs>
+          <table className="w-full">
+            <thead>
+              <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Report</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Description</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Frequency</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Format</th>
+                <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {reports.map((report) => (
+                <tr key={report.name} className="border-b border-gray-100 hover:bg-gray-50">
+                  <td className="px-4 py-3 text-sm font-medium text-gray-900">
+                    <div className="flex items-center gap-2">
+                      <FileText className="h-4 w-4 text-[#1844A6]" />
+                      {report.name}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-sm text-gray-500">{report.description}</td>
+                  <td className="px-4 py-3">
+                    <Badge variant="outline" className="text-xs rounded-full">{report.frequency}</Badge>
+                  </td>
+                  <td className="px-4 py-3">
+                    <Badge className="bg-[#1844A6] text-white rounded-full">{report.format}</Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Button size="sm" className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+                      <Download className="h-4 w-4 mr-1" />
+                      Generate
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

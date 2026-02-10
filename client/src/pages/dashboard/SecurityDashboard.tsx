@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useLocation } from "wouter";
 import {
   Shield,
   Lock,
@@ -16,7 +17,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -29,15 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import MetricCard from "@/components/MetricCard";
+import SubNavTabs from "@/components/dashboard/SubNavTabs";
+
+const basePath = "/dashboard/enhance/security-suite";
+
+const tabs = [
+  { label: "Encryption", href: basePath },
+  { label: "Access Control", href: `${basePath}?tab=access-control` },
+  { label: "Audit Log", href: `${basePath}?tab=audit-log` },
+  { label: "Compliance", href: `${basePath}?tab=compliance` },
+];
 
 interface EncryptionFeature {
   id: string;
@@ -194,11 +196,11 @@ const complianceItems: ComplianceItem[] = [
 function getRoleClasses(role: AccessUser["role"]): string {
   switch (role) {
     case "Owner":
-      return "bg-swipes-blue-deep text-white";
+      return "bg-[#1844A6] text-white";
     case "Admin":
-      return "bg-swipes-gold text-white";
+      return "bg-yellow-500 text-white";
     case "Analyst":
-      return "bg-swipes-trusted-green text-white";
+      return "bg-green-600 text-white";
     case "Read-only":
       return "bg-gray-400 text-white";
   }
@@ -207,11 +209,11 @@ function getRoleClasses(role: AccessUser["role"]): string {
 function getStatusClasses(status: AccessUser["status"]): string {
   switch (status) {
     case "Active":
-      return "bg-swipes-trusted-green text-white";
+      return "bg-green-600 text-white";
     case "Inactive":
-      return "bg-swipes-muted-red text-white";
+      return "bg-red-600 text-white";
     case "Pending":
-      return "bg-swipes-gold text-white";
+      return "bg-yellow-500 text-white";
   }
 }
 
@@ -220,6 +222,9 @@ export default function SecurityDashboard() {
   const [tlsVersion, setTlsVersion] = useState("1.3");
   const [auditFilter, setAuditFilter] = useState("all");
   const [auditSearch, setAuditSearch] = useState("");
+  const [location] = useLocation();
+  const urlParams = new URLSearchParams(location.split("?")[1] || "");
+  const activeTab = urlParams.get("tab") || "encryption";
 
   const toggleEncryption = (featureId: string) => {
     setEncryptionFeatures((prev) =>
@@ -244,16 +249,13 @@ export default function SecurityDashboard() {
   });
 
   return (
-    <div className="p-8 space-y-8">
-      <div>
-        <h1 className="text-2xl font-bold mb-2 text-swipes-black">Security</h1>
-        <p className="text-swipes-pro-gray">
-          PCI compliance monitoring, encryption settings, access control, and security audit log
-        </p>
-      </div>
+    <div>
+      <p className="text-gray-500 mb-6">
+        PCI compliance monitoring, encryption settings, access control, and security audit log
+      </p>
 
       {/* Compliance Overview Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <MetricCard
           title="PCI DSS Status"
           value="Compliant"
@@ -284,17 +286,11 @@ export default function SecurityDashboard() {
         />
       </div>
 
-      {/* Tabs */}
-      <Tabs defaultValue="encryption" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="encryption">Encryption</TabsTrigger>
-          <TabsTrigger value="access-control">Access Control</TabsTrigger>
-          <TabsTrigger value="audit-log">Audit Log</TabsTrigger>
-          <TabsTrigger value="compliance">Compliance</TabsTrigger>
-        </TabsList>
+      <SubNavTabs tabs={tabs} />
 
-        {/* Encryption Tab */}
-        <TabsContent value="encryption" className="space-y-4">
+      {/* Encryption Tab */}
+      {activeTab === "encryption" && (
+        <div className="space-y-4">
           {encryptionFeatures.map((feature) => {
             const Icon = feature.icon;
             return (
@@ -303,25 +299,25 @@ export default function SecurityDashboard() {
                 className="bg-white rounded-[7px] border border-gray-200 p-6 flex items-center justify-between gap-4"
               >
                 <div className="flex items-start gap-4 flex-1 min-w-0">
-                  <div className="w-10 h-10 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center shrink-0">
-                    <Icon className="h-5 w-5 text-swipes-blue-deep" />
+                  <div className="w-10 h-10 rounded-[7px] bg-[#1844A6]/10 flex items-center justify-center shrink-0">
+                    <Icon className="h-5 w-5 text-[#1844A6]" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3 mb-1">
-                      <h3 className="text-base font-semibold text-swipes-black">
+                      <h3 className="text-base font-semibold text-gray-900">
                         {feature.name}
                       </h3>
                       <Badge
-                        className={
+                        className={`rounded-full ${
                           feature.enabled
-                            ? "bg-swipes-trusted-green text-white"
+                            ? "bg-green-600 text-white"
                             : "bg-gray-400 text-white"
-                        }
+                        }`}
                       >
                         {feature.enabled ? "Enabled" : "Disabled"}
                       </Badge>
                     </div>
-                    <p className="text-sm text-swipes-pro-gray">{feature.description}</p>
+                    <p className="text-sm text-gray-500">{feature.description}</p>
                   </div>
                 </div>
                 <Switch
@@ -335,14 +331,14 @@ export default function SecurityDashboard() {
           {/* TLS Version Selector */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 flex items-center justify-between gap-4">
             <div className="flex items-start gap-4 flex-1 min-w-0">
-              <div className="w-10 h-10 rounded-[7px] bg-swipes-blue-deep/10 flex items-center justify-center shrink-0">
-                <Lock className="h-5 w-5 text-swipes-blue-deep" />
+              <div className="w-10 h-10 rounded-[7px] bg-[#1844A6]/10 flex items-center justify-center shrink-0">
+                <Lock className="h-5 w-5 text-[#1844A6]" />
               </div>
               <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold text-swipes-black mb-1">
+                <h3 className="text-base font-semibold text-gray-900 mb-1">
                   TLS Version
                 </h3>
-                <p className="text-sm text-swipes-pro-gray">
+                <p className="text-sm text-gray-500">
                   Select the minimum TLS version for all API and payment connections.
                 </p>
               </div>
@@ -357,75 +353,77 @@ export default function SecurityDashboard() {
               </SelectContent>
             </Select>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Access Control Tab */}
-        <TabsContent value="access-control" className="space-y-6">
+      {/* Access Control Tab */}
+      {activeTab === "access-control" && (
+        <div className="space-y-6">
           {/* User Table */}
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 flex items-center justify-between border-b border-gray-200">
-              <h3 className="text-lg font-semibold text-swipes-black">Users & Roles</h3>
-              <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+              <h3 className="text-lg font-semibold text-gray-900">Users & Roles</h3>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
                 <Plus className="h-4 w-4 mr-2" />
                 Invite User
               </Button>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Last Login</TableHead>
-                  <TableHead>2FA</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Email</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Role</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Last Login</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">2FA</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                  <th className="text-right px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
                 {accessUsers.map((user) => (
-                  <TableRow key={user.id}>
-                    <TableCell className="font-medium text-swipes-black">{user.name}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{user.email}</TableCell>
-                    <TableCell>
-                      <Badge className={getRoleClasses(user.role)}>{user.role}</Badge>
-                    </TableCell>
-                    <TableCell className="text-swipes-pro-gray">{user.lastLogin}</TableCell>
-                    <TableCell>
+                  <tr key={user.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{user.name}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{user.email}</td>
+                    <td className="px-4 py-3">
+                      <Badge className={`rounded-full ${getRoleClasses(user.role)}`}>{user.role}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{user.lastLogin}</td>
+                    <td className="px-4 py-3">
                       {user.twoFactor ? (
-                        <Badge className="bg-swipes-trusted-green text-white">Enabled</Badge>
+                        <Badge className="rounded-full bg-green-600 text-white">Enabled</Badge>
                       ) : (
-                        <Badge className="bg-gray-400 text-white">Disabled</Badge>
+                        <Badge className="rounded-full bg-gray-400 text-white">Disabled</Badge>
                       )}
-                    </TableCell>
-                    <TableCell>
-                      <Badge className={getStatusClasses(user.status)}>{user.status}</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
+                    </td>
+                    <td className="px-4 py-3">
+                      <Badge className={`rounded-full ${getStatusClasses(user.status)}`}>{user.status}</Badge>
+                    </td>
+                    <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button size="sm" variant="outline" className="rounded-[7px]">
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
-                          className="bg-swipes-muted-red hover:bg-swipes-muted-red/90 text-white rounded-[7px]"
+                          className="bg-red-600 hover:bg-red-600/90 text-white rounded-[7px]"
                         >
                           <XCircle className="h-4 w-4" />
                         </Button>
                       </div>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
 
           {/* IP Whitelist */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-swipes-black">IP Whitelist</h3>
-                <p className="text-sm text-swipes-pro-gray mt-1">
+                <h3 className="text-lg font-semibold text-gray-900">IP Whitelist</h3>
+                <p className="text-sm text-gray-500 mt-1">
                   Only allow access from these IP addresses.
                 </p>
               </div>
@@ -440,22 +438,24 @@ export default function SecurityDashboard() {
                   key={ip}
                   className="flex items-center justify-between py-2 px-3 bg-gray-50 rounded-[7px]"
                 >
-                  <code className="text-sm text-swipes-black font-mono">{ip}</code>
-                  <Button size="sm" variant="ghost" className="text-swipes-muted-red h-8 w-8 p-0">
+                  <code className="text-sm text-gray-900 font-mono">{ip}</code>
+                  <Button size="sm" variant="ghost" className="text-red-600 h-8 w-8 p-0">
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               ))}
             </div>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Audit Log Tab */}
-        <TabsContent value="audit-log" className="space-y-4">
+      {/* Audit Log Tab */}
+      {activeTab === "audit-log" && (
+        <div className="space-y-4">
           <div className="bg-white rounded-[7px] border border-gray-200">
             <div className="p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3 border-b border-gray-200">
               <div className="relative flex-1 w-full sm:max-w-xs">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-swipes-pro-gray" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <Input
                   placeholder="Search logs..."
                   value={auditSearch}
@@ -474,61 +474,63 @@ export default function SecurityDashboard() {
                 </SelectContent>
               </Select>
             </div>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Timestamp</TableHead>
-                  <TableHead>User</TableHead>
-                  <TableHead>Action</TableHead>
-                  <TableHead>Resource</TableHead>
-                  <TableHead>IP Address</TableHead>
-                  <TableHead>Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
+            <table className="w-full">
+              <thead>
+                <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Timestamp</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">User</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Action</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Resource</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">IP Address</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                </tr>
+              </thead>
+              <tbody>
                 {filteredAudit.map((entry) => (
-                  <TableRow key={entry.id}>
-                    <TableCell className="text-swipes-pro-gray text-sm font-mono">
+                  <tr key={entry.id} className="border-b border-gray-100 hover:bg-gray-50">
+                    <td className="px-4 py-3 text-sm text-gray-500 font-mono">
                       {entry.timestamp}
-                    </TableCell>
-                    <TableCell className="font-medium text-swipes-black">{entry.user}</TableCell>
-                    <TableCell className="text-swipes-black">{entry.action}</TableCell>
-                    <TableCell className="text-swipes-pro-gray">{entry.resource}</TableCell>
-                    <TableCell className="text-swipes-pro-gray font-mono text-sm">
+                    </td>
+                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{entry.user}</td>
+                    <td className="px-4 py-3 text-sm text-gray-900">{entry.action}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500">{entry.resource}</td>
+                    <td className="px-4 py-3 text-sm text-gray-500 font-mono">
                       {entry.ipAddress}
-                    </TableCell>
-                    <TableCell>
+                    </td>
+                    <td className="px-4 py-3">
                       <Badge
-                        className={
+                        className={`rounded-full ${
                           entry.status === "Success"
-                            ? "bg-swipes-trusted-green text-white"
-                            : "bg-swipes-muted-red text-white"
-                        }
+                            ? "bg-green-600 text-white"
+                            : "bg-red-600 text-white"
+                        }`}
                       >
                         {entry.status}
                       </Badge>
-                    </TableCell>
-                  </TableRow>
+                    </td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+            </table>
           </div>
-        </TabsContent>
+        </div>
+      )}
 
-        {/* Compliance Tab */}
-        <TabsContent value="compliance" className="space-y-6">
+      {/* Compliance Tab */}
+      {activeTab === "compliance" && (
+        <div className="space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6 space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-swipes-black">
+                <h3 className="text-lg font-semibold text-gray-900">
                   PCI DSS Compliance Checklist
                 </h3>
-                <p className="text-sm text-swipes-pro-gray mt-1">
+                <p className="text-sm text-gray-500 mt-1">
                   {passedCount} of {complianceItems.length} requirements met — {compliancePercent}%
                   compliant
                 </p>
               </div>
-              <Button className="bg-swipes-blue-deep hover:bg-swipes-blue-deep/90 text-white rounded-[7px]">
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
                 <Download className="h-4 w-4 mr-2" />
                 Download Report
               </Button>
@@ -544,20 +546,20 @@ export default function SecurityDashboard() {
                 >
                   <div className="mt-0.5">
                     {item.status === "passed" ? (
-                      <CheckCircle className="h-5 w-5 text-swipes-trusted-green" />
+                      <CheckCircle className="h-5 w-5 text-green-600" />
                     ) : (
-                      <AlertTriangle className="h-5 w-5 text-swipes-gold" />
+                      <AlertTriangle className="h-5 w-5 text-yellow-500" />
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-swipes-black">{item.requirement}</p>
+                    <p className="text-sm font-medium text-gray-900">{item.requirement}</p>
                   </div>
                   <Badge
-                    className={
+                    className={`rounded-full ${
                       item.status === "passed"
-                        ? "bg-swipes-trusted-green text-white"
-                        : "bg-swipes-gold text-white"
-                    }
+                        ? "bg-green-600 text-white"
+                        : "bg-yellow-500 text-white"
+                    }`}
                   >
                     {item.status === "passed" ? "Passed" : "Action Required"}
                   </Badge>
@@ -565,8 +567,8 @@ export default function SecurityDashboard() {
               ))}
             </div>
           </div>
-        </TabsContent>
-      </Tabs>
+        </div>
+      )}
     </div>
   );
 }

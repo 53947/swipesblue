@@ -150,13 +150,13 @@ export default function Home() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left */}
             <div>
-              <h1 className="text-5xl font-bold text-swipes-black leading-tight">
+              <h1 className="text-5xl font-bold text-gray-900 leading-tight">
                 Built for businesses<br />to grow
               </h1>
-              <p className="text-xl font-semibold text-swipes-blue-deep mt-2">
+              <p className="text-xl font-semibold text-[#1844A6] mt-2">
                 Less fees. More revenue.
               </p>
-              <p className="text-lg text-swipes-pro-gray mt-4 max-w-lg">
+              <p className="text-lg text-gray-500 mt-4 max-w-lg">
                 Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
               </p>
 
@@ -164,7 +164,7 @@ export default function Home() {
                 <Link href="/register" data-testid="link-hero-get-started">
                   <Button
                     size="lg"
-                    className="bg-swipes-blue-deep text-white rounded-[7px] px-6 py-3"
+                    className="bg-[#1844A6] text-white rounded-[7px] px-6 py-3"
                     data-testid="button-hero-get-started"
                   >
                     Start Accepting Payments
@@ -174,7 +174,7 @@ export default function Home() {
                   <Button
                     size="lg"
                     variant="outline"
-                    className="border-2 border-swipes-teal text-swipes-teal rounded-[7px] px-6 py-3"
+                    className="border-2 border-teal-600 text-teal-600 rounded-[7px] px-6 py-3"
                     data-testid="button-hero-contact-sales"
                   >
                     View API Docs
@@ -182,7 +182,7 @@ export default function Home() {
                 </Link>
               </div>
 
-              <p className="text-sm text-swipes-pro-gray mt-4">
+              <p className="text-sm text-gray-500 mt-4">
                 2.70% + $0.30 per transaction · No hidden fees
               </p>
             </div>
@@ -203,19 +203,19 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-gray-500">
               <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-swipes-trusted-green" />
+                <Shield className="h-5 w-5 text-green-600" />
                 <span className="text-sm font-medium">PCI DSS Level 1</span>
               </div>
               <div className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-swipes-blue-deep" />
+                <Lock className="h-5 w-5 text-[#1844A6]" />
                 <span className="text-sm font-medium">256-bit Encryption</span>
               </div>
               <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-swipes-gold" />
+                <Zap className="h-5 w-5 text-yellow-500" />
                 <span className="text-sm font-medium">99.99% Uptime</span>
               </div>
               <div className="flex items-center gap-2">
-                <Server className="h-5 w-5 text-swipes-teal" />
+                <Server className="h-5 w-5 text-teal-600" />
                 <span className="text-sm font-medium">Built on NMI Platform</span>
               </div>
             </div>
@@ -229,10 +229,10 @@ export default function Home() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {stats.map((stat, index) => (
               <div key={index} className="text-center" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                <div className="text-3xl md:text-4xl font-bold text-swipes-black">
+                <div className="text-3xl md:text-4xl font-bold text-gray-900">
                   {stat.value}
                 </div>
-                <div className="text-sm text-swipes-pro-gray mt-1 font-medium">
+                <div className="text-sm text-gray-500 mt-1 font-medium">
                   {stat.label}
                 </div>
               </div>
@@ -264,7 +264,7 @@ export default function Home() {
                   data-testid={`feature-card-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}
                 >
                   <div className="w-12 h-12 bg-blue-50 rounded-[7px] flex items-center justify-center mb-6">
-                    <Icon className="h-6 w-6 text-swipes-blue-deep" />
+                    <Icon className="h-6 w-6 text-[#1844A6]" />
                   </div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">
                     {feature.title}
@@ -273,7 +273,7 @@ export default function Home() {
                     {feature.description}
                   </p>
                   <Link href={feature.link} data-testid={`link-feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
-                    <span className="text-swipes-blue-deep font-medium text-sm mt-6 inline-flex items-center">
+                    <span className="text-[#1844A6] font-medium text-sm mt-6 inline-flex items-center">
                       {feature.linkText} <ArrowRight className="ml-1 h-4 w-4" />
                     </span>
                   </Link>
@@ -310,30 +310,30 @@ export default function Home() {
                 {competitors.map((competitor) => (
                   <tr
                     key={competitor.name}
-                    className={`border-b border-gray-100 ${competitor.isBest ? "bg-swipes-blue-deep/5" : ""}`}
+                    className={`border-b border-gray-100 ${competitor.isBest ? "bg-[#1844A6]/5" : ""}`}
                     data-testid={`row-${competitor.name.toLowerCase()}`}
                   >
                     <td className="py-4 px-6">
-                      <span className={competitor.isBest ? "font-bold text-swipes-blue-deep" : "text-gray-600"}>
+                      <span className={competitor.isBest ? "font-bold text-[#1844A6]" : "text-gray-600"}>
                         {competitor.name}
                       </span>
                     </td>
                     <td className="py-4 px-6">
-                      <span className={competitor.isBest ? "font-semibold text-swipes-blue-deep" : "text-gray-600"}>
+                      <span className={competitor.isBest ? "font-semibold text-[#1844A6]" : "text-gray-600"}>
                         {competitor.rate}
                       </span>
                     </td>
                     <td className="text-right py-4 px-6">
-                      <span className={competitor.isBest ? "font-bold text-swipes-blue-deep" : "text-gray-600"}>
+                      <span className={competitor.isBest ? "font-bold text-[#1844A6]" : "text-gray-600"}>
                         {competitor.fee}
                       </span>
                     </td>
                     <td className="text-right py-4 px-6">
-                      <span className={competitor.isBest ? "font-bold text-swipes-trusted-green" : "text-gray-600"}>
+                      <span className={competitor.isBest ? "font-bold text-green-600" : "text-gray-600"}>
                         {competitor.keep}
                       </span>
                       {competitor.savings && (
-                        <span className="ml-2 text-xs text-swipes-trusted-green">
+                        <span className="ml-2 text-xs text-green-600">
                           (Save {competitor.savings})
                         </span>
                       )}
@@ -346,7 +346,7 @@ export default function Home() {
 
           <div className="text-center mt-8">
             <Link href="/pricing" data-testid="link-see-full-pricing">
-              <Button className="bg-swipes-blue-deep text-white rounded-[7px]" data-testid="button-see-full-pricing">
+              <Button className="bg-[#1844A6] text-white rounded-[7px]" data-testid="button-see-full-pricing">
                 See Full Pricing
               </Button>
             </Link>
@@ -362,7 +362,7 @@ export default function Home() {
               Simple, transparent pricing
             </h2>
             <p className="text-lg text-gray-600">
-              Start free, scale as you grow. Plus <span className="font-semibold text-swipes-blue-deep">2.70% + $0.30</span> per transaction on all tiers.
+              Start free, scale as you grow. Plus <span className="font-semibold text-[#1844A6]">2.70% + $0.30</span> per transaction on all tiers.
             </p>
           </div>
 
@@ -372,14 +372,14 @@ export default function Home() {
                 key={tier.name}
                 className={`rounded-[7px] relative ${
                   tier.highlight
-                    ? "border-2 border-swipes-blue-deep shadow-card-hover"
+                    ? "border-2 border-[#1844A6] shadow-card-hover"
                     : "border border-gray-200"
                 }`}
                 data-testid={`pricing-tier-${tier.name.toLowerCase()}`}
               >
                 {tier.badge && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-swipes-gold text-black font-semibold px-3">
+                    <Badge className="bg-yellow-500 text-black font-semibold px-3">
                       {tier.badge}
                     </Badge>
                   </div>
@@ -397,7 +397,7 @@ export default function Home() {
                   <ul className="space-y-3 mb-6">
                     {tier.features.map((feature) => (
                       <li key={feature} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-swipes-trusted-green flex-shrink-0 mt-0.5" />
+                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
                         <span className="text-sm text-gray-600">{feature}</span>
                       </li>
                     ))}
@@ -407,8 +407,8 @@ export default function Home() {
                     <Button
                       className={`w-full rounded-[7px] ${
                         tier.highlight
-                          ? "bg-swipes-blue-deep text-white"
-                          : "bg-white border-2 border-swipes-teal text-swipes-teal"
+                          ? "bg-[#1844A6] text-white"
+                          : "bg-white border-2 border-teal-600 text-teal-600"
                       }`}
                       data-testid={`button-pricing-${tier.name.toLowerCase()}`}
                     >
@@ -427,9 +427,9 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-swipes-blue-deep/10 rounded-[7px] mb-6">
-                <Code className="h-4 w-4 text-swipes-blue-deep" />
-                <span className="text-sm font-medium text-swipes-blue-deep">Developer API</span>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1844A6]/10 rounded-[7px] mb-6">
+                <Code className="h-4 w-4 text-[#1844A6]" />
+                <span className="text-sm font-medium text-[#1844A6]">Developer API</span>
               </div>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
                 Built for developers
@@ -440,12 +440,12 @@ export default function Home() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/developers" data-testid="link-developer-read-docs">
-                  <Button className="bg-swipes-blue-deep text-white rounded-[7px]" data-testid="button-developer-read-docs">
+                  <Button className="bg-[#1844A6] text-white rounded-[7px]" data-testid="button-developer-read-docs">
                     Read the docs
                   </Button>
                 </Link>
                 <Link href="/dashboard/api-keys" data-testid="link-developer-api-keys">
-                  <Button variant="outline" className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]" data-testid="button-developer-api-keys">
+                  <Button variant="outline" className="border-2 border-teal-600 text-teal-600 rounded-[7px]" data-testid="button-developer-api-keys">
                     Get API keys
                   </Button>
                 </Link>
@@ -499,20 +499,20 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
             <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-swipes-blue-deep" />
-              <span className="text-sm text-swipes-pro-gray font-medium">PCI DSS Level 1 Compliant</span>
+              <Shield className="h-6 w-6 text-[#1844A6]" />
+              <span className="text-sm text-gray-500 font-medium">PCI DSS Level 1 Compliant</span>
             </div>
             <div className="flex items-center gap-3">
-              <Lock className="h-6 w-6 text-swipes-blue-deep" />
-              <span className="text-sm text-swipes-pro-gray font-medium">256-bit TLS Encryption</span>
+              <Lock className="h-6 w-6 text-[#1844A6]" />
+              <span className="text-sm text-gray-500 font-medium">256-bit TLS Encryption</span>
             </div>
             <div className="flex items-center gap-3">
-              <Activity className="h-6 w-6 text-swipes-blue-deep" />
-              <span className="text-sm text-swipes-pro-gray font-medium">99.99% Uptime SLA</span>
+              <Activity className="h-6 w-6 text-[#1844A6]" />
+              <span className="text-sm text-gray-500 font-medium">99.99% Uptime SLA</span>
             </div>
             <div className="flex items-center gap-3">
-              <Server className="h-6 w-6 text-swipes-blue-deep" />
-              <span className="text-sm text-swipes-pro-gray font-medium">Built on NMI's Platform</span>
+              <Server className="h-6 w-6 text-[#1844A6]" />
+              <span className="text-sm text-gray-500 font-medium">Built on NMI's Platform</span>
             </div>
           </div>
         </div>
@@ -531,7 +531,7 @@ export default function Home() {
             <Link href="/register" data-testid="link-cta-get-started">
               <Button
                 size="lg"
-                className="bg-swipes-blue-deep text-white rounded-[7px]"
+                className="bg-[#1844A6] text-white rounded-[7px]"
                 data-testid="button-cta-get-started"
               >
                 Get Started Free
@@ -541,7 +541,7 @@ export default function Home() {
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-swipes-teal text-swipes-teal rounded-[7px]"
+                className="border-2 border-teal-600 text-teal-600 rounded-[7px]"
                 data-testid="button-cta-view-pricing"
               >
                 View Pricing
