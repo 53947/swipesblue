@@ -94,7 +94,7 @@ export default function ShoppingCartProduct() {
           {
             icon: Mail,
             name: "Abandoned Cart Recovery",
-            description: "When a customer leaves items behind, swipesblue can automatically email them a reminder. (Starter plan+)",
+            description: "When a customer leaves items behind, swipesblue can automatically email them a reminder. (Growth plan+)",
             href: "/products/ecommerce",
           },
         ]}

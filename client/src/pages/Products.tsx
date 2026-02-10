@@ -57,7 +57,7 @@ const coreProducts = [
     description: "Professional invoices with automated reminders, partial payments, and real-time tracking.",
   },
   {
-    name: "Recurring Billing",
+    name: "Subscriptions",
     href: "/products/billing",
     icon: RefreshCw,
     description: "Subscription management with flexible billing cycles, dunning, and revenue analytics.",

@@ -21,6 +21,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import FeatureMarketingPage from "@/components/dashboard/FeatureMarketingPage";
 
 const tabs = [
   { label: "Terminal", href: "/dashboard/terminal" },
@@ -96,6 +98,7 @@ function generateAuthCode(): string {
 }
 
 export default function VirtualTerminal() {
+  const { tier, canAccess } = useMerchantAuth();
   const [location] = useLocation();
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "terminal";
@@ -128,6 +131,31 @@ export default function VirtualTerminal() {
   // Validation
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isProcessing, setIsProcessing] = useState(false);
+
+  // Tier gate: requires Scale
+  if (!canAccess("Scale")) {
+    return (
+      <FeatureMarketingPage
+        featureName="Virtual Terminal"
+        headline="Your customer is on the phone. They want to pay. Let them."
+        description="Process card-not-present transactions from any browser. No hardware, no app, no friction — just pull up the terminal and run the charge. Phone orders, mail orders, repeat charges — handled in seconds."
+        benefits={[
+          "Process payments from any browser — no hardware required",
+          "Accept phone, mail, and fax orders instantly",
+          "Real-time authorization with instant approval or decline",
+          "Auto-detect card brand from number entry",
+          "Save cards to Customer Vault for repeat charges",
+          "Full billing address verification (AVS)",
+          "Optional fields for PO numbers, order IDs, and descriptions",
+        ]}
+        requiredTier="Scale"
+        currentTier={tier}
+        price="$79/month"
+        ctaText="Upgrade to Scale — $79/month"
+        ctaLink="/dashboard/settings?tab=billing"
+      />
+    );
+  }
 
   const cardBrand = detectCardBrand(cardNumber);
 

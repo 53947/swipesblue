@@ -231,11 +231,11 @@ export default function CheckoutDashboard() {
                 </div>
                 <div className="flex justify-between">
                   <span>Apple Pay</span>
-                  <Badge className="text-xs bg-gray-100 text-gray-500 rounded-full">Coming soon</Badge>
+                  <Badge className="text-xs bg-gray-100 text-gray-500 rounded-full">Planned</Badge>
                 </div>
                 <div className="flex justify-between">
                   <span>Google Pay</span>
-                  <Badge className="text-xs bg-gray-100 text-gray-500 rounded-full">Coming soon</Badge>
+                  <Badge className="text-xs bg-gray-100 text-gray-500 rounded-full">Planned</Badge>
                 </div>
               </div>
             </CardContent>

@@ -75,7 +75,7 @@ const availableReports = [
     formats: ["CSV", "PDF"],
   },
   {
-    name: "Recurring Billing Report",
+    name: "Subscriptions Report",
     icon: RefreshCw,
     description: "Subscription status, upcoming renewals, failed rebills, and churn metrics",
     formats: ["CSV", "PDF"],
@@ -133,7 +133,7 @@ const mockHistoryReports = [
   { id: "RPT-008", name: "Gateway Performance Report", generatedDate: "2025-11-13 02:30 PM", dateRange: "Nov 6–12, 2025", format: "PDF", size: "—", status: "Failed" as const },
   { id: "RPT-009", name: "Daily Settlement Report", generatedDate: "2025-11-13 06:00 AM", dateRange: "Nov 12, 2025", format: "CSV", size: "251 KB", status: "Ready" as const },
   { id: "RPT-010", name: "Tax Summary Report", generatedDate: "2025-11-12 08:00 AM", dateRange: "Q3 2025", format: "PDF", size: "1.8 MB", status: "Ready" as const },
-  { id: "RPT-011", name: "Recurring Billing Report", generatedDate: "2025-11-12 09:30 AM", dateRange: "Oct 1–31, 2025", format: "CSV", size: "420 KB", status: "Ready" as const },
+  { id: "RPT-011", name: "Subscriptions Report", generatedDate: "2025-11-12 09:30 AM", dateRange: "Oct 1–31, 2025", format: "CSV", size: "420 KB", status: "Ready" as const },
   { id: "RPT-012", name: "Fee & Rate Analysis", generatedDate: "2025-11-11 10:00 AM", dateRange: "Oct 1–31, 2025", format: "PDF", size: "675 KB", status: "Ready" as const },
   { id: "RPT-013", name: "Daily Settlement Report", generatedDate: "2025-11-11 06:00 AM", dateRange: "Nov 10, 2025", format: "CSV", size: "229 KB", status: "Ready" as const },
   { id: "RPT-014", name: "Transaction Detail Export", generatedDate: "2025-11-10 06:30 AM", dateRange: "Nov 9, 2025", format: "XLSX", size: "1.1 MB", status: "Ready" as const },

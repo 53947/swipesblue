@@ -13,8 +13,17 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import MetricCard from "@/components/MetricCard";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useToast } from "@/hooks/use-toast";
 
 const tabs = [
   { label: "All Links", href: "/dashboard/payment-links" },
@@ -140,6 +149,11 @@ const typeColors: Record<string, string> = {
 export default function PaymentLinks() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [location] = useLocation();
+  const { toast } = useToast();
+  const [showCreate, setShowCreate] = useState(false);
+  const [editLink, setEditLink] = useState<PaymentLink | null>(null);
+  const [formName, setFormName] = useState("");
+  const [formAmount, setFormAmount] = useState("");
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "all";
 
@@ -162,7 +176,7 @@ export default function PaymentLinks() {
           <h1 className="text-2xl font-bold text-gray-900">Payment Links</h1>
           <p className="text-gray-500 mt-1">Create and manage shareable payment URLs</p>
         </div>
-        <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+        <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={() => { setFormName(""); setFormAmount(""); setShowCreate(true); }}>
           <Plus className="h-4 w-4 mr-2" />
           Create Payment Link
         </Button>
@@ -267,7 +281,7 @@ export default function PaymentLinks() {
                           </>
                         )}
                       </Button>
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Edit" onClick={() => { setFormName(link.name); setFormAmount(link.amount); setEditLink(link); }}>
                         <Edit className="h-4 w-4 text-gray-500" />
                       </Button>
                     </div>
@@ -282,6 +296,52 @@ export default function PaymentLinks() {
       <div className="mt-4 text-center">
         <span className="text-xs text-gray-400">{filteredLinks.length} payment links</span>
       </div>
+
+      {/* Create Payment Link Modal */}
+      <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Create Payment Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Link Name</Label>
+              <Input value={formName} onChange={(e) => setFormName(e.target.value)} placeholder="e.g. Premium Subscription" className="rounded-[7px]" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Amount</Label>
+              <Input value={formAmount} onChange={(e) => setFormAmount(e.target.value)} placeholder="$0.00" className="rounded-[7px]" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" className="rounded-[7px]" onClick={() => setShowCreate(false)}>Cancel</Button>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={() => { toast({ title: "Payment link created", description: `"${formName}" has been created.` }); setShowCreate(false); }}>Create Link</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Payment Link Modal */}
+      <Dialog open={!!editLink} onOpenChange={(open) => !open && setEditLink(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Payment Link</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Link Name</Label>
+              <Input value={formName} onChange={(e) => setFormName(e.target.value)} className="rounded-[7px]" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Amount</Label>
+              <Input value={formAmount} onChange={(e) => setFormAmount(e.target.value)} className="rounded-[7px]" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" className="rounded-[7px]" onClick={() => setEditLink(null)}>Cancel</Button>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={() => { toast({ title: "Payment link updated", description: `"${formName}" has been updated.` }); setEditLink(null); }}>Save Changes</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

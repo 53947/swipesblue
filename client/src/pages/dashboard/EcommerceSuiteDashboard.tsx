@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Link } from "wouter";
 import {
   Check,
@@ -10,6 +11,7 @@ import {
   RefreshCw,
   UserCheck,
   Lock,
+  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +25,11 @@ const tabs = [
   { label: "Overview", href: "/dashboard/ecommerce" },
   { label: "Shopping Cart", href: "/dashboard/ecommerce/cart" },
   { label: "One-Page Checkout", href: "/dashboard/ecommerce/checkout" },
+  { label: "Virtual Terminal", href: "/dashboard/terminal" },
+  { label: "Payment Links", href: "/dashboard/payment-links" },
+  { label: "Invoicing", href: "/dashboard/invoices" },
+  { label: "Subscriptions", href: "/dashboard/subscriptions" },
+  { label: "Customer Vault", href: "/dashboard/vault" },
 ];
 
 interface SuiteProduct {
@@ -72,8 +79,8 @@ const suiteProducts: SuiteProduct[] = [
     freeLabel: "Basic",
   },
   {
-    name: "Recurring Billing",
-    description: "Subscription plans with automated billing cycles",
+    name: "Subscriptions",
+    description: "Subscription management with automated billing cycles",
     icon: RefreshCw,
     href: "/dashboard/subscriptions",
     requiredTier: "Growth",
@@ -104,7 +111,7 @@ const tierFeatures: Record<string, string[]> = {
     "One-Page Checkout",
     "Payment Links",
     "Invoicing (full — templates, auto-reminders)",
-    "Recurring Billing",
+    "Subscriptions",
     "Customer Vault",
     "Virtual Terminal",
     "Discount Codes",
@@ -143,18 +150,42 @@ const tierPricing: Record<string, string> = {
   Enterprise: "Custom pricing",
 };
 
-const nextTier: Record<string, { name: string; price: string } | null> = {
-  Free: { name: "Growth", price: "$29/month" },
-  Growth: { name: "Scale", price: "$79/month" },
-  Scale: { name: "Enterprise", price: "Custom" },
+const nextTier: Record<string, { name: string; price: string; message: string } | null> = {
+  Free: {
+    name: "Growth",
+    price: "$29/month",
+    message: "You're leaving money on the table. Subscriptions, full invoicing, and a customer vault are one upgrade away. Merchants who switch to Growth see an average 23% increase in repeat purchases within 90 days.",
+  },
+  Growth: {
+    name: "Scale",
+    price: "$79/month",
+    message: "Your business outgrew its plan. Unlimited products, advanced analytics, and priority support are waiting. Scale merchants process 3x more volume with lower per-transaction costs.",
+  },
+  Scale: {
+    name: "Enterprise",
+    price: "Custom",
+    message: "You need a partner, not just a platform. Dedicated account management, custom integrations, and SLA guarantees for businesses that can't afford downtime.",
+  },
   Enterprise: null,
 };
 
+const setupMenuItems = [
+  { label: "Shopping Cart Settings", href: "/dashboard/ecommerce/cart", minTier: "Free" },
+  { label: "Checkout Settings", href: "/dashboard/ecommerce/checkout", minTier: "Free" },
+  { label: "Payment Links", href: "/dashboard/payment-links", minTier: "Free" },
+  { label: "Invoicing Settings", href: "/dashboard/invoices", minTier: "Free" },
+  { label: "Subscription Setup", href: "/dashboard/subscriptions", minTier: "Growth" },
+  { label: "Virtual Terminal", href: "/dashboard/terminal", minTier: "Scale" },
+  { label: "Customer Vault", href: "/dashboard/vault", minTier: "Scale" },
+];
+
 export default function EcommerceSuiteDashboard() {
   const { tier } = useMerchantAuth();
+  const [showSetupMenu, setShowSetupMenu] = useState(false);
   const features = tierFeatures[tier] || tierFeatures["Free"];
   const pricing = tierPricing[tier] || tierPricing["Free"];
   const upgrade = nextTier[tier];
+  const visibleSetupItems = setupMenuItems.filter((item) => meetsMinTier(tier, item.minTier));
 
   return (
     <div className="p-8">
@@ -164,11 +195,41 @@ export default function EcommerceSuiteDashboard() {
           <h1 className="text-2xl font-bold text-gray-900">E-Commerce Suite</h1>
           <TierBadge tier={tier} size="sm" />
         </div>
-        <Link href="/dashboard/settings/billing">
-          <Button variant="outline" className="rounded-[7px] border-gray-300 text-sm">
-            Manage Plan
-          </Button>
-        </Link>
+        {meetsMinTier(tier, "Growth") ? (
+          <div className="relative">
+            <Button
+              variant="outline"
+              className="rounded-[7px] border-gray-300 text-sm"
+              onClick={() => setShowSetupMenu(!showSetupMenu)}
+            >
+              Setup
+              <ChevronDown className="h-4 w-4 ml-2" />
+            </Button>
+            {showSetupMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowSetupMenu(false)} />
+                <div className="absolute right-0 mt-2 w-56 bg-white rounded-[7px] border border-gray-200 shadow-lg z-50 py-1">
+                  {visibleSetupItems.map((item) => (
+                    <Link key={item.href} href={item.href}>
+                      <div
+                        className="px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+                        onClick={() => setShowSetupMenu(false)}
+                      >
+                        {item.label}
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <Link href="/dashboard/ecommerce/checkout">
+            <Button variant="outline" className="rounded-[7px] border-gray-300 text-sm">
+              Setup
+            </Button>
+          </Link>
+        )}
       </div>
       <p className="text-gray-500 mb-6">Your complete payment processing platform</p>
 
@@ -250,9 +311,9 @@ export default function EcommerceSuiteDashboard() {
               Upgrade to {upgrade.name}
             </h3>
             <p className="text-sm text-gray-600 mb-4">
-              Unlock more features, higher limits, and priority support.
+              {upgrade.message}
             </p>
-            <Link href="/pricing">
+            <Link href="/dashboard/settings?tab=billing">
               <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px] group">
                 Upgrade to {upgrade.name} — {upgrade.price}
                 <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />

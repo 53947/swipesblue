@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useLocation } from "wouter";
+import { useState, useRef } from "react";
+import { Link, useLocation } from "wouter";
 import {
   Settings,
   Building2,
@@ -11,8 +11,12 @@ import {
   ExternalLink,
   Copy,
   Palette,
+  Check,
+  ArrowRight,
+  Layers,
 } from "lucide-react";
 import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import { TIER_HIERARCHY } from "@shared/tier-constants";
 import TierBadge from "@/components/TierBadge";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -28,12 +32,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useToast } from "@/hooks/use-toast";
 
 const basePath = "/dashboard/settings";
 
 const tabs = [
-  { label: "General", href: basePath },
+  { label: "Account", href: basePath },
   { label: "Business Profile", href: `${basePath}?tab=business` },
   { label: "Notifications", href: `${basePath}?tab=notifications` },
   { label: "Payment Settings", href: `${basePath}?tab=payment` },
@@ -41,21 +52,186 @@ const tabs = [
   { label: "API", href: `${basePath}?tab=api` },
 ];
 
-const billingHistory = [
-  { date: "Oct 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0010" },
-  { date: "Sep 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0009" },
-  { date: "Aug 1, 2025", description: "Scale Plan — Monthly", amount: "$49.00", status: "Paid", invoice: "INV-2025-0008" },
-  { date: "Jul 1, 2025", description: "Growth Plan — Monthly", amount: "$19.00", status: "Paid", invoice: "INV-2025-0007" },
-  { date: "Jun 1, 2025", description: "Growth Plan — Monthly", amount: "$19.00", status: "Paid", invoice: "INV-2025-0006" },
-  { date: "May 15, 2025", description: "Plan upgrade: Growth → Scale", amount: "$30.00", status: "Paid", invoice: "INV-2025-0005" },
+const planPricing: Record<string, string> = {
+  Free: "Free forever",
+  Growth: "$29.00/month",
+  Scale: "$79.00/month",
+  Enterprise: "Custom pricing",
+};
+
+const transactionRates: Record<string, string> = {
+  Free: "2.70% + $0.30 per transaction",
+  Growth: "2.70% + $0.30 per transaction",
+  Scale: "2.50% + $0.25 per transaction",
+  Enterprise: "Custom rates",
+};
+
+const planComparisonData = [
+  {
+    name: "Free",
+    price: "$0",
+    period: "forever",
+    rate: "2.70% + $0.30",
+    features: [
+      "Shopping Cart",
+      "One-Page Checkout",
+      "Payment Links",
+      "Basic Invoicing",
+      "Up to 25 Products",
+      "Fraud Prevention (basic)",
+      "Email Receipts",
+    ],
+  },
+  {
+    name: "Growth",
+    price: "$29",
+    period: "/month",
+    rate: "2.70% + $0.30",
+    features: [
+      "Everything in Free",
+      "Subscriptions",
+      "Full Invoicing",
+      "Discount Codes",
+      "Up to 500 Products",
+      "Basic Analytics",
+      "3 Team Members",
+      "Email Support",
+    ],
+  },
+  {
+    name: "Scale",
+    price: "$79",
+    period: "/month",
+    rate: "2.50% + $0.25",
+    features: [
+      "Everything in Growth",
+      "Virtual Terminal",
+      "Customer Vault",
+      "Unlimited Products",
+      "Advanced Analytics",
+      "Advanced Fraud Rules",
+      "Priority Support",
+      "10 Team Members",
+    ],
+  },
+  {
+    name: "Enterprise",
+    price: "Custom",
+    period: "",
+    rate: "Custom rates",
+    features: [
+      "Everything in Scale",
+      "All Enhancements",
+      "Unlimited Team Members",
+      "Custom Reporting",
+      "Dedicated Account Manager",
+      "Custom Integrations",
+      "SLA Guarantee",
+    ],
+  },
 ];
 
+function getTierBillingHistory(tier: string) {
+  if (tier === "Free") return [];
+  const tierPrices: Record<string, string> = { Growth: "$29.00", Scale: "$79.00", Enterprise: "$499.00" };
+  const price = tierPrices[tier] || "$29.00";
+  return [
+    { date: "Feb 1, 2026", description: `${tier} Plan — Monthly`, amount: price, status: "Paid", invoice: "INV-2026-0002" },
+    { date: "Jan 1, 2026", description: `${tier} Plan — Monthly`, amount: price, status: "Paid", invoice: "INV-2026-0001" },
+    { date: "Dec 1, 2025", description: `${tier} Plan — Monthly`, amount: price, status: "Paid", invoice: "INV-2025-0012" },
+    { date: "Nov 1, 2025", description: `${tier} Plan — Monthly`, amount: price, status: "Paid", invoice: "INV-2025-0011" },
+    { date: "Oct 1, 2025", description: `${tier} Plan — Monthly`, amount: price, status: "Paid", invoice: "INV-2025-0010" },
+    { date: "Sep 1, 2025", description: `${tier} Plan — Monthly`, amount: price, status: "Paid", invoice: "INV-2025-0009" },
+  ];
+}
+
+const enhancementInfo: Record<string, { name: string; price: string; renewalDate: string }> = {
+  "customer-portal": { name: "Customer Portal", price: "$149.99/year", renewalDate: "Jan 15, 2027" },
+  "security-suite": { name: "Security Suite", price: "$199.99/year", renewalDate: "Feb 1, 2027" },
+  "advanced-analytics": { name: "Advanced Analytics", price: "$99.99/year", renewalDate: "Mar 10, 2027" },
+  "checkout-optimizer": { name: "Checkout Optimizer", price: "$249.99/year", renewalDate: "Dec 20, 2026" },
+  "shopping-cart-pro": { name: "Cart Pro", price: "$149.99/year", renewalDate: "Nov 5, 2026" },
+  "multi-gateway": { name: "Multi-Gateway", price: "$299.99/year", renewalDate: "Apr 1, 2027" },
+  "premium-api": { name: "API Access", price: "$199.99/year", renewalDate: "May 15, 2027" },
+};
+
+const tierIncludedEnhancements: Record<string, string[]> = {
+  Free: [],
+  Growth: [],
+  Scale: ["advanced-analytics", "multi-gateway", "premium-api"],
+  Enterprise: ["customer-portal", "security-suite", "advanced-analytics", "checkout-optimizer", "shopping-cart-pro", "multi-gateway", "premium-api"],
+};
+
 export default function SettingsPage() {
-  const { tier } = useMerchantAuth();
+  const { tier, addons } = useMerchantAuth();
   const [location] = useLocation();
+  const { toast } = useToast();
 
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "general";
+
+  // File input refs
+  const logoInputRef = useRef<HTMLInputElement>(null);
+  const checkoutLogoInputRef = useRef<HTMLInputElement>(null);
+
+  // Payment method modal
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [cardNumber, setCardNumber] = useState("");
+  const [cardExpiry, setCardExpiry] = useState("");
+  const [cardCvc, setCardCvc] = useState("");
+
+  // Plan comparison
+  const [showPlanComparison, setShowPlanComparison] = useState(false);
+
+  // Billing tab computed values
+  const tierBillingHistory = getTierBillingHistory(tier);
+  const included = tierIncludedEnhancements[tier] || [];
+  const allEnhancementRows = [
+    ...addons
+      .filter((slug) => !included.includes(slug))
+      .map((slug) => {
+        const info = enhancementInfo[slug];
+        return info ? { slug, name: info.name, price: info.price, renewalDate: info.renewalDate, status: "purchased" as const } : null;
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null),
+    ...included.map((slug) => {
+      const info = enhancementInfo[slug];
+      return info ? { slug, name: info.name, price: info.price, renewalDate: "", status: "included" as const } : null;
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null),
+  ];
+
+  const handleSave = () => {
+    toast({ title: "Settings saved", description: "Your changes have been saved successfully." });
+  };
+
+  const handleFileSelect = (ref: React.RefObject<HTMLInputElement | null>) => {
+    ref.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, label: string) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      toast({ title: "File selected", description: `${file.name} has been selected for ${label}.` });
+    }
+  };
+
+  const handleUpdatePayment = () => {
+    setShowPaymentModal(false);
+    setCardNumber("");
+    setCardExpiry("");
+    setCardCvc("");
+    toast({ title: "Payment method updated", description: "Your payment method has been updated successfully." });
+  };
+
+  const handleDownloadInvoice = (invoiceId: string) => {
+    toast({ title: "Invoice downloaded", description: `${invoiceId} has been downloaded.` });
+  };
+
+  const handleCopyUrl = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({ title: "Copied", description: "Copied to clipboard." });
+  };
 
   // General
   const [companyName, setCompanyName] = useState("swipesblue, inc.");
@@ -234,7 +410,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleSave}>
               Save Changes
             </Button>
           </div>
@@ -381,7 +557,8 @@ export default function SettingsPage() {
                 Drag & drop your logo here, or click to browse
               </p>
               <p className="text-xs text-gray-500 mt-1">PNG, JPG, or SVG — Max 2MB</p>
-              <Button variant="outline" className="mt-4 rounded-[7px]">
+              <input ref={logoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "business logo")} />
+              <Button variant="outline" className="mt-4 rounded-[7px]" onClick={() => handleFileSelect(logoInputRef)}>
                 Choose File
               </Button>
             </div>
@@ -422,7 +599,8 @@ export default function SettingsPage() {
                   <p className="text-xs text-gray-500">
                     Upload a logo for your checkout page (PNG, JPG, SVG — Max 1MB)
                   </p>
-                  <Button variant="outline" size="sm" className="mt-2 rounded-[7px]">
+                  <input ref={checkoutLogoInputRef} type="file" accept="image/*" className="hidden" onChange={(e) => handleFileChange(e, "checkout logo")} />
+                  <Button variant="outline" size="sm" className="mt-2 rounded-[7px]" onClick={() => handleFileSelect(checkoutLogoInputRef)}>
                     Choose File
                   </Button>
                 </div>
@@ -431,7 +609,7 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleSave}>
               Save Changes
             </Button>
           </div>
@@ -792,7 +970,7 @@ export default function SettingsPage() {
           )}
 
           <div className="flex justify-end">
-            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleSave}>
               Save Changes
             </Button>
           </div>
@@ -813,31 +991,112 @@ export default function SettingsPage() {
                     <TierBadge tier={tier} size="sm" />
                     <Badge className="bg-green-600 text-white rounded-full">Active</Badge>
                   </div>
-                  <p className="text-sm text-gray-500">$49.00/month — Billed monthly</p>
-                  <p className="text-sm text-gray-500">Next billing date: November 1, 2025</p>
+                  <p className="text-sm text-gray-500">
+                    {planPricing[tier]} — {transactionRates[tier]}
+                  </p>
+                  {tier !== "Free" && (
+                    <p className="text-sm text-gray-500">Next billing date: March 1, 2026</p>
+                  )}
                 </div>
               </div>
-              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
-                Upgrade Plan
+              <Button
+                variant="outline"
+                className="rounded-[7px] border-gray-300"
+                onClick={() => setShowPlanComparison(!showPlanComparison)}
+              >
+                {showPlanComparison ? "Hide Plans" : "Change Plan"}
               </Button>
             </div>
           </div>
 
+          {/* Plan Comparison (expandable) */}
+          {showPlanComparison && (
+            <div className="bg-white rounded-[7px] border border-gray-200 p-6">
+              <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-6">
+                Compare Plans
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {planComparisonData.map((plan) => {
+                  const isCurrent = plan.name === tier;
+                  const currentLevel = TIER_HIERARCHY[tier] ?? 0;
+                  const planLevel = TIER_HIERARCHY[plan.name] ?? 0;
+                  return (
+                    <div
+                      key={plan.name}
+                      className={`rounded-[7px] border p-5 ${
+                        isCurrent
+                          ? "border-[#1844A6] bg-[#1844A6]/5"
+                          : "border-gray-200"
+                      }`}
+                    >
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-gray-900">{plan.name}</h4>
+                        <div className="flex items-baseline gap-1 mt-1">
+                          <span className="text-2xl font-bold text-gray-900">{plan.price}</span>
+                          <span className="text-sm text-gray-500">{plan.period}</span>
+                        </div>
+                        <p className="text-xs text-gray-500 mt-1">{plan.rate} per txn</p>
+                      </div>
+                      <ul className="space-y-2 mb-4">
+                        {plan.features.map((feature, i) => (
+                          <li key={i} className="flex items-start gap-2">
+                            <Check className="h-3.5 w-3.5 text-[#1844A6] mt-0.5 shrink-0" />
+                            <span className="text-xs text-gray-600">{feature}</span>
+                          </li>
+                        ))}
+                      </ul>
+                      {isCurrent ? (
+                        <Badge className="w-full justify-center bg-[#1844A6]/10 text-[#1844A6] text-xs rounded-[7px] py-1.5">
+                          Current Plan
+                        </Badge>
+                      ) : (
+                        <Button
+                          className="w-full bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px] text-xs"
+                          onClick={() =>
+                            toast({
+                              title: "Plan change requested",
+                              description: `Switching to ${plan.name} plan. Changes take effect at next billing cycle.`,
+                            })
+                          }
+                        >
+                          {planLevel > currentLevel
+                            ? `Upgrade to ${plan.name}`
+                            : `Switch to ${plan.name}`}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Payment Method */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method on File</h3>
-            <div className="flex items-center justify-between p-4 bg-gray-50 rounded-[7px]">
-              <div className="flex items-center gap-3">
-                <CreditCard className="h-6 w-6 text-[#1844A6]" />
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Visa ending in 4242</p>
-                  <p className="text-xs text-gray-500">Expires 12/2026</p>
-                </div>
+            {tier === "Free" ? (
+              <div className="text-center py-6">
+                <CreditCard className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-500 mb-1">No payment method on file</p>
+                <p className="text-xs text-gray-400 mb-4">Add a payment method to upgrade your plan.</p>
+                <Button variant="outline" className="rounded-[7px]" onClick={() => setShowPaymentModal(true)}>
+                  Add Payment Method
+                </Button>
               </div>
-              <Button variant="outline" className="rounded-[7px]">
-                Update
-              </Button>
-            </div>
+            ) : (
+              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-[7px]">
+                <div className="flex items-center gap-3">
+                  <CreditCard className="h-6 w-6 text-[#1844A6]" />
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Visa ending in 4242</p>
+                    <p className="text-xs text-gray-500">Expires 12/2026</p>
+                  </div>
+                </div>
+                <Button variant="outline" className="rounded-[7px]" onClick={() => setShowPaymentModal(true)}>
+                  Update
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Billing History */}
@@ -845,38 +1104,133 @@ export default function SettingsPage() {
             <div className="p-4 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Billing History</h3>
             </div>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-[#F6F9FC] text-left">
-                    <th className="px-4 py-3 font-medium text-gray-700">Date</th>
-                    <th className="px-4 py-3 font-medium text-gray-700">Description</th>
-                    <th className="px-4 py-3 font-medium text-gray-700">Amount</th>
-                    <th className="px-4 py-3 font-medium text-gray-700">Status</th>
-                    <th className="px-4 py-3 font-medium text-gray-700 text-right">Invoice</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {billingHistory.map((entry) => (
-                    <tr key={entry.invoice} className="hover:bg-gray-50">
-                      <td className="px-4 py-3 text-gray-500">{entry.date}</td>
-                      <td className="px-4 py-3 font-medium text-gray-900">
-                        {entry.description}
-                      </td>
-                      <td className="px-4 py-3 text-gray-900">{entry.amount}</td>
-                      <td className="px-4 py-3">
-                        <Badge className="bg-green-600 text-white rounded-full">{entry.status}</Badge>
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button size="sm" variant="outline" className="rounded-[7px]">
-                          <Receipt className="h-4 w-4 mr-1" />
-                          {entry.invoice}
-                        </Button>
-                      </td>
+            {tierBillingHistory.length === 0 ? (
+              <div className="p-8 text-center">
+                <Receipt className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-500">No billing history</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Billing records will appear here when you upgrade to a paid plan.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[#F6F9FC] text-left">
+                      <th className="px-4 py-3 font-medium text-gray-700">Date</th>
+                      <th className="px-4 py-3 font-medium text-gray-700">Description</th>
+                      <th className="px-4 py-3 font-medium text-gray-700">Amount</th>
+                      <th className="px-4 py-3 font-medium text-gray-700">Status</th>
+                      <th className="px-4 py-3 font-medium text-gray-700 text-right">Invoice</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {tierBillingHistory.map((entry) => (
+                      <tr key={entry.invoice} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 text-gray-500">{entry.date}</td>
+                        <td className="px-4 py-3 font-medium text-gray-900">{entry.description}</td>
+                        <td className="px-4 py-3 text-gray-900">{entry.amount}</td>
+                        <td className="px-4 py-3">
+                          <Badge className="bg-green-600 text-white rounded-full">{entry.status}</Badge>
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-[7px]"
+                            onClick={() => handleDownloadInvoice(entry.invoice)}
+                          >
+                            <Receipt className="h-4 w-4 mr-1" />
+                            {entry.invoice}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Active Enhancements */}
+          <div className="bg-white rounded-[7px] border border-gray-200">
+            <div className="p-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Active Enhancements</h3>
+            </div>
+            {allEnhancementRows.length === 0 ? (
+              <div className="p-8 text-center">
+                <Layers className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-500">No active enhancements</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  Enhancements add powerful features to your dashboard.
+                </p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-[#F6F9FC] text-left">
+                      <th className="px-4 py-3 font-medium text-gray-700">Enhancement</th>
+                      <th className="px-4 py-3 font-medium text-gray-700">Status</th>
+                      <th className="px-4 py-3 font-medium text-gray-700">Price</th>
+                      <th className="px-4 py-3 font-medium text-gray-700">Renewal Date</th>
+                      <th className="px-4 py-3 font-medium text-gray-700 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {allEnhancementRows.map((row) => (
+                      <tr key={row.slug} className="hover:bg-gray-50">
+                        <td className="px-4 py-3 font-medium text-gray-900">{row.name}</td>
+                        <td className="px-4 py-3">
+                          {row.status === "included" ? (
+                            <Badge className="bg-blue-100 text-blue-700 text-xs rounded-full">
+                              Included with {tier}
+                            </Badge>
+                          ) : (
+                            <Badge className="bg-green-100 text-green-700 text-xs rounded-full">
+                              Active
+                            </Badge>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">
+                          {row.status === "included" ? "—" : row.price}
+                        </td>
+                        <td className="px-4 py-3 text-gray-600">
+                          {row.status === "included" ? "—" : row.renewalDate}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {row.status === "purchased" && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              className="rounded-[7px] text-red-600 border-red-200 hover:bg-red-50"
+                              onClick={() =>
+                                toast({
+                                  title: "Enhancement cancelled",
+                                  description: `${row.name} will be deactivated at the end of the billing period.`,
+                                })
+                              }
+                            >
+                              Cancel
+                            </Button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+            <div className="p-4 border-t border-gray-200">
+              <Link href="/dashboard/ecommerce">
+                <Button
+                  variant="outline"
+                  className="rounded-[7px] border-gray-300 text-sm group"
+                >
+                  Browse Enhancements
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -921,7 +1275,7 @@ export default function SettingsPage() {
                   <code className="text-sm text-gray-900 font-mono">
                     https://api.swipesblue.com/v1
                   </code>
-                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0">
+                  <Button size="sm" variant="ghost" className="h-7 w-7 p-0" onClick={() => handleCopyUrl("https://api.swipesblue.com/v1")}>
                     <Copy className="h-4 w-4 text-gray-500" />
                   </Button>
                 </div>
@@ -983,6 +1337,50 @@ export default function SettingsPage() {
           </div>
         </div>
       )}
+
+      {/* Payment Method Update Modal */}
+      <Dialog open={showPaymentModal} onOpenChange={setShowPaymentModal}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Update Payment Method</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Card Number</Label>
+              <Input
+                placeholder="4242 4242 4242 4242"
+                value={cardNumber}
+                onChange={(e) => setCardNumber(e.target.value)}
+                className="rounded-[7px]"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-900">Expiry Date</Label>
+                <Input
+                  placeholder="MM/YY"
+                  value={cardExpiry}
+                  onChange={(e) => setCardExpiry(e.target.value)}
+                  className="rounded-[7px]"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-sm font-medium text-gray-900">CVC</Label>
+                <Input
+                  placeholder="123"
+                  value={cardCvc}
+                  onChange={(e) => setCardCvc(e.target.value)}
+                  className="rounded-[7px]"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" className="rounded-[7px]" onClick={() => setShowPaymentModal(false)}>Cancel</Button>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleUpdatePayment}>Update Payment Method</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

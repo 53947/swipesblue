@@ -69,7 +69,7 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
           { icon: Terminal, label: "Virtual Terminal", description: "Process cards in your browser", href: "/products/terminal" },
           { icon: LinkIcon, label: "Payment Links", description: "Shareable payment URLs", href: "/products/payment-links" },
           { icon: Receipt, label: "Invoicing", description: "Send professional invoices", href: "/products/invoicing" },
-          { icon: RefreshCw, label: "Recurring Billing", description: "Subscriptions & payment plans", href: "/products/billing" },
+          { icon: RefreshCw, label: "Subscriptions", description: "Subscriptions & payment plans", href: "/products/billing" },
           { icon: Users, label: "Customer Vault", description: "Store payment methods securely", href: "/products/customers" },
           { icon: Lock, label: "Fraud Prevention", description: "Real-time fraud detection", href: "/products/fraud" },
         ],

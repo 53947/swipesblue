@@ -4,7 +4,15 @@ import { Users, Search, Plus, Mail, ArrowUpDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useToast } from "@/hooks/use-toast";
 
 const tabs = [
   { label: "All Customers", href: "/dashboard/customers" },
@@ -27,6 +35,10 @@ const mockCustomers = [
 export default function CustomerList() {
   const [search, setSearch] = useState("");
   const [location] = useLocation();
+  const { toast } = useToast();
+  const [showAddCustomer, setShowAddCustomer] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
 
   // Parse tab from URL
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
@@ -57,7 +69,7 @@ export default function CustomerList() {
           <h1 className="text-2xl font-bold text-gray-900">Customer List</h1>
           <p className="text-gray-500 mt-1">Manage your customers and their details</p>
         </div>
-        <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]">
+        <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={() => { setNewName(""); setNewEmail(""); setShowAddCustomer(true); }}>
           <Plus className="h-4 w-4 mr-2" />
           Add Customer
         </Button>
@@ -151,6 +163,29 @@ export default function CustomerList() {
       <div className="mt-4 text-center">
         <span className="text-xs text-gray-400">{filteredCustomers.length} customers</span>
       </div>
+
+      {/* Add Customer Modal */}
+      <Dialog open={showAddCustomer} onOpenChange={setShowAddCustomer}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Customer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Full Name</Label>
+              <Input value={newName} onChange={(e) => setNewName(e.target.value)} placeholder="John Doe" className="rounded-[7px]" />
+            </div>
+            <div className="space-y-2">
+              <Label className="text-sm font-medium text-gray-900">Email</Label>
+              <Input type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="john@example.com" className="rounded-[7px]" />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button variant="outline" className="rounded-[7px]" onClick={() => setShowAddCustomer(false)}>Cancel</Button>
+              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={() => { toast({ title: "Customer added", description: `${newName} has been added to your customer list.` }); setShowAddCustomer(false); }}>Add Customer</Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -9,7 +9,7 @@ const footerSections = {
       { label: "Online Checkout", href: "/products/checkout" },
       { label: "Payment Links", href: "/products/payment-links" },
       { label: "Invoicing", href: "/products/invoicing" },
-      { label: "Recurring Billing", href: "/products/billing" },
+      { label: "Subscriptions", href: "/products/billing" },
       { label: "Customer Vault", href: "/products/customers" },
       { label: "Fraud Prevention", href: "/products/fraud" },
     ],

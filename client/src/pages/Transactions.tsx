@@ -44,7 +44,7 @@ export default function Transactions() {
 
       <TransactionTable
         transactions={mockTransactions}
-        onViewDetails={(id) => console.log("View transaction details:", id)}
+        onViewDetails={() => {}}
       />
     </div>
   );

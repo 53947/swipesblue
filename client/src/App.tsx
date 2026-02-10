@@ -66,7 +66,7 @@ import CheckoutDashboard from "@/pages/dashboard/CheckoutDashboard";
 import VirtualTerminal from "@/pages/dashboard/VirtualTerminal";
 import PaymentLinks from "@/pages/dashboard/PaymentLinks";
 import Invoicing from "@/pages/dashboard/Invoicing";
-import RecurringBilling from "@/pages/dashboard/RecurringBilling";
+import Subscriptions from "@/pages/dashboard/Subscriptions";
 import CustomerVault from "@/pages/dashboard/CustomerVault";
 import FraudPrevention from "@/pages/dashboard/FraudPrevention";
 
@@ -324,11 +324,11 @@ function Router() {
           </DashboardLayout>
         )}
       </Route>
-      {/* Standalone: Recurring Billing */}
+      {/* Standalone: Subscriptions */}
       <Route path="/dashboard/subscriptions">
         {() => (
           <DashboardLayout>
-            <RecurringBilling />
+            <Subscriptions />
           </DashboardLayout>
         )}
       </Route>

@@ -136,31 +136,16 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       name: "Customer List",
       href: "/dashboard/customers",
       icon: Users,
-      subItems: [
-        { name: "All Customers", href: "/dashboard/customers" },
-        { name: "Recent", href: "/dashboard/customers?tab=recent" },
-        { name: "Top Customers", href: "/dashboard/customers?tab=top" },
-      ],
     },
     {
-      name: "Orders",
+      name: "Order Management",
       href: "/dashboard/orders",
       icon: ShoppingCart,
-      subItems: [
-        { name: "All Orders", href: "/dashboard/orders" },
-        { name: "Pending", href: "/dashboard/orders?tab=pending" },
-        { name: "Fulfilled", href: "/dashboard/orders?tab=fulfilled" },
-      ],
     },
     {
       name: "Transactions",
       href: "/dashboard/transactions",
       icon: CreditCard,
-      subItems: [
-        { name: "All Transactions", href: "/dashboard/transactions" },
-        { name: "Successful", href: "/dashboard/transactions?tab=successful" },
-        { name: "Failed", href: "/dashboard/transactions?tab=failed" },
-      ],
     },
     {
       name: "Balances",
@@ -171,11 +156,6 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       name: "Product Catalog",
       href: "/dashboard/catalog",
       icon: Package,
-      subItems: [
-        { name: "All Products", href: "/dashboard/catalog" },
-        { name: "Add Product", href: "/dashboard/catalog/create" },
-        { name: "Categories", href: "/dashboard/catalog?tab=categories" },
-      ],
     },
   ];
 
@@ -213,13 +193,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       ],
     },
     {
-      name: "Recurring Billing",
+      name: "Subscriptions",
       href: "/dashboard/subscriptions",
       icon: RefreshCw,
       subItems: [
         { name: "Active Subscriptions", href: "/dashboard/subscriptions" },
-        { name: "Plans", href: "/dashboard/subscriptions?tab=plans" },
-        { name: "Create Plan", href: "/dashboard/subscriptions?tab=create" },
+        { name: "Preset Subscriptions", href: "/dashboard/subscriptions?tab=templates" },
+        { name: "Create Subscription", href: "/dashboard/subscriptions?tab=create" },
       ],
     },
     {

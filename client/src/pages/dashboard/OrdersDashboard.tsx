@@ -4,7 +4,24 @@ import { ShoppingCart, Search, Eye, RotateCcw } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useToast } from "@/hooks/use-toast";
 
 const tabs = [
   { label: "All Orders", href: "/dashboard/orders" },
@@ -53,6 +70,9 @@ const paymentStatusColors: Record<string, string> = {
 export default function OrdersDashboard() {
   const [search, setSearch] = useState("");
   const [location] = useLocation();
+  const { toast } = useToast();
+  const [viewOrder, setViewOrder] = useState<MockOrder | null>(null);
+  const [refundOrder, setRefundOrder] = useState<MockOrder | null>(null);
 
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "all";
@@ -77,7 +97,7 @@ export default function OrdersDashboard() {
     <div className="p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Order Management</h1>
           <p className="text-gray-500 mt-1">View and manage customer orders</p>
         </div>
       </div>
@@ -146,11 +166,11 @@ export default function OrdersDashboard() {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="View details">
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="View details" onClick={() => setViewOrder(order)}>
                         <Eye className="h-4 w-4 text-gray-500" />
                       </Button>
                       {order.status !== "refunded" && order.paymentStatus === "paid" && (
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Refund">
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0" title="Refund" onClick={() => setRefundOrder(order)}>
                           <RotateCcw className="h-4 w-4 text-gray-500" />
                         </Button>
                       )}
@@ -166,6 +186,75 @@ export default function OrdersDashboard() {
       <div className="mt-4 text-center">
         <span className="text-xs text-gray-400">{filteredOrders.length} orders</span>
       </div>
+
+      {/* View Order Modal */}
+      <Dialog open={!!viewOrder} onOpenChange={(open) => !open && setViewOrder(null)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Order Details</DialogTitle>
+          </DialogHeader>
+          {viewOrder && (
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <p className="text-xs text-gray-500">Order Number</p>
+                <p className="text-sm font-medium text-gray-900">{viewOrder.orderNumber}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Date</p>
+                <p className="text-sm text-gray-900">{viewOrder.date}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Customer</p>
+                <p className="text-sm font-medium text-gray-900">{viewOrder.customer}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Email</p>
+                <p className="text-sm text-gray-900">{viewOrder.email}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Items</p>
+                <p className="text-sm text-gray-900">{viewOrder.items}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total</p>
+                <p className="text-sm font-medium text-gray-900">${viewOrder.total.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Status</p>
+                <Badge className={`text-xs rounded-full ${statusColors[viewOrder.status]}`}>{viewOrder.status}</Badge>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Payment</p>
+                <Badge className={`text-xs rounded-full ${paymentStatusColors[viewOrder.paymentStatus]}`}>{viewOrder.paymentStatus}</Badge>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Refund Confirmation */}
+      <AlertDialog open={!!refundOrder} onOpenChange={(open) => !open && setRefundOrder(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to refund ${refundOrder?.total.toFixed(2)} for order {refundOrder?.orderNumber}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="rounded-[7px]">Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700 text-white rounded-[7px]"
+              onClick={() => {
+                toast({ title: "Refund initiated", description: `Refund of $${refundOrder?.total.toFixed(2)} initiated for ${refundOrder?.orderNumber}.` });
+                setRefundOrder(null);
+              }}
+            >
+              Issue Refund
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

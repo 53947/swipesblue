@@ -90,7 +90,7 @@ export default function CustomerVaultProduct() {
           },
           {
             icon: Repeat,
-            name: "Recurring Billing",
+            name: "Subscriptions",
             description: "Subscriptions pull from saved payment methods. Card updates automatically when it expires.",
             href: "/products/billing",
           },

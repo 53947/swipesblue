@@ -108,7 +108,7 @@ export default function EcommerceSuite() {
           },
           {
             icon: Repeat,
-            name: "Recurring Billing",
+            name: "Subscriptions",
             description: "Sell subscriptions and memberships alongside one-time products. Same cart, same checkout.",
             href: "/products/billing",
           },
@@ -150,7 +150,7 @@ export default function EcommerceSuite() {
                     { feature: "Transaction fees", swipes: "2.70% + $0.30", woo: "2.90% + $0.30 (Stripe)", shopify: "2.90% + $0.30" },
                     { feature: "Hosting required", swipes: "Included", woo: "$30+/mo separate", shopify: "Included" },
                     { feature: "Plugins required", swipes: "None", woo: "10+ average", shopify: "Varies" },
-                    { feature: "Abandoned cart recovery", swipes: "Starter plan", woo: "$79-399/yr plugin", shopify: "$79+/mo plan" },
+                    { feature: "Abandoned cart recovery", swipes: "Growth plan", woo: "$79-399/yr plugin", shopify: "$79+/mo plan" },
                   ] as Array<{ feature: string; swipes?: string; swipesCheck?: boolean; woo: string; shopify: string }>).map((row) => (
                     <tr key={row.feature} className="border-b border-gray-100">
                       <td className="py-4 px-6 text-sm text-[#4B5563] font-medium">{row.feature}</td>

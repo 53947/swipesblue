@@ -8,6 +8,7 @@ import { Slider } from "@/components/ui/slider";
 import { Label } from "@/components/ui/label";
 import MetricCard from "@/components/MetricCard";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useToast } from "@/hooks/use-toast";
 
 const tabs = [
   { label: "Fraud Rules", href: "/dashboard/fraud" },
@@ -23,6 +24,8 @@ interface FraudRule {
   enabled: boolean;
 }
 
+type FlaggedStatus = "pending" | "approved" | "blocked";
+
 interface FlaggedTransaction {
   id: string;
   amount: string;
@@ -30,6 +33,7 @@ interface FlaggedTransaction {
   riskScore: number;
   flags: string[];
   date: string;
+  status: FlaggedStatus;
 }
 
 const initialRules: FraudRule[] = [
@@ -42,13 +46,13 @@ const initialRules: FraudRule[] = [
   { id: "rule-7", name: "Duplicate Detection", description: "Identifies repeated transactions with the same card, amount, and merchant within minutes.", severity: "High", enabled: true },
 ];
 
-const flaggedTransactions: FlaggedTransaction[] = [
-  { id: "FLG-4821", amount: "$2,499.00", customer: "Marcus Chen", riskScore: 87, flags: ["Velocity Check", "Amount Threshold"], date: "2025-10-24" },
-  { id: "FLG-4819", amount: "$189.50", customer: "Sarah Johnson", riskScore: 42, flags: ["AVS Mismatch"], date: "2025-10-24" },
-  { id: "FLG-4815", amount: "$1,200.00", customer: "Viktor Petrov", riskScore: 91, flags: ["IP Geolocation", "BIN Country Mismatch", "Velocity Check"], date: "2025-10-23" },
-  { id: "FLG-4812", amount: "$75.00", customer: "Emily Watson", riskScore: 28, flags: ["Duplicate Detection"], date: "2025-10-23" },
-  { id: "FLG-4808", amount: "$649.99", customer: "James Okafor", riskScore: 63, flags: ["CVV Mismatch", "Amount Threshold"], date: "2025-10-22" },
-  { id: "FLG-4803", amount: "$3,100.00", customer: "Li Wei", riskScore: 78, flags: ["BIN Country Mismatch", "Amount Threshold", "Velocity Check"], date: "2025-10-22" },
+const initialFlaggedTransactions: FlaggedTransaction[] = [
+  { id: "FLG-4821", amount: "$2,499.00", customer: "Marcus Chen", riskScore: 87, flags: ["Velocity Check", "Amount Threshold"], date: "2025-10-24", status: "pending" },
+  { id: "FLG-4819", amount: "$189.50", customer: "Sarah Johnson", riskScore: 42, flags: ["AVS Mismatch"], date: "2025-10-24", status: "pending" },
+  { id: "FLG-4815", amount: "$1,200.00", customer: "Viktor Petrov", riskScore: 91, flags: ["IP Geolocation", "BIN Country Mismatch", "Velocity Check"], date: "2025-10-23", status: "pending" },
+  { id: "FLG-4812", amount: "$75.00", customer: "Emily Watson", riskScore: 28, flags: ["Duplicate Detection"], date: "2025-10-23", status: "pending" },
+  { id: "FLG-4808", amount: "$649.99", customer: "James Okafor", riskScore: 63, flags: ["CVV Mismatch", "Amount Threshold"], date: "2025-10-22", status: "pending" },
+  { id: "FLG-4803", amount: "$3,100.00", customer: "Li Wei", riskScore: 78, flags: ["BIN Country Mismatch", "Amount Threshold", "Velocity Check"], date: "2025-10-22", status: "pending" },
 ];
 
 function getRiskScoreColor(score: number): string {
@@ -68,7 +72,9 @@ export default function FraudPrevention() {
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "rules";
 
+  const { toast } = useToast();
   const [rules, setRules] = useState<FraudRule[]>(initialRules);
+  const [flaggedTxns, setFlaggedTxns] = useState<FlaggedTransaction[]>(initialFlaggedTransactions);
   const [blockThreshold, setBlockThreshold] = useState<number[]>([75]);
   const [reviewThreshold, setReviewThreshold] = useState<number[]>([40]);
   const [highRiskAlerts, setHighRiskAlerts] = useState(true);
@@ -173,7 +179,7 @@ export default function FraudPrevention() {
               </tr>
             </thead>
             <tbody>
-              {flaggedTransactions.map((txn) => (
+              {flaggedTxns.map((txn) => (
                 <tr key={txn.id} className="border-b border-gray-100 hover:bg-gray-50">
                   <td className="px-4 py-3 text-sm font-mono text-gray-900">{txn.id}</td>
                   <td className="px-4 py-3 text-sm font-medium text-gray-900">{txn.amount}</td>
@@ -194,22 +200,38 @@ export default function FraudPrevention() {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-600">{txn.date}</td>
                   <td className="px-4 py-3">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button
-                        size="sm"
-                        className="bg-green-600 hover:bg-green-700 text-white rounded-[7px] text-xs"
-                      >
-                        <CheckCircle className="h-3 w-3 mr-1" />
-                        Approve
-                      </Button>
-                      <Button
-                        size="sm"
-                        className="bg-red-600 hover:bg-red-700 text-white rounded-[7px] text-xs"
-                      >
-                        <XCircle className="h-3 w-3 mr-1" />
-                        Block
-                      </Button>
-                    </div>
+                    {txn.status === "pending" ? (
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
+                          size="sm"
+                          className="bg-green-600 hover:bg-green-700 text-white rounded-[7px] text-xs"
+                          onClick={() => {
+                            setFlaggedTxns((prev) => prev.map((t) => t.id === txn.id ? { ...t, status: "approved" as FlaggedStatus } : t));
+                            toast({ title: "Transaction approved", description: `${txn.id} (${txn.amount}) has been approved.` });
+                          }}
+                        >
+                          <CheckCircle className="h-3 w-3 mr-1" />
+                          Approve
+                        </Button>
+                        <Button
+                          size="sm"
+                          className="bg-red-600 hover:bg-red-700 text-white rounded-[7px] text-xs"
+                          onClick={() => {
+                            setFlaggedTxns((prev) => prev.map((t) => t.id === txn.id ? { ...t, status: "blocked" as FlaggedStatus } : t));
+                            toast({ title: "Transaction blocked", description: `${txn.id} (${txn.amount}) has been blocked.` });
+                          }}
+                        >
+                          <XCircle className="h-3 w-3 mr-1" />
+                          Block
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="flex justify-end">
+                        <Badge className={`text-xs rounded-full ${txn.status === "approved" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-600"}`}>
+                          {txn.status === "approved" ? "Approved" : "Blocked"}
+                        </Badge>
+                      </div>
+                    )}
                   </td>
                 </tr>
               ))}

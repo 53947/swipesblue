@@ -6,6 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import MetricCard from "@/components/MetricCard";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
+import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import FeatureMarketingPage from "@/components/dashboard/FeatureMarketingPage";
 
 const tabs = [
   { label: "All Customers", href: "/dashboard/vault" },
@@ -219,12 +221,37 @@ const activityStatusColors: Record<string, string> = {
 };
 
 export default function CustomerVault() {
+  const { tier, canAccess } = useMerchantAuth();
   const [location] = useLocation();
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "customers";
 
   const [searchTerm, setSearchTerm] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+
+  // Tier gate: requires Scale
+  if (!canAccess("Scale")) {
+    return (
+      <FeatureMarketingPage
+        featureName="Customer Vault"
+        headline="Your customers shouldn't have to repeat themselves."
+        description="Securely store payment methods, track transaction history, and charge returning customers in one click. PCI-compliant storage means you never touch raw card data — but your customers never have to re-enter it either."
+        benefits={[
+          "Securely store customer payment methods (PCI-compliant)",
+          "One-click repeat charges for returning customers",
+          "Customer profiles with full transaction history",
+          "Multiple cards per customer",
+          "Search and filter across your entire customer base",
+          "Integrates with Subscriptions for automated billing",
+        ]}
+        requiredTier="Scale"
+        currentTier={tier}
+        price="$79/month"
+        ctaText="Upgrade to Scale — $79/month"
+        ctaLink="/dashboard/settings?tab=billing"
+      />
+    );
+  }
 
   const filteredCustomers = mockCustomers.filter((customer) => {
     const term = searchTerm.toLowerCase();

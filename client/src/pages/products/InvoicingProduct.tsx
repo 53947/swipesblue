@@ -93,8 +93,8 @@ export default function InvoicingProduct() {
           },
           {
             icon: Repeat,
-            name: "Recurring Billing",
-            description: "Have a client you invoice every month for the same amount? Set up recurring billing instead and automate the whole thing.",
+            name: "Subscriptions",
+            description: "Have a client you invoice every month for the same amount? Set up a subscription instead and automate the whole thing.",
             href: "/products/billing",
           },
           {

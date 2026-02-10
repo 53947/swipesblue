@@ -40,19 +40,19 @@ const mockTransactions = [
 
 const upgradeRecommendations: Record<string, { message: string; cta: string; tier: string; price: string }> = {
   Free: {
-    message: "Unlock recurring billing, full invoicing, and up to 500 products.",
+    message: "You're leaving money on the table. Subscriptions, full invoicing, and a customer vault are one upgrade away. Merchants who switch to Growth see an average 23% increase in repeat purchases within 90 days.",
     cta: "Upgrade to Growth",
     tier: "Growth",
     price: "$29/month",
   },
   Growth: {
-    message: "Get unlimited products, advanced analytics, and priority support.",
+    message: "Your business outgrew its plan. Unlimited products, advanced analytics, and priority support are waiting. Scale merchants process 3x more volume with lower per-transaction costs.",
     cta: "Upgrade to Scale",
     tier: "Scale",
     price: "$79/month",
   },
   Scale: {
-    message: "Get a dedicated account manager, custom integrations, and SLA guarantees.",
+    message: "You need a partner, not just a platform. Dedicated account management, custom integrations, and SLA guarantees for businesses that can't afford downtime.",
     cta: "Upgrade to Enterprise",
     tier: "Enterprise",
     price: "Custom pricing",
@@ -159,7 +159,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2">
           <TransactionTable
             transactions={mockTransactions}
-            onViewDetails={(id) => console.log("View transaction details:", id)}
+            onViewDetails={() => {}}
           />
         </div>
 
@@ -221,7 +221,7 @@ export default function Dashboard() {
             <p className="text-sm text-gray-600 mb-4">
               {upgrade.message}
             </p>
-            <Link href="/pricing">
+            <Link href="/dashboard/settings?tab=billing">
               <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px] group">
                 {upgrade.cta} — {upgrade.price}
                 <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />

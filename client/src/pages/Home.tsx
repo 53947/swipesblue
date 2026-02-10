@@ -49,7 +49,7 @@ const bentoFeatures = [
   },
   {
     icon: RefreshCw,
-    title: "Recurring Billing",
+    title: "Subscriptions",
     description: "Automate subscriptions, memberships, and payment plans with flexible scheduling.",
     link: "/products/billing",
     linkText: "Learn more",

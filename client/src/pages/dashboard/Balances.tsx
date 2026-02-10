@@ -132,8 +132,8 @@ export default function Balances() {
           <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Deposit History</h3>
           <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
             <Calendar className="h-12 w-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">Deposits coming soon</h3>
-            <p className="text-gray-500 text-sm">Direct deposit tracking will be available as you process more payments.</p>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">No deposits yet</h3>
+            <p className="text-gray-500 text-sm">Direct deposit history will appear here as you process payments.</p>
           </div>
         </div>
       )}
