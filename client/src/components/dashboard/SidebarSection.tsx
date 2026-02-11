@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronDown, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Badge } from "@/components/ui/badge";
 
 export interface SidebarSubItem {
   name: string;
@@ -23,13 +22,6 @@ export interface SidebarNavItem {
 interface SidebarNavLinkProps {
   item: SidebarNavItem;
 }
-
-const badgeStyles: Record<string, string> = {
-  green: "bg-green-100 text-green-700",
-  blue: "bg-blue-100 text-blue-700",
-  gray: "bg-gray-200 text-gray-600",
-  tier: "bg-[#1844A6] text-white",
-};
 
 export function SidebarNavLink({ item }: SidebarNavLinkProps) {
   const [location] = useLocation();
@@ -87,12 +79,12 @@ export function SidebarNavLink({ item }: SidebarNavLinkProps) {
             <Tooltip>
               <TooltipTrigger asChild>
                 <span
-                  className="inline-flex items-center justify-center h-4 w-4 rounded-full border border-gray-300 text-gray-400 hover:border-[#1844A6] hover:text-[#1844A6] transition-colors cursor-help shrink-0"
+                  className="inline-flex items-center justify-center cursor-help shrink-0"
                   onClick={(e) => e.preventDefault()}
                 >
-                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5">
+                  <svg viewBox="0 0 24 24" className="h-4 w-4" style={{ color: "#09080e" }}>
                     <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" strokeWidth="2" />
-                    <text x="12" y="17" textAnchor="middle" fontSize="15" fontFamily="Georgia, serif" fontStyle="italic" fill="currentColor">i</text>
+                    <text x="12" y="17.5" textAnchor="middle" fontSize="15" fontFamily="Georgia, serif" fontStyle="italic" fill="currentColor">i</text>
                   </svg>
                 </span>
               </TooltipTrigger>
@@ -103,17 +95,13 @@ export function SidebarNavLink({ item }: SidebarNavLinkProps) {
           )}
 
           {item.badge && (
-            <Badge
-              className={`text-[10px] px-1.5 py-0 no-default-hover-elevate ${
-                badgeStyles[item.badgeVariant || "gray"]
-              }`}
-            >
+            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wide shrink-0">
               {item.badge}
-            </Badge>
+            </span>
           )}
 
           {item.locked && (
-            <Lock className="h-3 w-3 text-gray-400" />
+            <Lock className="h-4 w-4 text-gray-400 shrink-0" />
           )}
 
           {hasSubItems && (
