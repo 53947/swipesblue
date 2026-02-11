@@ -2,6 +2,13 @@ import { useState } from "react";
 import {
   Check,
   ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  DollarSign,
+  ShoppingCart,
+  Users,
+  BarChart3,
+  TrendingUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
@@ -42,8 +49,17 @@ const dashboardTxns = [
   { name: "Sarah Davis", amount: "$32.50" },
 ];
 
+// ── ALT DASHBOARD MOCKUP DATA ──────────────────────────────
+const altMockTxns = [
+  { id: "TXN-4821", customer: "Sarah Chen", amount: "$142.00", status: "success" },
+  { id: "TXN-4820", customer: "Marcus Rivera", amount: "$89.50", status: "success" },
+  { id: "TXN-4819", customer: "Emma Wilson", amount: "$215.00", status: "success" },
+  { id: "TXN-4818", customer: "James Park", amount: "$67.99", status: "pending" },
+];
+
 export default function Home() {
   const [hoveredPath, setHoveredPath] = useState<string | null>(null);
+  const [dashboardView, setDashboardView] = useState(0);
 
   return (
     <div className="min-h-screen bg-white">
@@ -315,65 +331,193 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Right column: CSS dashboard mockup */}
-          <div className="bg-gray-100 rounded-xl p-6 border border-gray-200">
-            <div className="bg-white rounded-lg overflow-hidden shadow-sm">
-              {/* Browser chrome */}
-              <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#1a1a2e" }}>
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
-                <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
-                <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
-                <span className="text-gray-400 text-[11px] ml-2">swipesblue dashboard</span>
-              </div>
-              <div className="flex">
-                {/* Sidebar */}
-                <div className="w-40 bg-[#f9fafb] border-r border-gray-200" style={{ padding: "12px 8px" }}>
-                  {dashboardNav.map((item, i) => (
-                    <div
-                      key={item}
-                      className="text-[11px] font-medium mb-0.5 rounded"
-                      style={{
-                        padding: "6px 10px",
-                        background: i === 0 ? "#1844A6" : "transparent",
-                        color: i === 0 ? "#fff" : "#6b7280",
-                      }}
-                    >
-                      {item}
+          {/* Right column: toggleable dashboard mockups */}
+          <div className="relative">
+            {/* Left arrow */}
+            <button
+              onClick={() => setDashboardView(dashboardView === 0 ? 1 : 0)}
+              className="absolute left-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+              aria-label="Previous view"
+            >
+              <ChevronLeft className="h-5 w-5 text-gray-600" />
+            </button>
+
+            {/* Right arrow */}
+            <button
+              onClick={() => setDashboardView(dashboardView === 0 ? 1 : 0)}
+              className="absolute right-[-20px] top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-gray-200 shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+              aria-label="Next view"
+            >
+              <ChevronRight className="h-5 w-5 text-gray-600" />
+            </button>
+
+            {/* Dots indicator */}
+            <div className="flex justify-center gap-2 mt-4 absolute bottom-[-28px] left-0 right-0">
+              <button
+                onClick={() => setDashboardView(0)}
+                className={`w-2 h-2 rounded-full transition-colors ${dashboardView === 0 ? "bg-[#1844A6]" : "bg-gray-300"}`}
+                aria-label="View 1"
+              />
+              <button
+                onClick={() => setDashboardView(1)}
+                className={`w-2 h-2 rounded-full transition-colors ${dashboardView === 1 ? "bg-[#1844A6]" : "bg-gray-300"}`}
+                aria-label="View 2"
+              />
+            </div>
+
+            {/* View 1: Browser chrome dashboard */}
+            <div
+              className="transition-opacity duration-300"
+              style={{ display: dashboardView === 0 ? "block" : "none" }}
+            >
+              <div className="bg-gray-100 rounded-xl p-6 border border-gray-200">
+                <div className="bg-white rounded-lg overflow-hidden shadow-sm">
+                  {/* Browser chrome */}
+                  <div className="flex items-center gap-2 px-4 py-3" style={{ background: "#1a1a2e" }}>
+                    <div className="w-2.5 h-2.5 rounded-full bg-red-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-yellow-500" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-green-500" />
+                    <span className="text-gray-400 text-[11px] ml-2">swipesblue dashboard</span>
+                  </div>
+                  <div className="flex">
+                    {/* Sidebar */}
+                    <div className="w-40 bg-[#f9fafb] border-r border-gray-200" style={{ padding: "12px 8px" }}>
+                      {dashboardNav.map((item, i) => (
+                        <div
+                          key={item}
+                          className="text-[11px] font-medium mb-0.5 rounded"
+                          style={{
+                            padding: "6px 10px",
+                            background: i === 0 ? "#1844A6" : "transparent",
+                            color: i === 0 ? "#fff" : "#6b7280",
+                          }}
+                        >
+                          {item}
+                        </div>
+                      ))}
+                      <div className="border-t border-gray-200 mt-2 pt-2">
+                        <div className="text-[9px] text-gray-400 font-semibold uppercase px-2.5 mb-1">Products</div>
+                        {dashboardProducts.map((item) => (
+                          <div key={item} className="text-[10px] text-gray-500 px-2.5 py-1">{item}</div>
+                        ))}
+                      </div>
                     </div>
-                  ))}
-                  <div className="border-t border-gray-200 mt-2 pt-2">
-                    <div className="text-[9px] text-gray-400 font-semibold uppercase px-2.5 mb-1">Products</div>
-                    {dashboardProducts.map((item) => (
-                      <div key={item} className="text-[10px] text-gray-500 px-2.5 py-1">{item}</div>
-                    ))}
+                    {/* Body */}
+                    <div className="flex-1 p-4">
+                      <div className="text-[13px] font-bold text-gray-900 mb-3">Overview</div>
+                      <div className="grid grid-cols-3 gap-2">
+                        {dashboardMetrics.map((card) => (
+                          <div key={card.label} className="bg-[#f9fafb] rounded-md px-3 py-2.5">
+                            <div className="text-[9px] text-gray-400 font-medium">{card.label}</div>
+                            <div className="text-base font-bold text-gray-900 mt-0.5">{card.value}</div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="bg-[#f9fafb] rounded-md p-3 mt-3">
+                        <div className="text-[9px] text-gray-400 font-medium mb-2">Recent Transactions</div>
+                        {dashboardTxns.map((tx) => (
+                          <div
+                            key={tx.name}
+                            className="flex justify-between text-[10px] text-gray-600 py-1 border-b border-gray-100 last:border-0"
+                          >
+                            <span>{tx.name}</span>
+                            <span className="flex gap-2">
+                              <span className="font-semibold">{tx.amount}</span>
+                              <span className="text-green-600">✓</span>
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
-                {/* Body */}
-                <div className="flex-1 p-4">
-                  <div className="text-[13px] font-bold text-gray-900 mb-3">Overview</div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {dashboardMetrics.map((card) => (
-                      <div key={card.label} className="bg-[#f9fafb] rounded-md px-3 py-2.5">
-                        <div className="text-[9px] text-gray-400 font-medium">{card.label}</div>
-                        <div className="text-base font-bold text-gray-900 mt-0.5">{card.value}</div>
-                      </div>
-                    ))}
+              </div>
+            </div>
+
+            {/* View 2: Analytics dashboard */}
+            <div
+              className="transition-opacity duration-300"
+              style={{ display: dashboardView === 1 ? "block" : "none" }}
+            >
+              <div className="bg-[#F6F9FC] rounded-[7px] border border-gray-200 p-6 shadow-sm">
+                {/* Metric cards */}
+                <div className="grid grid-cols-3 gap-3 mb-5">
+                  <div className="bg-white rounded-[7px] border border-gray-200 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <DollarSign className="h-3.5 w-3.5 text-[#1844A6]" />
+                      <span className="text-[10px] text-gray-500 font-medium">Revenue</span>
+                    </div>
+                    <div className="text-lg font-bold text-gray-900">$12,482</div>
+                    <div className="text-[10px] text-green-600 font-medium">+18.2%</div>
                   </div>
-                  <div className="bg-[#f9fafb] rounded-md p-3 mt-3">
-                    <div className="text-[9px] text-gray-400 font-medium mb-2">Recent Transactions</div>
-                    {dashboardTxns.map((tx) => (
-                      <div
-                        key={tx.name}
-                        className="flex justify-between text-[10px] text-gray-600 py-1 border-b border-gray-100 last:border-0"
-                      >
-                        <span>{tx.name}</span>
-                        <span className="flex gap-2">
-                          <span className="font-semibold">{tx.amount}</span>
-                          <span className="text-green-600">✓</span>
+                  <div className="bg-white rounded-[7px] border border-gray-200 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <ShoppingCart className="h-3.5 w-3.5 text-[#1844A6]" />
+                      <span className="text-[10px] text-gray-500 font-medium">Orders</span>
+                    </div>
+                    <div className="text-lg font-bold text-gray-900">284</div>
+                    <div className="text-[10px] text-green-600 font-medium">+12.5%</div>
+                  </div>
+                  <div className="bg-white rounded-[7px] border border-gray-200 p-3">
+                    <div className="flex items-center gap-1.5 mb-1">
+                      <Users className="h-3.5 w-3.5 text-[#1844A6]" />
+                      <span className="text-[10px] text-gray-500 font-medium">Customers</span>
+                    </div>
+                    <div className="text-lg font-bold text-gray-900">1,247</div>
+                    <div className="text-[10px] text-green-600 font-medium">+8.3%</div>
+                  </div>
+                </div>
+
+                {/* Bar chart */}
+                <div className="bg-white rounded-[7px] border border-gray-200 p-4 mb-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-1.5">
+                      <BarChart3 className="h-3.5 w-3.5 text-[#1844A6]" />
+                      <span className="text-xs font-semibold text-gray-700">Weekly Revenue</span>
+                    </div>
+                    <TrendingUp className="h-3.5 w-3.5 text-green-500" />
+                  </div>
+                  <div className="flex items-end gap-2 h-20">
+                    {[40, 55, 45, 70, 60, 85, 75].map((h, i) => (
+                      <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                        <div
+                          className="w-full rounded-t-[3px] bg-[#1844A6]"
+                          style={{ height: `${h}%`, opacity: i === 5 ? 1 : 0.6 }}
+                        />
+                        <span className="text-[8px] text-gray-400">
+                          {["M", "T", "W", "T", "F", "S", "S"][i]}
                         </span>
                       </div>
                     ))}
                   </div>
+                </div>
+
+                {/* Transactions */}
+                <div className="bg-white rounded-[7px] border border-gray-200">
+                  <div className="px-3 py-2 border-b border-gray-100">
+                    <span className="text-xs font-semibold text-gray-700">Recent Transactions</span>
+                  </div>
+                  {altMockTxns.map((txn, i) => (
+                    <div
+                      key={txn.id}
+                      className={`px-3 py-2 flex items-center justify-between text-xs ${
+                        i < altMockTxns.length - 1 ? "border-b border-gray-50" : ""
+                      }`}
+                    >
+                      <div>
+                        <span className="font-medium text-gray-900">{txn.customer}</span>
+                        <span className="text-gray-400 ml-2">{txn.id}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-semibold text-gray-900">{txn.amount}</span>
+                        <span
+                          className={`w-1.5 h-1.5 rounded-full ${
+                            txn.status === "success" ? "bg-green-500" : "bg-yellow-500"
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
