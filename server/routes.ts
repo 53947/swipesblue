@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import rateLimit from "express-rate-limit";
+import { doubleCsrf } from "csrf-csrf";
 import { storage } from "./storage";
 import {
   insertProductSchema,
@@ -9,6 +11,33 @@ import {
   insertPaymentGatewaySchema,
   insertPaymentTransactionSchema,
   insertMerchantSchema,
+  insertCustomerAccountSchema,
+  insertCustomerPaymentMethodSchema,
+  insertCustomerSupportTicketSchema,
+  insertSecuritySettingsSchema,
+  insertFraudScoreSchema,
+  insertDeviceFingerprintSchema,
+  insertChargebackAlertSchema,
+  insertCheckoutSettingsSchema,
+  insertAbTestSchema,
+  insertAbTestResultSchema,
+  insertCheckoutAnalyticsSchema,
+  insertSavedCartSchema,
+  insertCartRecommendationSchema,
+  insertCartNoteSchema,
+  insertInventoryReservationSchema,
+  insertAnalyticsDailySchema,
+  insertAnalyticsProductsSchema,
+  insertCustomerLtvSchema,
+  insertScheduledReportSchema,
+  insertBrandSettingsSchema,
+  insertEmailTemplateSchema,
+  insertReceiptSettingsSchema,
+  insertMerchantSubscriptionSchema,
+  insertAddonSubscriptionSchema,
+  insertApiLogSchema,
+  insertCustomerVaultSchema,
+  insertVaultPaymentMethodSchema,
   type InsertOrderItem,
 } from "@shared/schema";
 import { z } from "zod";
@@ -19,7 +48,53 @@ import { requireApiKey, requirePermission, generateApiKey, generateApiSecret, ty
 import { webhookService, WebhookEventType } from "./services/webhook";
 import { normalizeTier, meetsMinTier as sharedMeetsMinTier, TIER_PRODUCT_LIMITS as SHARED_TIER_PRODUCT_LIMITS } from "@shared/tier-constants";
 
+// Rate limiters
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: { error: "Too many login attempts. Try again in 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 100,
+  message: { error: "Too many requests. Slow down." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+const paymentLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30,
+  message: { error: "Too many payment requests. Try again shortly." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+// CSRF protection for session-based state-changing routes
+// NOTE: Frontend must fetch /api/csrf-token and include the token in the x-csrf-token header
+// for all POST/PUT/PATCH/DELETE requests to session-based endpoints. Will be wired in a future prompt.
+const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
+  getSecret: () => process.env.CSRF_SECRET || "swipesblue-csrf-secret-change-in-production",
+  getSessionIdentifier: (req) => (req as any).sessionID || "",
+  cookieName: "__csrf",
+  cookieOptions: {
+    httpOnly: true,
+    sameSite: "strict" as const,
+    secure: process.env.NODE_ENV === "production",
+  },
+  getCsrfTokenFromRequest: (req) => req.headers["x-csrf-token"] as string || null,
+});
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // CSRF token endpoint
+  app.get("/api/csrf-token", (req, res) => {
+    const token = generateCsrfToken(req, res);
+    res.json({ token });
+  });
+
   // Session helper to get session ID from express-session
   function getSessionId(req: any): string {
     if (!req.session) {
@@ -159,7 +234,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/cart", async (req, res) => {
+  app.post("/api/cart", doubleCsrfProtection, async (req, res) => {
     try {
       const sessionId = getSessionId(req);
       const validatedData = insertCartItemSchema.parse({
@@ -177,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.patch("/api/cart/:id", async (req, res) => {
+  app.patch("/api/cart/:id", doubleCsrfProtection, async (req, res) => {
     try {
       const { quantity } = req.body;
       if (typeof quantity !== "number" || quantity < 1) {
@@ -194,7 +269,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart/:id", async (req, res) => {
+  app.delete("/api/cart/:id", doubleCsrfProtection, async (req, res) => {
     try {
       const deleted = await storage.removeFromCart(req.params.id);
       if (!deleted) {
@@ -207,7 +282,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/cart", async (req, res) => {
+  app.delete("/api/cart", doubleCsrfProtection, async (req, res) => {
     try {
       const sessionId = getSessionId(req);
       await storage.clearCart(sessionId);
@@ -703,7 +778,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Partner Payment Processing API (requires API key authentication)
 
   // Process a payment on behalf of a merchant
-  app.post("/api/v1/payments/process", requireApiKey, requirePermission("process_payments"), async (req, res) => {
+  app.post("/api/v1/payments/process", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
     try {
       const authReq = req as AuthenticatedRequest;
       const platform = authReq.apiKey!.platform;
@@ -1092,11 +1167,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API Key Management Endpoints (internal use only)
 
   // Create a new API key
-  app.post("/api/v1/api-keys/create", async (req, res) => {
+  app.post("/api/v1/api-keys/create", apiLimiter, requireAdmin, async (req, res) => {
     try {
-      // TODO: Add admin authentication here
-      // For now, anyone can create API keys (remove this in production!)
-
       const apiKeySchema = z.object({
         platform: z.enum(["businessblueprint", "hostsblue", "swipesblue", "internal"]),
         name: z.string().min(1, "Name is required"),
@@ -1134,7 +1206,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         message: "API key created successfully. Store these credentials securely - they won't be shown again.",
       });
     } catch (error) {
-      console.error("Error creating API key:", error);
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           error: "Invalid API key data",
@@ -1146,9 +1217,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // List API keys (without exposing the actual keys)
-  app.get("/api/v1/api-keys", async (_req, res) => {
+  app.get("/api/v1/api-keys", apiLimiter, requireAdmin, async (_req, res) => {
     try {
-      // TODO: Add admin authentication here
       const keys = await storage.getAllApiKeys();
 
       // Remove sensitive data
@@ -1165,22 +1235,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       res.json(sanitizedKeys);
     } catch (error) {
-      console.error("Error fetching API keys:", error);
       res.status(500).json({ message: "Failed to fetch API keys" });
     }
   });
 
   // Deactivate an API key
-  app.delete("/api/v1/api-keys/:id", async (req, res) => {
+  app.delete("/api/v1/api-keys/:id", apiLimiter, requireAdmin, async (req, res) => {
     try {
-      // TODO: Add admin authentication here
       const deactivated = await storage.deactivateApiKey(req.params.id);
       if (!deactivated) {
         return res.status(404).json({ message: "API key not found" });
       }
       res.json({ message: "API key deactivated successfully" });
     } catch (error) {
-      console.error("Error deactivating API key:", error);
       res.status(500).json({ message: "Failed to deactivate API key" });
     }
   });
@@ -1391,7 +1458,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   };
   
   // Merchant login - validates against database with hashed passwords
-  app.post("/api/auth/login", async (req, res) => {
+  app.post("/api/auth/login", doubleCsrfProtection, authLimiter, async (req, res) => {
     try {
       // Validate request body with zod
       const { loginMerchantSchema } = await import("@shared/schema");
@@ -1443,7 +1510,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Merchant register - creates account with hashed password
-  app.post("/api/auth/register", async (req, res) => {
+  app.post("/api/auth/register", doubleCsrfProtection, authLimiter, async (req, res) => {
     try {
       // Validate request body with zod
       const { registerMerchantSchema } = await import("@shared/schema");
@@ -1493,7 +1560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Merchant logout
-  app.post("/api/auth/logout", (req, res) => {
+  app.post("/api/auth/logout", doubleCsrfProtection, (req, res) => {
     (req.session as any).isMerchant = false;
     req.session.destroy((err) => {
       if (err) {
@@ -1558,13 +1625,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // ========================================
   // Admin Auth Endpoints
   // ========================================
-  const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "changeme123";
+  const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+  const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
   // Admin login
-  app.post("/api/admin/auth/login", (req, res) => {
+  app.post("/api/admin/auth/login", doubleCsrfProtection, authLimiter, (req, res) => {
     const { username, password } = req.body;
-    
+
+    if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+      return res.status(503).json({
+        success: false,
+        message: "Admin credentials not configured. Set ADMIN_USERNAME and ADMIN_PASSWORD environment variables.",
+      });
+    }
+
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       (req.session as any).isAdmin = true;
       res.json({ success: true, message: "Login successful" });
@@ -1574,7 +1648,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Admin logout
-  app.post("/api/admin/auth/logout", (req, res) => {
+  app.post("/api/admin/auth/logout", doubleCsrfProtection, (req, res) => {
     (req.session as any).isAdmin = false;
     req.session.destroy((err) => {
       if (err) {
@@ -2955,6 +3029,1043 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error executing import:", error);
       res.status(500).json({ message: "Failed to execute import" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // CUSTOMER PORTAL ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Customer Accounts
+  app.get("/api/merchant/customers", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const customers = await storage.getCustomerAccountsByMerchant(merchantId);
+      res.json(customers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch customers" });
+    }
+  });
+
+  app.get("/api/merchant/customers/:id", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerAccount(req.params.id);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      res.json(customer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch customer" });
+    }
+  });
+
+  app.post("/api/merchant/customers", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertCustomerAccountSchema.parse({ ...req.body, merchantId });
+      const customer = await storage.createCustomerAccount(parsed);
+      res.status(201).json(customer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create customer" });
+    }
+  });
+
+  app.patch("/api/merchant/customers/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getCustomerAccount(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      const updated = await storage.updateCustomerAccount(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update customer" });
+    }
+  });
+
+  app.delete("/api/merchant/customers/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getCustomerAccount(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      await storage.deleteCustomerAccount(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete customer" });
+    }
+  });
+
+  // Customer Payment Methods
+  app.get("/api/merchant/customers/:customerId/payment-methods", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerAccount(req.params.customerId);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      const methods = await storage.getCustomerPaymentMethodsByCustomer(req.params.customerId);
+      res.json(methods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch payment methods" });
+    }
+  });
+
+  app.post("/api/merchant/customers/:customerId/payment-methods", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerAccount(req.params.customerId);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      const parsed = insertCustomerPaymentMethodSchema.parse({ ...req.body, customerId: req.params.customerId });
+      const method = await storage.createCustomerPaymentMethod(parsed);
+      res.status(201).json(method);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create payment method" });
+    }
+  });
+
+  app.delete("/api/merchant/customers/:customerId/payment-methods/:id", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerAccount(req.params.customerId);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Customer not found" });
+      }
+      await storage.deleteCustomerPaymentMethod(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete payment method" });
+    }
+  });
+
+  // Support Tickets
+  app.get("/api/merchant/support-tickets", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const tickets = await storage.getCustomerSupportTicketsByMerchant(merchantId);
+      res.json(tickets);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch support tickets" });
+    }
+  });
+
+  app.get("/api/merchant/support-tickets/:id", requireMerchant, async (req, res) => {
+    try {
+      const ticket = await storage.getCustomerSupportTicket(req.params.id);
+      if (!ticket || ticket.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+      res.json(ticket);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch ticket" });
+    }
+  });
+
+  app.post("/api/merchant/support-tickets", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertCustomerSupportTicketSchema.parse({ ...req.body, merchantId });
+      const ticket = await storage.createCustomerSupportTicket(parsed);
+      res.status(201).json(ticket);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create ticket" });
+    }
+  });
+
+  app.patch("/api/merchant/support-tickets/:id", requireMerchant, async (req, res) => {
+    try {
+      const ticket = await storage.getCustomerSupportTicket(req.params.id);
+      if (!ticket || ticket.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Ticket not found" });
+      }
+      const updated = await storage.updateCustomerSupportTicket(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update ticket" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // SECURITY SUITE ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Security Settings (one per merchant)
+  app.get("/api/merchant/security-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.getSecuritySettings(merchantId);
+      res.json(settings || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch security settings" });
+    }
+  });
+
+  app.put("/api/merchant/security-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.upsertSecuritySettings(merchantId, req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update security settings" });
+    }
+  });
+
+  // Fraud Scores
+  app.get("/api/merchant/fraud-scores", requireMerchant, async (req, res) => {
+    try {
+      const { transactionId } = req.query;
+      if (!transactionId || typeof transactionId !== "string") {
+        return res.status(400).json({ message: "transactionId is required" });
+      }
+      const scores = await storage.getFraudScoresByTransaction(transactionId);
+      res.json(scores);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch fraud scores" });
+    }
+  });
+
+  app.post("/api/merchant/fraud-scores", requireMerchant, async (req, res) => {
+    try {
+      const parsed = insertFraudScoreSchema.parse(req.body);
+      const score = await storage.createFraudScore(parsed);
+      res.status(201).json(score);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create fraud score" });
+    }
+  });
+
+  // Device Fingerprints
+  app.get("/api/merchant/device-fingerprints", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const fingerprints = await storage.getDeviceFingerprintsByMerchant(merchantId);
+      res.json(fingerprints);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch device fingerprints" });
+    }
+  });
+
+  app.post("/api/merchant/device-fingerprints", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertDeviceFingerprintSchema.parse({ ...req.body, merchantId });
+      const fingerprint = await storage.createDeviceFingerprint(parsed);
+      res.status(201).json(fingerprint);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create device fingerprint" });
+    }
+  });
+
+  app.patch("/api/merchant/device-fingerprints/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getDeviceFingerprint(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Fingerprint not found" });
+      }
+      const updated = await storage.updateDeviceFingerprint(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update device fingerprint" });
+    }
+  });
+
+  // Chargeback Alerts
+  app.get("/api/merchant/chargeback-alerts", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const alerts = await storage.getChargebackAlertsByMerchant(merchantId);
+      res.json(alerts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch chargeback alerts" });
+    }
+  });
+
+  app.post("/api/merchant/chargeback-alerts", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertChargebackAlertSchema.parse({ ...req.body, merchantId });
+      const alert = await storage.createChargebackAlert(parsed);
+      res.status(201).json(alert);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create chargeback alert" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // CHECKOUT OPTIMIZER ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Checkout Settings (one per merchant)
+  app.get("/api/merchant/checkout-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.getCheckoutSettings(merchantId);
+      res.json(settings || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch checkout settings" });
+    }
+  });
+
+  app.put("/api/merchant/checkout-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.upsertCheckoutSettings(merchantId, req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update checkout settings" });
+    }
+  });
+
+  // A/B Tests
+  app.get("/api/merchant/ab-tests", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const tests = await storage.getAbTestsByMerchant(merchantId);
+      res.json(tests);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch A/B tests" });
+    }
+  });
+
+  app.get("/api/merchant/ab-tests/:id", requireMerchant, async (req, res) => {
+    try {
+      const test = await storage.getAbTest(req.params.id);
+      if (!test || test.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      res.json(test);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch A/B test" });
+    }
+  });
+
+  app.post("/api/merchant/ab-tests", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertAbTestSchema.parse({ ...req.body, merchantId });
+      const test = await storage.createAbTest(parsed);
+      res.status(201).json(test);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create A/B test" });
+    }
+  });
+
+  app.patch("/api/merchant/ab-tests/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getAbTest(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      const updated = await storage.updateAbTest(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update A/B test" });
+    }
+  });
+
+  app.delete("/api/merchant/ab-tests/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getAbTest(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      await storage.deleteAbTest(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete A/B test" });
+    }
+  });
+
+  // A/B Test Results
+  app.get("/api/merchant/ab-tests/:testId/results", requireMerchant, async (req, res) => {
+    try {
+      const test = await storage.getAbTest(req.params.testId);
+      if (!test || test.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      const results = await storage.getAbTestResultsByTest(req.params.testId);
+      res.json(results);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch A/B test results" });
+    }
+  });
+
+  app.post("/api/merchant/ab-tests/:testId/results", requireMerchant, async (req, res) => {
+    try {
+      const test = await storage.getAbTest(req.params.testId);
+      if (!test || test.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "A/B test not found" });
+      }
+      const parsed = insertAbTestResultSchema.parse({ ...req.body, testId: req.params.testId });
+      const result = await storage.createAbTestResult(parsed);
+      res.status(201).json(result);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create A/B test result" });
+    }
+  });
+
+  // Checkout Analytics
+  app.get("/api/merchant/checkout-analytics", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const analytics = await storage.getCheckoutAnalyticsByMerchant(merchantId);
+      res.json(analytics);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch checkout analytics" });
+    }
+  });
+
+  app.post("/api/merchant/checkout-analytics", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertCheckoutAnalyticsSchema.parse({ ...req.body, merchantId });
+      const record = await storage.createCheckoutAnalytics(parsed);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create checkout analytics" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // SHOPPING CART PRO ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Saved Carts
+  app.get("/api/merchant/saved-carts", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const carts = await storage.getSavedCartsByMerchant(merchantId);
+      res.json(carts);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch saved carts" });
+    }
+  });
+
+  app.get("/api/merchant/saved-carts/:id", requireMerchant, async (req, res) => {
+    try {
+      const cart = await storage.getSavedCart(req.params.id);
+      if (!cart || cart.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Saved cart not found" });
+      }
+      res.json(cart);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch saved cart" });
+    }
+  });
+
+  app.get("/api/shared-cart/:token", async (req, res) => {
+    try {
+      const cart = await storage.getSavedCartByShareToken(req.params.token);
+      if (!cart) {
+        return res.status(404).json({ message: "Shared cart not found" });
+      }
+      res.json(cart);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch shared cart" });
+    }
+  });
+
+  app.post("/api/merchant/saved-carts", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertSavedCartSchema.parse({ ...req.body, merchantId });
+      const cart = await storage.createSavedCart(parsed);
+      res.status(201).json(cart);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create saved cart" });
+    }
+  });
+
+  app.delete("/api/merchant/saved-carts/:id", requireMerchant, async (req, res) => {
+    try {
+      const cart = await storage.getSavedCart(req.params.id);
+      if (!cart || cart.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Saved cart not found" });
+      }
+      await storage.deleteSavedCart(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete saved cart" });
+    }
+  });
+
+  // Cart Recommendations
+  app.get("/api/merchant/cart-recommendations", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const recs = await storage.getCartRecommendationsByMerchant(merchantId);
+      res.json(recs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch cart recommendations" });
+    }
+  });
+
+  app.post("/api/merchant/cart-recommendations", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertCartRecommendationSchema.parse({ ...req.body, merchantId });
+      const rec = await storage.createCartRecommendation(parsed);
+      res.status(201).json(rec);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create cart recommendation" });
+    }
+  });
+
+  app.delete("/api/merchant/cart-recommendations/:id", requireMerchant, async (req, res) => {
+    try {
+      await storage.deleteCartRecommendation(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete cart recommendation" });
+    }
+  });
+
+  // Cart Notes
+  app.get("/api/merchant/cart-notes/:cartId", requireMerchant, async (req, res) => {
+    try {
+      const notes = await storage.getCartNotesByCart(req.params.cartId);
+      res.json(notes);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch cart notes" });
+    }
+  });
+
+  app.post("/api/merchant/cart-notes", requireMerchant, async (req, res) => {
+    try {
+      const parsed = insertCartNoteSchema.parse(req.body);
+      const note = await storage.createCartNote(parsed);
+      res.status(201).json(note);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create cart note" });
+    }
+  });
+
+  app.delete("/api/merchant/cart-notes/:id", requireMerchant, async (req, res) => {
+    try {
+      await storage.deleteCartNote(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete cart note" });
+    }
+  });
+
+  // Inventory Reservations
+  app.get("/api/merchant/inventory-reservations", requireMerchant, async (req, res) => {
+    try {
+      const { productId } = req.query;
+      if (productId && typeof productId === "string") {
+        const reservations = await storage.getInventoryReservationsByProduct(productId);
+        return res.json(reservations);
+      }
+      res.status(400).json({ message: "productId query parameter is required" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch inventory reservations" });
+    }
+  });
+
+  app.post("/api/merchant/inventory-reservations", requireMerchant, async (req, res) => {
+    try {
+      const parsed = insertInventoryReservationSchema.parse(req.body);
+      const reservation = await storage.createInventoryReservation(parsed);
+      res.status(201).json(reservation);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create inventory reservation" });
+    }
+  });
+
+  app.patch("/api/merchant/inventory-reservations/:id", requireMerchant, async (req, res) => {
+    try {
+      const updated = await storage.updateInventoryReservation(req.params.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ message: "Reservation not found" });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update inventory reservation" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // ANALYTICS ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Daily Analytics
+  app.get("/api/merchant/analytics/daily", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const { startDate, endDate } = req.query;
+      const start = startDate ? new Date(startDate as string) : undefined;
+      const end = endDate ? new Date(endDate as string) : undefined;
+      const data = await storage.getAnalyticsDailyByMerchant(merchantId, start, end);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch daily analytics" });
+    }
+  });
+
+  app.post("/api/merchant/analytics/daily", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertAnalyticsDailySchema.parse({ ...req.body, merchantId });
+      const record = await storage.createAnalyticsDaily(parsed);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create daily analytics" });
+    }
+  });
+
+  // Product Analytics
+  app.get("/api/merchant/analytics/products", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const data = await storage.getAnalyticsProductsByMerchant(merchantId);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch product analytics" });
+    }
+  });
+
+  app.post("/api/merchant/analytics/products", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertAnalyticsProductsSchema.parse({ ...req.body, merchantId });
+      const record = await storage.createAnalyticsProducts(parsed);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create product analytics" });
+    }
+  });
+
+  // Customer LTV
+  app.get("/api/merchant/analytics/ltv", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const data = await storage.getCustomerLtvByMerchant(merchantId);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch customer LTV data" });
+    }
+  });
+
+  app.post("/api/merchant/analytics/ltv", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertCustomerLtvSchema.parse({ ...req.body, merchantId });
+      const record = await storage.createCustomerLtv(parsed);
+      res.status(201).json(record);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create customer LTV record" });
+    }
+  });
+
+  // Scheduled Reports
+  app.get("/api/merchant/scheduled-reports", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const reports = await storage.getScheduledReportsByMerchant(merchantId);
+      res.json(reports);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch scheduled reports" });
+    }
+  });
+
+  app.post("/api/merchant/scheduled-reports", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertScheduledReportSchema.parse({ ...req.body, merchantId });
+      const report = await storage.createScheduledReport(parsed);
+      res.status(201).json(report);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create scheduled report" });
+    }
+  });
+
+  app.patch("/api/merchant/scheduled-reports/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getScheduledReport(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      const updated = await storage.updateScheduledReport(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update scheduled report" });
+    }
+  });
+
+  app.delete("/api/merchant/scheduled-reports/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getScheduledReport(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+      await storage.deleteScheduledReport(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete scheduled report" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // BRANDING ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Brand Settings (one per merchant)
+  app.get("/api/merchant/brand-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.getBrandSettings(merchantId);
+      res.json(settings || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch brand settings" });
+    }
+  });
+
+  app.put("/api/merchant/brand-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.upsertBrandSettings(merchantId, req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update brand settings" });
+    }
+  });
+
+  // Email Templates
+  app.get("/api/merchant/email-templates", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const templates = await storage.getEmailTemplatesByMerchant(merchantId);
+      res.json(templates);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch email templates" });
+    }
+  });
+
+  app.get("/api/merchant/email-templates/:id", requireMerchant, async (req, res) => {
+    try {
+      const template = await storage.getEmailTemplate(req.params.id);
+      if (!template || template.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      res.json(template);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch email template" });
+    }
+  });
+
+  app.post("/api/merchant/email-templates", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertEmailTemplateSchema.parse({ ...req.body, merchantId });
+      const template = await storage.createEmailTemplate(parsed);
+      res.status(201).json(template);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create email template" });
+    }
+  });
+
+  app.patch("/api/merchant/email-templates/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getEmailTemplate(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      const updated = await storage.updateEmailTemplate(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update email template" });
+    }
+  });
+
+  app.delete("/api/merchant/email-templates/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getEmailTemplate(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Template not found" });
+      }
+      await storage.deleteEmailTemplate(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete email template" });
+    }
+  });
+
+  // Receipt Settings (one per merchant)
+  app.get("/api/merchant/receipt-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.getReceiptSettings(merchantId);
+      res.json(settings || {});
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch receipt settings" });
+    }
+  });
+
+  app.put("/api/merchant/receipt-settings", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const settings = await storage.upsertReceiptSettings(merchantId, req.body);
+      res.json(settings);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update receipt settings" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // SUBSCRIPTION ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  // Merchant Subscriptions
+  app.get("/api/merchant/subscriptions", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const subs = await storage.getMerchantSubscriptionsByMerchant(merchantId);
+      res.json(subs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch subscriptions" });
+    }
+  });
+
+  app.post("/api/merchant/subscriptions", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertMerchantSubscriptionSchema.parse({ ...req.body, merchantId });
+      const sub = await storage.createMerchantSubscription(parsed);
+      res.status(201).json(sub);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create subscription" });
+    }
+  });
+
+  app.patch("/api/merchant/subscriptions/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getMerchantSubscription(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Subscription not found" });
+      }
+      const updated = await storage.updateMerchantSubscription(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update subscription" });
+    }
+  });
+
+  // Addon Subscriptions
+  app.get("/api/merchant/addon-subscriptions", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const subs = await storage.getAddonSubscriptionsByMerchant(merchantId);
+      res.json(subs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch addon subscriptions" });
+    }
+  });
+
+  app.post("/api/merchant/addon-subscriptions", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertAddonSubscriptionSchema.parse({ ...req.body, merchantId });
+      const sub = await storage.createAddonSubscription(parsed);
+      res.status(201).json(sub);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create addon subscription" });
+    }
+  });
+
+  app.patch("/api/merchant/addon-subscriptions/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getAddonSubscription(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Addon subscription not found" });
+      }
+      const updated = await storage.updateAddonSubscription(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update addon subscription" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // API LOGS ROUTES (Part 9)
+  // ══════════════════════════════════════════════════════════════
+
+  app.get("/api/merchant/api-logs", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const logs = await storage.getApiLogsByMerchant(merchantId);
+      res.json(logs);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch API logs" });
+    }
+  });
+
+  // ══════════════════════════════════════════════════════════════
+  // CUSTOMER VAULT ROUTES (Prompt 10)
+  // ══════════════════════════════════════════════════════════════
+
+  app.get("/api/merchant/vault", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const customers = await storage.getCustomerVaultByMerchant(merchantId);
+      res.json(customers);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vault customers" });
+    }
+  });
+
+  app.get("/api/merchant/vault/:id", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerVaultRecord(req.params.id);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Vault customer not found" });
+      }
+      res.json(customer);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vault customer" });
+    }
+  });
+
+  app.post("/api/merchant/vault", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const parsed = insertCustomerVaultSchema.parse({ ...req.body, merchantId });
+      const customer = await storage.createCustomerVaultRecord(parsed);
+      res.status(201).json(customer);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create vault customer" });
+    }
+  });
+
+  app.patch("/api/merchant/vault/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getCustomerVaultRecord(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Vault customer not found" });
+      }
+      const updated = await storage.updateCustomerVaultRecord(req.params.id, req.body);
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update vault customer" });
+    }
+  });
+
+  app.delete("/api/merchant/vault/:id", requireMerchant, async (req, res) => {
+    try {
+      const existing = await storage.getCustomerVaultRecord(req.params.id);
+      if (!existing || existing.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Vault customer not found" });
+      }
+      await storage.deleteCustomerVaultRecord(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete vault customer" });
+    }
+  });
+
+  // Vault Payment Methods
+  app.get("/api/merchant/vault/:customerId/payment-methods", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerVaultRecord(req.params.customerId);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Vault customer not found" });
+      }
+      const methods = await storage.getVaultPaymentMethodsByCustomer(req.params.customerId);
+      res.json(methods);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch vault payment methods" });
+    }
+  });
+
+  app.post("/api/merchant/vault/:customerId/payment-methods", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerVaultRecord(req.params.customerId);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Vault customer not found" });
+      }
+      const parsed = insertVaultPaymentMethodSchema.parse({ ...req.body, customerId: req.params.customerId });
+      const method = await storage.createVaultPaymentMethod(parsed);
+      res.status(201).json(method);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ message: "Invalid input", errors: error.errors });
+      }
+      res.status(500).json({ message: "Failed to create vault payment method" });
+    }
+  });
+
+  app.delete("/api/merchant/vault/:customerId/payment-methods/:id", requireMerchant, async (req, res) => {
+    try {
+      const customer = await storage.getCustomerVaultRecord(req.params.customerId);
+      if (!customer || customer.merchantId !== (req.session as any).merchantId) {
+        return res.status(404).json({ message: "Vault customer not found" });
+      }
+      await storage.deleteVaultPaymentMethod(req.params.id);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete vault payment method" });
     }
   });
 

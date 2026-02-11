@@ -1,4 +1,5 @@
 import express, { type Request, Response, NextFunction } from "express";
+import cookieParser from "cookie-parser";
 import session from "express-session";
 import connectPgSimple from "connect-pg-simple";
 import { pool } from "./db";
@@ -28,6 +29,7 @@ if (!process.env.SESSION_SECRET && process.env.NODE_ENV === 'production') {
 
 app.set('trust proxy', 1);
 
+app.use(cookieParser());
 app.use(express.json({
   verify: (req, _res, buf) => {
     req.rawBody = buf;
