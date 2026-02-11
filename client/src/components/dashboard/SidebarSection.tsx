@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, Lock } from "lucide-react";
+import { ChevronDown, Lock, Info } from "lucide-react";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 
 export interface SidebarSubItem {
@@ -15,6 +16,7 @@ export interface SidebarNavItem {
   badge?: string;
   badgeVariant?: "green" | "blue" | "gray" | "tier";
   locked?: boolean;
+  tooltip?: string;
   subItems?: SidebarSubItem[];
 }
 
@@ -80,6 +82,22 @@ export function SidebarNavLink({ item }: SidebarNavLinkProps) {
         >
           <Icon className="h-4 w-4 shrink-0" />
           <span className="flex-1 whitespace-nowrap">{item.name}</span>
+
+          {item.tooltip && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span
+                  className="inline-flex items-center justify-center h-4 w-4 rounded-full border border-gray-300 text-gray-400 hover:border-[#1844A6] hover:text-[#1844A6] transition-colors cursor-help shrink-0"
+                  onClick={(e) => e.preventDefault()}
+                >
+                  <Info className="h-2.5 w-2.5" />
+                </span>
+              </TooltipTrigger>
+              <TooltipContent side="right" className="text-xs max-w-48">
+                {item.tooltip}
+              </TooltipContent>
+            </Tooltip>
+          )}
 
           {item.badge && (
             <Badge
