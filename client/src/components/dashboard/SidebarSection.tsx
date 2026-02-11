@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { ChevronDown, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
 
 export interface SidebarSubItem {
   name: string;
@@ -14,10 +15,17 @@ export interface SidebarNavItem {
   icon: React.ElementType;
   badge?: string;
   badgeVariant?: "green" | "blue" | "gray" | "tier";
+  badgeTooltip?: string;
   locked?: boolean;
-  tooltip?: string;
   subItems?: SidebarSubItem[];
 }
+
+const badgeStyles: Record<string, string> = {
+  green: "bg-green-100 text-green-700",
+  blue: "bg-blue-100 text-blue-700",
+  gray: "bg-gray-200 text-gray-600",
+  tier: "bg-[#1844A6] text-white",
+};
 
 interface SidebarNavLinkProps {
   item: SidebarNavItem;
@@ -75,29 +83,23 @@ export function SidebarNavLink({ item }: SidebarNavLinkProps) {
           <Icon className="h-4 w-4 shrink-0" />
           <span className="flex-1 whitespace-nowrap">{item.name}</span>
 
-          {item.tooltip && (
+          {item.badge && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <span
-                  className="inline-flex items-center justify-center cursor-help shrink-0"
-                  onClick={(e) => e.preventDefault()}
+                <Badge
+                  className={`text-[10px] px-1.5 py-0 no-default-hover-elevate ${item.badgeTooltip ? "cursor-help" : ""} ${
+                    badgeStyles[item.badgeVariant || "gray"]
+                  }`}
                 >
-                  <svg viewBox="0 0 24 24" className="h-4 w-4" style={{ color: "#09080e" }}>
-                    <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" strokeWidth="2" />
-                    <text x="12" y="17.5" textAnchor="middle" fontSize="15" fontFamily="Georgia, serif" fontStyle="italic" fill="currentColor">i</text>
-                  </svg>
-                </span>
+                  {item.badge}
+                </Badge>
               </TooltipTrigger>
-              <TooltipContent side="right" className="text-xs max-w-48">
-                {item.tooltip}
-              </TooltipContent>
+              {item.badgeTooltip && (
+                <TooltipContent side="right" className="text-xs max-w-48">
+                  {item.badgeTooltip}
+                </TooltipContent>
+              )}
             </Tooltip>
-          )}
-
-          {item.badge && (
-            <span className="text-[9px] font-medium text-gray-400 uppercase tracking-wide shrink-0">
-              {item.badge}
-            </span>
           )}
 
           {item.locked && (

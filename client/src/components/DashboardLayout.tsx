@@ -239,15 +239,11 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const { badge, badgeVariant, locked } = getEnhancementBadge(enh);
     const href = `/dashboard/enhance/${enh.slug}`;
 
-    let tooltip: string | undefined;
-    if (hasAddon(enh.slug)) {
-      tooltip = undefined;
-    } else if (enh.includedTiers?.includes(tier)) {
-      tooltip = undefined;
-    } else if (!canAccess(enh.requiredTier)) {
-      tooltip = `Upgrade to ${enh.requiredTier} to unlock this enhancement`;
-    } else {
-      tooltip = `Available on your ${tier} plan — click to learn more`;
+    let badgeTooltip: string | undefined;
+    if (badge === "UPGRADE" && !canAccess(enh.requiredTier)) {
+      badgeTooltip = `Requires ${enh.requiredTier} plan`;
+    } else if (badge === "UPGRADE" && canAccess(enh.requiredTier)) {
+      badgeTooltip = `Available on your plan`;
     }
 
     return {
@@ -257,7 +253,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       badge,
       badgeVariant,
       locked,
-      tooltip,
+      badgeTooltip,
     };
   });
 
