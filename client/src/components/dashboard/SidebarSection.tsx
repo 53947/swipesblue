@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
-import { ChevronDown, Lock, Info } from "lucide-react";
+import { ChevronDown, Lock } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Badge } from "@/components/ui/badge";
 
@@ -90,7 +90,10 @@ export function SidebarNavLink({ item }: SidebarNavLinkProps) {
                   className="inline-flex items-center justify-center h-4 w-4 rounded-full border border-gray-300 text-gray-400 hover:border-[#1844A6] hover:text-[#1844A6] transition-colors cursor-help shrink-0"
                   onClick={(e) => e.preventDefault()}
                 >
-                  <Info className="h-2.5 w-2.5" />
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-2.5 w-2.5">
+                    <circle cx="12" cy="12" r="11" fill="none" stroke="currentColor" strokeWidth="2" />
+                    <text x="12" y="17" textAnchor="middle" fontSize="15" fontFamily="Georgia, serif" fontStyle="italic" fill="currentColor">i</text>
+                  </svg>
                 </span>
               </TooltipTrigger>
               <TooltipContent side="right" className="text-xs max-w-48">
