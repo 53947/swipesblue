@@ -8,6 +8,7 @@ interface MerchantSession {
   name: string | null;
   businessName: string | null;
   tier: string | null;
+  signupPath: string | null;
 }
 
 export function useMerchantAuth() {
@@ -46,6 +47,7 @@ export function useMerchantAuth() {
     email: data?.email || null,
     businessName: data?.businessName || null,
     merchantId: data?.merchantId || null,
+    signupPath: data?.signupPath || null,
     isAuthenticated,
     isLoading,
     canAccess,

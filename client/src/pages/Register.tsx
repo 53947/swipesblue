@@ -30,10 +30,21 @@ const registerFormSchema = registerMerchantSchema.extend({
 
 type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
+const pathHeadings: Record<string, { title: string; subtitle: string }> = {
+  ecommerce: { title: "Start selling online", subtitle: "Set up your storefront and start accepting payments" },
+  developer: { title: "Get your API keys", subtitle: "Build payment integrations with our developer platform" },
+  gateway: { title: "Connect your gateway", subtitle: "Start processing transactions in minutes" },
+};
+
 export default function Register() {
   const [showPassword, setShowPassword] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Read signup path from URL query param
+  const searchParams = new URLSearchParams(window.location.search);
+  const signupPath = searchParams.get("path") as "ecommerce" | "developer" | "gateway" | null;
+  const heading = signupPath && pathHeadings[signupPath] ? pathHeadings[signupPath] : { title: "Create your account", subtitle: "Start accepting payments in minutes" };
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -49,7 +60,10 @@ export default function Register() {
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterFormValues) => {
       const { confirmPassword, ...registerData } = data;
-      const response = await apiRequest("POST", "/api/auth/register", registerData);
+      const response = await apiRequest("POST", "/api/auth/register", {
+        ...registerData,
+        ...(signupPath ? { signupPath } : {}),
+      });
       return response.json();
     },
     onSuccess: () => {
@@ -87,8 +101,8 @@ export default function Register() {
       <main className="flex-1 flex items-center justify-center p-4 py-12">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">Create your account</h1>
-            <p className="text-gray-600">Start accepting payments in minutes</p>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">{heading.title}</h1>
+            <p className="text-gray-600">{heading.subtitle}</p>
           </div>
 
           <Card className="border border-gray-200 rounded-[7px] shadow-sm">

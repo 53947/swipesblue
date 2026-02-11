@@ -169,7 +169,7 @@ export default function Developers() {
                 Quick Start Guide
               </Button>
             </a>
-            <Link href="/dashboard/api-keys">
+            <Link href="/register?path=developer">
               <Button
                 variant="outline"
                 className="border-2 border-teal-600 text-teal-600 rounded-[7px] px-6 py-3"
@@ -388,29 +388,29 @@ export default function Developers() {
             Ready to integrate?
           </h2>
           <p className="text-lg text-gray-500 mb-8 max-w-xl mx-auto">
-            Create your account and start building in minutes.
+            Create your free sandbox account and start building in minutes.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <Link href="/dashboard/api-keys">
+            <Link href="/register?path=developer">
               <Button
-                className="bg-[#1844A6] text-white rounded-[7px] px-6 py-3"
-                data-testid="button-cta-get-api-keys"
+                className="bg-[#1844A6] text-white rounded-[7px] px-6 py-3 group"
+                data-testid="button-cta-create-sandbox"
               >
                 <span className="flex items-center">
-                  Get API Keys
-                  <ArrowRight className="h-4 w-4 ml-2" />
+                  Create Free Sandbox Account
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
                 </span>
               </Button>
             </Link>
-            <Link href="/developers">
+            <a href="#quick-start">
               <Button
                 variant="outline"
                 className="border-2 border-teal-600 text-teal-600 rounded-[7px] px-6 py-3"
                 data-testid="button-cta-view-docs"
               >
-                View Full Docs
+                View Quick Start Guide
               </Button>
-            </Link>
+            </a>
           </div>
         </div>
       </section>

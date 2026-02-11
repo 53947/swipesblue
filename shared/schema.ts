@@ -47,6 +47,7 @@ export const merchantAccounts = pgTable("merchant_accounts", {
   fullName: text("full_name").notNull(),
   tier: text("tier").notNull().default("Free"), // 'Free' | 'Growth' | 'Scale' | 'Enterprise'
   status: text("status").notNull().default("active"), // 'active' | 'suspended' | 'pending'
+  signupPath: text("signup_path"), // 'ecommerce' | 'developer' | 'gateway' | null
   createdAt: timestamp("created_at").notNull().defaultNow(),
   lastLoginAt: timestamp("last_login_at"),
 });
@@ -62,6 +63,7 @@ export const registerMerchantSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   businessName: z.string().min(1, "Business name is required"),
   fullName: z.string().min(1, "Full name is required"),
+  signupPath: z.enum(["ecommerce", "developer", "gateway"]).optional(),
 });
 
 export const loginMerchantSchema = z.object({

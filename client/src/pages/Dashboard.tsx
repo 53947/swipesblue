@@ -11,6 +11,12 @@ import {
   ArrowRight,
   Layers,
   Package,
+  Key,
+  Code,
+  Zap,
+  Terminal,
+  BarChart3,
+  Webhook,
 } from "lucide-react";
 import MetricCard from "@/components/MetricCard";
 import TransactionTable from "@/components/TransactionTable";
@@ -23,11 +29,26 @@ import { useMerchantAuth } from "@/hooks/use-merchant-auth";
 import { TIER_PRODUCT_LIMITS } from "@shared/tier-constants";
 import type { AddOnProduct } from "@shared/schema";
 
-const quickActions = [
+// ── QUICK ACTIONS (per path) ────────────────────────────────
+const ecommerceActions = [
   { label: "New Transaction", href: "/dashboard/terminal", icon: CreditCard },
   { label: "Create Invoice", href: "/dashboard/invoices", icon: Receipt },
   { label: "Add Product", href: "/dashboard/catalog/create", icon: Plus },
   { label: "Payment Link", href: "/dashboard/payment-links", icon: Link2 },
+];
+
+const developerActions = [
+  { label: "API Keys", href: "/dashboard/enhance/premium-api", icon: Key },
+  { label: "View Docs", href: "/developers", icon: Code },
+  { label: "Webhooks", href: "/dashboard/enhance/premium-api", icon: Webhook },
+  { label: "Test Sandbox", href: "/developers#quick-start", icon: Zap },
+];
+
+const gatewayActions = [
+  { label: "Process Payment", href: "/dashboard/terminal", icon: CreditCard },
+  { label: "Payment Link", href: "/dashboard/payment-links", icon: Link2 },
+  { label: "View Transactions", href: "/dashboard/transactions", icon: BarChart3 },
+  { label: "Create Invoice", href: "/dashboard/invoices", icon: Receipt },
 ];
 
 const mockTransactions = [
@@ -59,8 +80,16 @@ const upgradeRecommendations: Record<string, { message: string; cta: string; tie
   },
 };
 
+// ── SUBTITLE PER PATH ───────────────────────────────────────
+const pathSubtitles: Record<string, string> = {
+  ecommerce: "E-Commerce Suite",
+  developer: "Developer API",
+  gateway: "Gateway Processing",
+};
+
 export default function Dashboard() {
-  const { tier, businessName, addons } = useMerchantAuth();
+  const { tier, businessName, addons, signupPath } = useMerchantAuth();
+  const path = signupPath || "ecommerce";
 
   const { data: allAddOns = [] } = useQuery<AddOnProduct[]>({
     queryKey: ["/api/add-ons"],
@@ -85,6 +114,12 @@ export default function Dashboard() {
   const productCount = countData?.count ?? 0;
   const productLimit = TIER_PRODUCT_LIMITS[tier] ?? 25;
 
+  // Pick quick actions based on path
+  const quickActions =
+    path === "developer" ? developerActions :
+    path === "gateway" ? gatewayActions :
+    ecommerceActions;
+
   return (
     <div className="p-8 space-y-8">
       {/* Header with greeting + TierBadge */}
@@ -94,7 +129,7 @@ export default function Dashboard() {
             Welcome back{businessName ? `, ${businessName}` : ""}
           </h1>
           <p className="text-gray-500 mt-1">
-            E-Commerce Suite
+            {pathSubtitles[path] || "E-Commerce Suite"}
           </p>
         </div>
         <TierBadge tier={tier} size="lg" />
@@ -103,42 +138,107 @@ export default function Dashboard() {
       {/* Onboarding Card (first-time users) */}
       <OnboardingCard />
 
-      {/* Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <MetricCard
-          title="Revenue"
-          value="$45,231.89"
-          change="+20.1% from last month"
-          changeType="positive"
-          icon={DollarSign}
-        />
-        <MetricCard
-          title="Orders"
-          value="2,350"
-          change="+15.3% from last month"
-          changeType="positive"
-          icon={CreditCard}
-        />
-        <MetricCard
-          title="Products"
-          value={`${productCount} / ${productLimit === Infinity ? "\u221E" : productLimit}`}
-          change={productLimit !== Infinity && productCount >= productLimit * 0.9 ? "Near limit" : "active"}
-          changeType="neutral"
-          icon={Package}
-        />
-        <MetricCard
-          title="Customers"
-          value="573"
-          change="+12 new this week"
-          changeType="neutral"
-          icon={Users}
-        />
-      </div>
+      {/* Metric Cards — vary by path */}
+      {path === "developer" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            title="API Calls (30d)"
+            value="12,847"
+            change="+32.1% from last month"
+            changeType="positive"
+            icon={Code}
+          />
+          <MetricCard
+            title="Success Rate"
+            value="99.4%"
+            change="Stable"
+            changeType="neutral"
+            icon={Zap}
+          />
+          <MetricCard
+            title="Webhooks Delivered"
+            value="8,291"
+            change="+18.5% from last month"
+            changeType="positive"
+            icon={Webhook}
+          />
+          <MetricCard
+            title="Revenue (API)"
+            value="$28,450"
+            change="+22.3% from last month"
+            changeType="positive"
+            icon={DollarSign}
+          />
+        </div>
+      ) : path === "gateway" ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            title="Processed"
+            value="$85,312"
+            change="+14.8% from last month"
+            changeType="positive"
+            icon={DollarSign}
+          />
+          <MetricCard
+            title="Transactions"
+            value="1,842"
+            change="+11.2% from last month"
+            changeType="positive"
+            icon={CreditCard}
+          />
+          <MetricCard
+            title="Approval Rate"
+            value="98.2%"
+            change="+0.3% from last month"
+            changeType="positive"
+            icon={TrendingUp}
+          />
+          <MetricCard
+            title="Avg. Transaction"
+            value="$46.32"
+            change="+$2.10 from last month"
+            changeType="positive"
+            icon={BarChart3}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard
+            title="Revenue"
+            value="$45,231.89"
+            change="+20.1% from last month"
+            changeType="positive"
+            icon={DollarSign}
+          />
+          <MetricCard
+            title="Orders"
+            value="2,350"
+            change="+15.3% from last month"
+            changeType="positive"
+            icon={CreditCard}
+          />
+          <MetricCard
+            title="Products"
+            value={`${productCount} / ${productLimit === Infinity ? "\u221E" : productLimit}`}
+            change={productLimit !== Infinity && productCount >= productLimit * 0.9 ? "Near limit" : "active"}
+            changeType="neutral"
+            icon={Package}
+          />
+          <MetricCard
+            title="Customers"
+            value="573"
+            change="+12 new this week"
+            changeType="neutral"
+            icon={Users}
+          />
+        </div>
+      )}
 
       {/* Quick Actions */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {quickActions.map((action) => {
           const Icon = action.icon;
+          const isExternal = action.href.startsWith("/developers");
           return (
             <Link key={action.label} href={action.href}>
               <Button
@@ -152,6 +252,36 @@ export default function Dashboard() {
           );
         })}
       </div>
+
+      {/* Developer path: API quick-start snippet */}
+      {path === "developer" && (
+        <Card className="rounded-[7px] border-gray-200">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 mb-4">
+              <Terminal className="h-5 w-5 text-[#1844A6]" />
+              <h3 className="font-semibold text-gray-900">Quick Start</h3>
+            </div>
+            <div className="bg-[#1a1a2e] rounded-[7px] p-4 overflow-x-auto">
+              <pre className="text-sm font-mono text-gray-100">
+                <code>{`curl -X POST https://api.swipesblue.com/v1/charges \\
+  -u sb_test_xxxxxxxxxxxx: \\
+  -d amount=2000 \\
+  -d currency=usd \\
+  -d source=tok_visa \\
+  -d description="Test payment"`}</code>
+              </pre>
+            </div>
+            <div className="mt-4 flex gap-3">
+              <Link href="/developers">
+                <Button variant="outline" className="rounded-[7px] border-gray-300 text-sm">
+                  Full Documentation
+                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Two-column bottom: Transactions + Active Enhancements */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

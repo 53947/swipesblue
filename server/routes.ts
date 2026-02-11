@@ -1500,15 +1500,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       (req.session as any).merchantName = merchant.fullName;
       (req.session as any).businessName = merchant.businessName;
       (req.session as any).merchantTier = merchant.tier;
+      (req.session as any).signupPath = merchant.signupPath;
       (req.session as any).isMerchant = true;
-      
+
       res.json({ success: true, message: "Login successful" });
     } catch (error) {
       console.error("Login error:", error);
       res.status(500).json({ message: "Login failed" });
     }
   });
-  
+
   // Merchant register - creates account with hashed password
   app.post("/api/auth/register", doubleCsrfProtection, authLimiter, async (req, res) => {
     try {
@@ -1523,17 +1524,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
-      const { email, password, businessName, fullName } = parseResult.data;
-      
+      const { email, password, businessName, fullName, signupPath } = parseResult.data;
+
       // Check if email already exists
       const existingAccount = await storage.getMerchantAccountByEmail(email);
       if (existingAccount) {
         return res.status(400).json({ message: "An account with this email already exists" });
       }
-      
+
       // Hash password
       const passwordHash = await hashPassword(password);
-      
+
       // Create merchant account
       const merchant = await storage.createMerchantAccount({
         email,
@@ -1542,14 +1543,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fullName,
         tier: "FREE",
         status: "active",
+        signupPath: signupPath || null,
       });
-      
+
       // Set session (auto-login after registration)
       (req.session as any).merchantId = merchant.id;
       (req.session as any).merchantEmail = merchant.email;
       (req.session as any).merchantName = merchant.fullName;
       (req.session as any).businessName = merchant.businessName;
       (req.session as any).merchantTier = merchant.tier;
+      (req.session as any).signupPath = merchant.signupPath;
       (req.session as any).isMerchant = true;
       
       res.json({ success: true, message: "Registration successful" });
@@ -1582,6 +1585,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       name: (req.session as any)?.merchantName || null,
       businessName: (req.session as any)?.businessName || null,
       tier: rawTier ? normalizeTier(rawTier) : null,
+      signupPath: (req.session as any)?.signupPath || null,
     });
   });
 

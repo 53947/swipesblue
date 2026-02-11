@@ -30,6 +30,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
+import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface MenuItem {
   icon: any;
@@ -142,12 +144,31 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
 };
 
 export default function Header() {
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const { isAuthenticated, isLoading } = useMerchantAuth();
+  const queryClient = useQueryClient();
+
+  const handleSignOut = async () => {
+    try {
+      // Fetch CSRF token first
+      const csrfRes = await fetch("/api/csrf-token");
+      const { token } = await csrfRes.json();
+      await fetch("/api/auth/logout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-csrf-token": token },
+      });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/check"] });
+      setLocation("/");
+    } catch {
+      // If logout fails, still redirect
+      setLocation("/");
+    }
+  };
 
   useEffect(() => {
     const handleScroll = () => {
@@ -291,32 +312,45 @@ export default function Header() {
           </div>
         </nav>
 
-        {/* Right: Actions */}
+        {/* Right: Actions — auth-aware */}
         <div className="hidden lg:flex items-center gap-4">
-          <Link href="/login" className="flex items-center" data-testid="link-sign-in">
-            <span 
-              className="text-[15px] font-medium text-gray-600"
-            >
-              Sign in
-            </span>
-          </Link>
-          <Link href="/dashboard" className="flex items-center" data-testid="link-dashboard">
-            <Button 
-              variant="outline"
-              className="border-2 border-teal-600 text-teal-600 rounded-[7px]"
-              data-testid="button-dashboard"
-            >
-              Dashboard
-            </Button>
-          </Link>
-          <Link href="/shoppingcart" className="flex items-center" data-testid="link-get-started">
-            <Button 
-              className="bg-[#1844A6] text-white rounded-[7px]"
-              data-testid="button-get-started"
-            >
-              Get Started
-            </Button>
-          </Link>
+          {!isLoading && isAuthenticated ? (
+            <>
+              <Link href="/dashboard" className="flex items-center" data-testid="link-dashboard">
+                <Button
+                  variant="outline"
+                  className="border-2 border-teal-600 text-teal-600 rounded-[7px]"
+                  data-testid="button-dashboard"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+              <Button
+                variant="ghost"
+                className="text-[15px] font-medium text-gray-600 rounded-[7px]"
+                onClick={handleSignOut}
+                data-testid="button-sign-out"
+              >
+                Sign out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="flex items-center" data-testid="link-sign-in">
+                <span className="text-[15px] font-medium text-gray-600">
+                  Sign in
+                </span>
+              </Link>
+              <Link href="/register" className="flex items-center" data-testid="link-get-started">
+                <Button
+                  className="bg-[#1844A6] text-white rounded-[7px]"
+                  data-testid="button-get-started"
+                >
+                  Get Started
+                </Button>
+              </Link>
+            </>
+          )}
         </div>
 
         {/* Mobile menu button */}
@@ -421,19 +455,35 @@ export default function Header() {
             <Link href="/pricing" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-pricing">
               <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">Pricing</span>
             </Link>
-            <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-dashboard">
-              <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">Dashboard</span>
-            </Link>
-            
             <div className="pt-4 mt-4 border-t border-gray-100 flex flex-col gap-3">
-              <Link href="/login" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-sign-in">
-                <span className="block py-3 px-4 text-[15px] font-medium text-gray-600">Sign in</span>
-              </Link>
-              <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-get-started">
-                <Button className="w-full bg-[#1844A6] text-white rounded-[7px]" data-testid="button-mobile-get-started">
-                  Get Started
-                </Button>
-              </Link>
+              {!isLoading && isAuthenticated ? (
+                <>
+                  <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-nav-dashboard">
+                    <Button className="w-full bg-[#1844A6] text-white rounded-[7px]" data-testid="button-mobile-dashboard">
+                      Dashboard
+                    </Button>
+                  </Link>
+                  <Button
+                    variant="ghost"
+                    className="w-full text-[15px] font-medium text-gray-600 rounded-[7px]"
+                    onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
+                    data-testid="button-mobile-sign-out"
+                  >
+                    Sign out
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-sign-in">
+                    <span className="block py-3 px-4 text-[15px] font-medium text-gray-600">Sign in</span>
+                  </Link>
+                  <Link href="/register" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-get-started">
+                    <Button className="w-full bg-[#1844A6] text-white rounded-[7px]" data-testid="button-mobile-get-started">
+                      Get Started
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </nav>
         </div>

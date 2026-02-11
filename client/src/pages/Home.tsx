@@ -1,234 +1,202 @@
 import {
-  CreditCard,
+  Store,
   Code,
   ArrowRight,
   Check,
   Shield,
-  Zap,
-  Users,
   Lock,
-  RefreshCw,
-  FileText,
-  Link as LinkIcon,
-  Activity,
-  Server
+  Zap,
+  Server,
+  CreditCard,
+  DollarSign,
+  TrendingUp,
+  Users,
+  ShoppingCart,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 
-const stats = [
-  { value: "5.8B+", label: "Transactions Powered Annually" },
-  { value: "99.99%", label: "Uptime" },
-  { value: "200+", label: "Processor Integrations" },
-  { value: "<100ms", label: "Response Time" },
-];
-
-const bentoFeatures = [
+// ── THREE PATHS ──────────────────────────────────────────────
+const paths = [
   {
+    id: "ecommerce",
+    icon: Store,
+    title: "E-Commerce Suite",
+    subtitle: "Sell online with a full storefront",
+    color: "#1844A6",
+    features: [
+      "Shopping cart + one-page checkout",
+      "Product catalog with inventory",
+      "Invoicing & subscriptions",
+      "Customer vault & fraud prevention",
+    ],
+    cta: "Start Selling",
+    href: "/register?path=ecommerce",
+  },
+  {
+    id: "developer",
+    icon: Code,
+    title: "Developer API",
+    subtitle: "Build payments into your platform",
+    color: "#0D9488",
+    features: [
+      "RESTful API with SDKs in 6 languages",
+      "Sandbox environment with test cards",
+      "Webhooks with HMAC-SHA256 signing",
+      "Tokenization & recurring billing",
+    ],
+    cta: "Get API Keys",
+    href: "/register?path=developer",
+  },
+  {
+    id: "gateway",
     icon: CreditCard,
-    title: "Virtual Terminal",
-    description: "Process cards in your browser. No hardware required. Accept payments from anywhere.",
-    link: "/products/terminal",
-    linkText: "Try Virtual Terminal",
-  },
-  {
-    icon: Users,
-    title: "Customer Vault",
-    description: "Securely store customer payment methods for faster repeat purchases.",
-    link: "/products/customers",
-    linkText: "Learn more",
-  },
-  {
-    icon: FileText,
-    title: "Invoicing",
-    description: "Send professional invoices with one-click payment links.",
-    link: "/products/invoicing",
-    linkText: "Learn more",
-  },
-  {
-    icon: RefreshCw,
-    title: "Subscriptions",
-    description: "Automate subscriptions, memberships, and payment plans with flexible scheduling.",
-    link: "/products/billing",
-    linkText: "Learn more",
-  },
-  {
-    icon: LinkIcon,
-    title: "Payment Links",
-    description: "Create shareable payment links in seconds. No website needed.",
-    link: "/products/payment-links",
-    linkText: "Learn more",
-  },
-  {
-    icon: Lock,
-    title: "Fraud Prevention",
-    description: "Real-time fraud detection with customizable rules and velocity checks.",
-    link: "/products/fraud",
-    linkText: "Learn more",
+    title: "Gateway Only",
+    subtitle: "Just process transactions",
+    color: "#374151",
+    features: [
+      "Virtual terminal for manual charges",
+      "Payment links — no website needed",
+      "Real-time transaction reporting",
+      "PCI-compliant card storage",
+    ],
+    cta: "Start Processing",
+    href: "/register?path=gateway",
   },
 ];
 
-const pricingTiers = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Start selling with zero monthly fees",
-    features: [
-      "Up to 25 products",
-      "Basic checkout",
-      "Order management",
-      "Email receipts",
-    ],
-    cta: "Start Free",
-    href: "/register",
-    highlight: false,
-  },
-  {
-    name: "Growth",
-    price: "$29",
-    period: "/month",
-    description: "For growing businesses",
-    features: [
-      "Up to 500 products",
-      "Recurring billing",
-      "Discount codes",
-      "Basic analytics",
-    ],
-    cta: "Get Started",
-    href: "/register",
-    highlight: false,
-  },
-  {
-    name: "Scale",
-    price: "$79",
-    period: "/month",
-    description: "For established businesses",
-    features: [
-      "Everything in Growth",
-      "Brand Studio (white-label)",
-      "Advanced analytics",
-      "Priority support",
-    ],
-    cta: "Get Started",
-    href: "/register",
-    highlight: true,
-    badge: "POPULAR",
-  },
-  {
-    name: "Enterprise",
-    price: "$299",
-    period: "/month",
-    description: "For high-volume merchants",
-    features: [
-      "Everything in Scale",
-      "API access & webhooks",
-      "Dedicated account manager",
-      "Custom SLA",
-    ],
-    cta: "Contact Sales",
-    href: "/register",
-    highlight: false,
-  },
+// ── STATS ────────────────────────────────────────────────────
+const stats = [
+  { value: "5.8B+", label: "Transactions Processed*" },
+  { value: "99.99%", label: "Platform Uptime*" },
+  { value: "98.5%", label: "Avg. Approval Rate" },
+  { value: "<2 hrs", label: "Support Response" },
 ];
 
-const competitors = [
-  { name: "swipesblue", rate: "2.70% + $0.30", fee: "$3.00", keep: "$97.00", isBest: true },
-  { name: "Stripe", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
-  { name: "PayPal", rate: "2.99% + $0.49", fee: "$3.48", keep: "$96.52", savings: "$0.48" },
-  { name: "Square", rate: "2.90% + $0.30", fee: "$3.20", keep: "$96.80", savings: "$0.20" },
+// ── COMPARISON TABLE ─────────────────────────────────────────
+const comparisonRows = [
+  { feature: "Setup fees", swipesblue: "None", stripe: "None", square: "None", paypal: "None" },
+  { feature: "Monthly fee", swipesblue: "$0 (Free tier)", stripe: "$0", square: "$0", paypal: "$0" },
+  { feature: "Processing rate", swipesblue: "2.70% + $0.30", stripe: "2.90% + $0.30", square: "2.90% + $0.30", paypal: "2.99% + $0.49", highlight: true },
+  { feature: "Fee on $100 sale", swipesblue: "$3.00", stripe: "$3.20", square: "$3.20", paypal: "$3.48", highlight: true },
+  { feature: "You keep", swipesblue: "$97.00", stripe: "$96.80", square: "$96.80", paypal: "$96.52", highlight: true },
+  { feature: "Dispute fees", swipesblue: "$15.00", stripe: "$15.00", square: "N/A", paypal: "$20.00" },
+  { feature: "Invoicing", swipesblue: "Included", stripe: "Included", square: "Paid add-on", paypal: "Included" },
+  { feature: "Recurring billing", swipesblue: "Included (Growth+)", stripe: "0.5% surcharge", square: "Paid add-on", paypal: "Included" },
+  { feature: "Virtual terminal", swipesblue: "Included", stripe: "Included", square: "Included", paypal: "$30/mo" },
+  { feature: "Developer API", swipesblue: "Included (Scale+)", stripe: "Included", square: "Limited", paypal: "Included" },
+];
+
+// ── MOCK DASHBOARD TRANSACTIONS ──────────────────────────────
+const mockTxns = [
+  { id: "TXN-4821", customer: "Sarah Chen", amount: "$142.00", status: "success" },
+  { id: "TXN-4820", customer: "Marcus Rivera", amount: "$89.50", status: "success" },
+  { id: "TXN-4819", customer: "Emma Wilson", amount: "$215.00", status: "success" },
+  { id: "TXN-4818", customer: "James Park", amount: "$67.99", status: "pending" },
 ];
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
-      <section className="relative pt-16 pb-24 md:pt-24 md:pb-32" data-testid="section-hero">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left */}
-            <div>
-              <h1 className="text-5xl font-bold text-gray-900 leading-tight">
-                Built for businesses<br />to grow
-              </h1>
-              <p className="text-xl font-semibold text-[#1844A6] mt-2">
-                Less fees. More revenue.
-              </p>
-              <p className="text-lg text-gray-500 mt-4 max-w-lg">
-                Simple payment processing for small businesses and developers. Accept cards, manage transactions, and scale without complexity.
-              </p>
-
-              <div className="flex flex-col sm:flex-row items-start gap-4 mt-8">
-                <Link href="/register" data-testid="link-hero-get-started">
-                  <Button
-                    size="lg"
-                    className="bg-[#1844A6] text-white rounded-[7px] px-6 py-3"
-                    data-testid="button-hero-get-started"
-                  >
-                    Start Accepting Payments
-                  </Button>
-                </Link>
-                <Link href="/developers" data-testid="link-hero-view-api-docs">
-                  <Button
-                    size="lg"
-                    variant="outline"
-                    className="border-2 border-teal-600 text-teal-600 rounded-[7px] px-6 py-3"
-                    data-testid="button-hero-contact-sales"
-                  >
-                    View API Docs
-                  </Button>
-                </Link>
-              </div>
-
-              <p className="text-sm text-gray-500 mt-4">
-                2.70% + $0.30 per transaction · No hidden fees
-              </p>
-            </div>
-
-            {/* Right */}
-            <div className="flex flex-col items-center">
-              <img
-                src="/images/less_fees_more_revenue.jpg"
-                alt="Less fees, more revenue"
-                className="w-full rounded-[7px] shadow-lg"
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Trust bar */}
-        <div className="mt-16 border-t border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="flex flex-wrap items-center justify-center gap-6 md:gap-12 text-gray-500">
-              <div className="flex items-center gap-2">
-                <Shield className="h-5 w-5 text-green-600" />
-                <span className="text-sm font-medium">PCI DSS Level 1</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Lock className="h-5 w-5 text-[#1844A6]" />
-                <span className="text-sm font-medium">256-bit Encryption</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Zap className="h-5 w-5 text-yellow-500" />
-                <span className="text-sm font-medium">99.99% Uptime</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Server className="h-5 w-5 text-teal-600" />
-                <span className="text-sm font-medium">Built on NMI Platform</span>
-              </div>
-            </div>
+      {/* ═══ HERO ═══ */}
+      <section className="pt-20 pb-16 md:pt-28 md:pb-20">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 leading-tight">
+            Accept payments. Build integrations.
+            <br />
+            <span className="text-[#1844A6]">Scale your business.</span>
+          </h1>
+          <p className="text-lg text-gray-500 mt-6 max-w-2xl mx-auto">
+            One platform for e-commerce, developer APIs, and gateway processing.
+            Transparent pricing starting at 2.70% + $0.30 per transaction.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+            <Link href="/register">
+              <Button
+                size="lg"
+                className="bg-[#1844A6] text-white rounded-[7px] px-8 py-3 group"
+              >
+                Get Started Free
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+              </Button>
+            </Link>
+            <Link href="/pricing">
+              <Button
+                size="lg"
+                variant="outline"
+                className="border-2 border-gray-300 text-gray-700 rounded-[7px] px-8 py-3"
+              >
+                View Pricing
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* Stats Bar */}
-      <section className="bg-[#F6F9FC] border-y border-gray-200 py-12" data-testid="section-stats">
+      {/* ═══ THREE PATH CARDS ═══ */}
+      <section className="pb-20 md:pb-28">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-12">
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
+              Choose your path
+            </h2>
+            <p className="text-gray-500 mt-2">
+              Every path includes a free tier. Upgrade when you're ready.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {paths.map((path) => {
+              const Icon = path.icon;
+              return (
+                <div
+                  key={path.id}
+                  className="bg-white border border-gray-200 rounded-[7px] p-8 flex flex-col hover:shadow-lg transition-shadow"
+                >
+                  <div
+                    className="w-12 h-12 rounded-[7px] flex items-center justify-center mb-6"
+                    style={{ backgroundColor: `${path.color}10` }}
+                  >
+                    <Icon className="h-6 w-6" style={{ color: path.color }} />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900 mb-1">
+                    {path.title}
+                  </h3>
+                  <p className="text-sm text-gray-500 mb-6">{path.subtitle}</p>
+                  <ul className="space-y-3 flex-1">
+                    {path.features.map((feature) => (
+                      <li key={feature} className="flex items-start gap-2">
+                        <Check
+                          className="h-4 w-4 mt-0.5 flex-shrink-0"
+                          style={{ color: path.color }}
+                        />
+                        <span className="text-sm text-gray-600">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href={path.href}>
+                    <Button
+                      className="w-full mt-8 rounded-[7px] text-white group"
+                      style={{ backgroundColor: path.color }}
+                    >
+                      {path.cta}
+                      <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ STATS BAR ═══ */}
+      <section className="bg-[#F6F9FC] border-y border-gray-200 py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <div key={index} className="text-center" data-testid={`stat-${stat.label.toLowerCase().replace(/\s+/g, '-')}`}>
+            {stats.map((stat) => (
+              <div key={stat.label} className="text-center">
                 <div className="text-3xl md:text-4xl font-bold text-gray-900">
                   {stat.value}
                 </div>
@@ -241,112 +209,181 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Bento Grid Features */}
-      <section className="py-20 md:py-28" data-testid="section-features">
+      {/* ═══ E-COMMERCE DEEP DIVE ═══ */}
+      <section className="py-20 md:py-28">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Everything you need to accept payments
-            </h2>
-            <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              From virtual terminals to recurring billing, swipesblue provides complete payment infrastructure.
-            </p>
-          </div>
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Left: pitch */}
+            <div>
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1844A6]/10 rounded-[7px] mb-6">
+                <Store className="h-4 w-4 text-[#1844A6]" />
+                <span className="text-sm font-medium text-[#1844A6]">E-Commerce Suite</span>
+              </div>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
+                Your entire storefront in one dashboard
+              </h2>
+              <p className="text-lg text-gray-600 mb-6 leading-relaxed">
+                Products, orders, customers, invoices, and subscriptions — all managed
+                from a single place. No stitching together five different services.
+              </p>
+              <ul className="space-y-3 mb-8">
+                {[
+                  "Drag-and-drop product catalog with variants",
+                  "One-page checkout that converts",
+                  "Automated invoicing and recurring billing",
+                  "Built-in fraud prevention and customer vault",
+                ].map((item) => (
+                  <li key={item} className="flex items-start gap-2">
+                    <Check className="h-4 w-4 text-[#1844A6] mt-0.5 flex-shrink-0" />
+                    <span className="text-sm text-gray-600">{item}</span>
+                  </li>
+                ))}
+              </ul>
+              <Link href="/register?path=ecommerce">
+                <Button className="bg-[#1844A6] text-white rounded-[7px] group">
+                  Start Selling Free
+                  <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
+                </Button>
+              </Link>
+            </div>
 
-          {/* Feature Grid — 3x2 equal cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {bentoFeatures.map((feature) => {
-              const Icon = feature.icon;
-              return (
-                <div
-                  key={feature.title}
-                  className="bg-white border border-gray-200 rounded-[7px] p-8 flex flex-col h-full"
-                  data-testid={`feature-card-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}
-                >
-                  <div className="w-12 h-12 bg-blue-50 rounded-[7px] flex items-center justify-center mb-6">
-                    <Icon className="h-6 w-6 text-[#1844A6]" />
+            {/* Right: CSS-only dashboard mockup */}
+            <div className="bg-[#F6F9FC] rounded-[7px] border border-gray-200 p-6 shadow-sm">
+              {/* Mock metric cards */}
+              <div className="grid grid-cols-3 gap-3 mb-5">
+                <div className="bg-white rounded-[7px] border border-gray-200 p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <DollarSign className="h-3.5 w-3.5 text-[#1844A6]" />
+                    <span className="text-[10px] text-gray-500 font-medium">Revenue</span>
                   </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3">
-                    {feature.title}
-                  </h3>
-                  <p className="text-gray-600 text-sm leading-relaxed flex-grow">
-                    {feature.description}
-                  </p>
-                  <Link href={feature.link} data-testid={`link-feature-${feature.title.toLowerCase().replace(/\s+/g, '-')}`}>
-                    <span className="text-[#1844A6] font-medium text-sm mt-6 inline-flex items-center">
-                      {feature.linkText} <ArrowRight className="ml-1 h-4 w-4" />
-                    </span>
-                  </Link>
+                  <div className="text-lg font-bold text-gray-900">$12,482</div>
+                  <div className="text-[10px] text-green-600 font-medium">+18.2% ↑</div>
                 </div>
-              );
-            })}
+                <div className="bg-white rounded-[7px] border border-gray-200 p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <ShoppingCart className="h-3.5 w-3.5 text-[#1844A6]" />
+                    <span className="text-[10px] text-gray-500 font-medium">Orders</span>
+                  </div>
+                  <div className="text-lg font-bold text-gray-900">284</div>
+                  <div className="text-[10px] text-green-600 font-medium">+12.5% ↑</div>
+                </div>
+                <div className="bg-white rounded-[7px] border border-gray-200 p-3">
+                  <div className="flex items-center gap-1.5 mb-1">
+                    <Users className="h-3.5 w-3.5 text-[#1844A6]" />
+                    <span className="text-[10px] text-gray-500 font-medium">Customers</span>
+                  </div>
+                  <div className="text-lg font-bold text-gray-900">1,247</div>
+                  <div className="text-[10px] text-green-600 font-medium">+8.3% ↑</div>
+                </div>
+              </div>
+
+              {/* Mock chart area */}
+              <div className="bg-white rounded-[7px] border border-gray-200 p-4 mb-5">
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1.5">
+                    <BarChart3 className="h-3.5 w-3.5 text-[#1844A6]" />
+                    <span className="text-xs font-semibold text-gray-700">Weekly Revenue</span>
+                  </div>
+                  <TrendingUp className="h-3.5 w-3.5 text-green-500" />
+                </div>
+                {/* CSS bar chart */}
+                <div className="flex items-end gap-2 h-20">
+                  {[40, 55, 45, 70, 60, 85, 75].map((h, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                      <div
+                        className="w-full rounded-t-[3px] bg-[#1844A6]"
+                        style={{ height: `${h}%`, opacity: i === 5 ? 1 : 0.6 }}
+                      />
+                      <span className="text-[8px] text-gray-400">
+                        {["M", "T", "W", "T", "F", "S", "S"][i]}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mock transactions */}
+              <div className="bg-white rounded-[7px] border border-gray-200">
+                <div className="px-3 py-2 border-b border-gray-100">
+                  <span className="text-xs font-semibold text-gray-700">Recent Transactions</span>
+                </div>
+                {mockTxns.map((txn, i) => (
+                  <div
+                    key={txn.id}
+                    className={`px-3 py-2 flex items-center justify-between text-xs ${
+                      i < mockTxns.length - 1 ? "border-b border-gray-50" : ""
+                    }`}
+                  >
+                    <div>
+                      <span className="font-medium text-gray-900">{txn.customer}</span>
+                      <span className="text-gray-400 ml-2">{txn.id}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-semibold text-gray-900">{txn.amount}</span>
+                      <span
+                        className={`w-1.5 h-1.5 rounded-full ${
+                          txn.status === "success" ? "bg-green-500" : "bg-yellow-500"
+                        }`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Comparison Table */}
-      <section className="py-20 md:py-28 bg-gray-50" data-testid="section-comparison">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* ═══ COMPARISON TABLE ═══ */}
+      <section className="py-20 md:py-28 bg-[#F6F9FC]">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Keep more of what you earn
             </h2>
             <p className="text-lg text-gray-600">
-              Compare processing fees on a $100 sale. Less fees. More revenue.
+              Side-by-side comparison so you can see exactly where swipesblue saves you money.
             </p>
           </div>
 
           <div className="bg-white rounded-[7px] border border-gray-200 overflow-hidden shadow-sm">
-            <table className="w-full" data-testid="table-comparison">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left py-4 px-6 font-semibold text-gray-900">Provider</th>
-                  <th className="text-left py-4 px-6 font-semibold text-gray-900">Rate</th>
-                  <th className="text-right py-4 px-6 font-semibold text-gray-900">Fee</th>
-                  <th className="text-right py-4 px-6 font-semibold text-gray-900">You Keep</th>
-                </tr>
-              </thead>
-              <tbody>
-                {competitors.map((competitor) => (
-                  <tr
-                    key={competitor.name}
-                    className={`border-b border-gray-100 ${competitor.isBest ? "bg-[#1844A6]/5" : ""}`}
-                    data-testid={`row-${competitor.name.toLowerCase()}`}
-                  >
-                    <td className="py-4 px-6">
-                      <span className={competitor.isBest ? "font-bold text-[#1844A6]" : "text-gray-600"}>
-                        {competitor.name}
-                      </span>
-                    </td>
-                    <td className="py-4 px-6">
-                      <span className={competitor.isBest ? "font-semibold text-[#1844A6]" : "text-gray-600"}>
-                        {competitor.rate}
-                      </span>
-                    </td>
-                    <td className="text-right py-4 px-6">
-                      <span className={competitor.isBest ? "font-bold text-[#1844A6]" : "text-gray-600"}>
-                        {competitor.fee}
-                      </span>
-                    </td>
-                    <td className="text-right py-4 px-6">
-                      <span className={competitor.isBest ? "font-bold text-green-600" : "text-gray-600"}>
-                        {competitor.keep}
-                      </span>
-                      {competitor.savings && (
-                        <span className="ml-2 text-xs text-green-600">
-                          (Save {competitor.savings})
-                        </span>
-                      )}
-                    </td>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-200">
+                    <th className="text-left py-3 px-5 font-semibold text-gray-900 min-w-[160px]">Feature</th>
+                    <th className="text-center py-3 px-4 font-bold text-[#1844A6] min-w-[120px]">
+                      <span className="text-[#374151]">swipes</span>
+                      <span className="text-[#0000FF]">blue</span>
+                    </th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-600 min-w-[120px]">Stripe</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-600 min-w-[120px]">Square</th>
+                    <th className="text-center py-3 px-4 font-semibold text-gray-600 min-w-[120px]">PayPal</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {comparisonRows.map((row) => (
+                    <tr
+                      key={row.feature}
+                      className={`border-b border-gray-100 last:border-0 ${
+                        row.highlight ? "bg-[#1844A6]/[0.03]" : ""
+                      }`}
+                    >
+                      <td className="py-3 px-5 font-medium text-gray-900">{row.feature}</td>
+                      <td className="py-3 px-4 text-center font-semibold text-[#1844A6]">{row.swipesblue}</td>
+                      <td className="py-3 px-4 text-center text-gray-600">{row.stripe}</td>
+                      <td className="py-3 px-4 text-center text-gray-600">{row.square}</td>
+                      <td className="py-3 px-4 text-center text-gray-600">{row.paypal}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <div className="text-center mt-8">
-            <Link href="/pricing" data-testid="link-see-full-pricing">
-              <Button className="bg-[#1844A6] text-white rounded-[7px]" data-testid="button-see-full-pricing">
+            <Link href="/pricing">
+              <Button className="bg-[#1844A6] text-white rounded-[7px]">
                 See Full Pricing
               </Button>
             </Link>
@@ -354,195 +391,30 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Pricing Preview */}
-      <section className="py-20 md:py-28" data-testid="section-pricing">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Simple, transparent pricing
-            </h2>
-            <p className="text-lg text-gray-600">
-              Start free, scale as you grow. Plus <span className="font-semibold text-[#1844A6]">2.70% + $0.30</span> per transaction on all tiers.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {pricingTiers.map((tier) => (
-              <Card
-                key={tier.name}
-                className={`rounded-[7px] relative ${
-                  tier.highlight
-                    ? "border-2 border-[#1844A6] shadow-card-hover"
-                    : "border border-gray-200"
-                }`}
-                data-testid={`pricing-tier-${tier.name.toLowerCase()}`}
-              >
-                {tier.badge && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                    <Badge className="bg-yellow-500 text-black font-semibold px-3">
-                      {tier.badge}
-                    </Badge>
-                  </div>
-                )}
-                <CardContent className="p-6 pt-8">
-                  <div className="text-center mb-6">
-                    <h3 className="text-lg font-bold text-gray-900 mb-2">{tier.name}</h3>
-                    <div className="flex items-baseline justify-center gap-1">
-                      <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
-                      <span className="text-gray-500">{tier.period}</span>
-                    </div>
-                    <p className="text-sm text-gray-500 mt-2">{tier.description}</p>
-                  </div>
-
-                  <ul className="space-y-3 mb-6">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-green-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm text-gray-600">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <Link href={tier.href} data-testid={`link-pricing-${tier.name.toLowerCase()}`}>
-                    <Button
-                      className={`w-full rounded-[7px] ${
-                        tier.highlight
-                          ? "bg-[#1844A6] text-white"
-                          : "bg-white border-2 border-teal-600 text-teal-600"
-                      }`}
-                      data-testid={`button-pricing-${tier.name.toLowerCase()}`}
-                    >
-                      {tier.cta}
-                    </Button>
-                  </Link>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Developer Preview */}
-      <section className="py-20 md:py-28 bg-white" data-testid="section-developer">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#1844A6]/10 rounded-[7px] mb-6">
-                <Code className="h-4 w-4 text-[#1844A6]" />
-                <span className="text-sm font-medium text-[#1844A6]">Developer API</span>
-              </div>
-              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-                Built for developers
-              </h2>
-              <p className="text-lg text-gray-600 mb-8 leading-relaxed">
-                Clean RESTful APIs, comprehensive documentation, and sandbox testing.
-                Integrate swipesblue payments into your platform in minutes.
-              </p>
-              <div className="flex flex-wrap gap-4">
-                <Link href="/developers" data-testid="link-developer-read-docs">
-                  <Button className="bg-[#1844A6] text-white rounded-[7px]" data-testid="button-developer-read-docs">
-                    Read the docs
-                  </Button>
-                </Link>
-                <Link href="/dashboard/api-keys" data-testid="link-developer-api-keys">
-                  <Button variant="outline" className="border-2 border-teal-600 text-teal-600 rounded-[7px]" data-testid="button-developer-api-keys">
-                    Get API keys
-                  </Button>
-                </Link>
-              </div>
-            </div>
-
-            <div className="bg-[#1a1a2e] rounded-[7px] p-6 overflow-x-auto">
-              <div className="mb-3">
-                <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">Request</span>
-              </div>
-              <pre className="text-sm font-mono text-gray-100">
-                <code>{`curl -X POST https://api.swipesblue.com/v1/payments/process \\
-  -H "Authorization: Bearer sb_live_xxxxxxxxxxxx" \\
-  -H "Content-Type: application/json" \\
-  -d '{
-    "merchantId": "your-merchant-id",
-    "amount": 49.99,
-    "currency": "USD",
-    "cardNumber": "4111111111111111",
-    "cardName": "Jane Smith",
-    "expiry": "1228",
-    "cvv": "123",
-    "customerEmail": "jane@example.com",
-    "description": "Order #1042"
-  }'`}</code>
-              </pre>
-              <div className="mt-5 pt-4 border-t border-gray-700">
-                <span className="text-xs font-mono text-gray-400 uppercase tracking-wider">Response</span>
-              </div>
-              <pre className="text-sm font-mono text-gray-100 mt-3">
-                <code>{`{
-  "success": true,
-  "transactionId": "txn_a1b2c3d4e5f6",
-  "gatewayTransactionId": "3847261950",
-  "authCode": "A11234",
-  "amount": 49.99,
-  "currency": "USD",
-  "status": "success",
-  "cardBrand": "visa",
-  "cardLastFour": "1111",
-  "message": "Payment processed successfully"
-}`}</code>
-              </pre>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Trust Badges */}
-      <section className="py-12 bg-[#F6F9FC]" data-testid="section-trust">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-center gap-8 md:gap-16">
-            <div className="flex items-center gap-3">
-              <Shield className="h-6 w-6 text-[#1844A6]" />
-              <span className="text-sm text-gray-500 font-medium">PCI DSS Level 1 Compliant</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Lock className="h-6 w-6 text-[#1844A6]" />
-              <span className="text-sm text-gray-500 font-medium">256-bit TLS Encryption</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Activity className="h-6 w-6 text-[#1844A6]" />
-              <span className="text-sm text-gray-500 font-medium">99.99% Uptime SLA</span>
-            </div>
-            <div className="flex items-center gap-3">
-              <Server className="h-6 w-6 text-[#1844A6]" />
-              <span className="text-sm text-gray-500 font-medium">Built on NMI's Platform</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="py-20 md:py-28 bg-[#F6F9FC]" data-testid="section-cta">
+      {/* ═══ FINAL CTA ═══ */}
+      <section className="py-20 md:py-28 bg-white">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6">
-            Ready to start accepting payments?
+            Start accepting payments today
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto">
-            Create your account in minutes. Start processing payments today with transparent pricing and no hidden fees.
+            Create your free account in minutes. No setup fees, no contracts, no surprises.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <Link href="/register" data-testid="link-cta-get-started">
+            <Link href="/register">
               <Button
                 size="lg"
-                className="bg-[#1844A6] text-white rounded-[7px]"
-                data-testid="button-cta-get-started"
+                className="bg-[#1844A6] text-white rounded-[7px] px-8 group"
               >
                 Get Started Free
+                <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-0.5 transition-transform" />
               </Button>
             </Link>
-            <Link href="/pricing" data-testid="link-cta-view-pricing">
+            <Link href="/pricing">
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-teal-600 text-teal-600 rounded-[7px]"
-                data-testid="button-cta-view-pricing"
+                className="border-2 border-gray-300 text-gray-700 rounded-[7px] px-8"
               >
                 View Pricing
               </Button>
@@ -551,7 +423,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* NMI Footnote */}
+      {/* ═══ NMI FOOTNOTE ═══ */}
       <div className="bg-white border-t border-gray-100 py-4 px-8">
         <p className="text-xs text-gray-400 text-center max-w-4xl mx-auto">
           * Platform statistics reflect NMI's global payment gateway network, on which swipesblue is built.
