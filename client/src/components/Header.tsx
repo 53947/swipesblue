@@ -230,7 +230,7 @@ export default function Header() {
         data-testid="header"
         ref={menuRef}
       >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center gap-4">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center flex-shrink-0" data-testid="link-logo-home">
           <Logo showIcon variant="default" />
@@ -293,7 +293,7 @@ export default function Header() {
           </Link>
 
           {/* Resources dropdown */}
-          <div 
+          <div
             className="relative"
             onMouseEnter={() => handleMouseEnter('resources')}
             onMouseLeave={handleMouseLeave}
@@ -310,25 +310,32 @@ export default function Header() {
               <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${activeMenu === 'resources' ? 'rotate-180' : ''}`} />
             </Button>
           </div>
+
+          {/* Dashboard link — always visible in nav */}
+          <Link href="/dashboard" data-testid="link-nav-dashboard">
+            <Button
+              variant="ghost"
+              size="sm"
+              className={`text-[15px] font-medium rounded-[7px] ${
+                location.startsWith('/dashboard') ? "text-[#1844A6] bg-gray-50" : "text-gray-600"
+              }`}
+              data-testid="button-nav-dashboard"
+            >
+              Dashboard
+            </Button>
+          </Link>
         </nav>
 
-        {/* Right: Actions — auth-aware */}
-        <div className="hidden lg:flex items-center gap-4">
+        {/* Right: Actions — auth-aware, pushed to far right */}
+        <div className="hidden lg:flex items-center gap-4 ml-auto">
           {!isLoading && isAuthenticated ? (
-            <>
-              <Link href="/dashboard" className="flex items-center" data-testid="link-dashboard">
-                <span className="text-[15px] font-medium text-gray-600">
-                  Dashboard
-                </span>
-              </Link>
-              <Button
-                className="bg-[#1844A6] text-white rounded-[7px]"
-                onClick={handleSignOut}
-                data-testid="button-sign-out"
-              >
-                Sign out
-              </Button>
-            </>
+            <Button
+              className="bg-[#1844A6] text-white rounded-[7px]"
+              onClick={handleSignOut}
+              data-testid="button-sign-out"
+            >
+              Sign out
+            </Button>
           ) : (
             <>
               <Link href="/login" className="flex items-center" data-testid="link-sign-in">
