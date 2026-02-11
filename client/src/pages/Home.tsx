@@ -83,7 +83,7 @@ const pricingTiers = [
       "Email receipts",
     ],
     cta: "Start Free",
-    href: "/shoppingcart",
+    href: "/register",
     highlight: false,
   },
   {
@@ -98,7 +98,7 @@ const pricingTiers = [
       "Basic analytics",
     ],
     cta: "Get Started",
-    href: "/pricing",
+    href: "/register",
     highlight: false,
   },
   {
@@ -113,7 +113,7 @@ const pricingTiers = [
       "Priority support",
     ],
     cta: "Get Started",
-    href: "/pricing",
+    href: "/register",
     highlight: true,
     badge: "POPULAR",
   },
@@ -129,7 +129,7 @@ const pricingTiers = [
       "Custom SLA",
     ],
     cta: "Contact Sales",
-    href: "/pricing",
+    href: "/register",
     highlight: false,
   },
 ];

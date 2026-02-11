@@ -237,10 +237,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   const enhancementItems: SidebarNavItem[] = enhancementDefs.map((enh) => {
     const { badge, badgeVariant, locked } = getEnhancementBadge(enh);
-    const isActive = hasAddon(enh.slug) || (enh.includedTiers?.includes(tier) ?? false);
-    const href = isActive
-      ? `/dashboard/enhance/${enh.slug}`
-      : `/dashboard/enhance/${enh.slug}`;
+    const href = `/dashboard/enhance/${enh.slug}`;
 
     return {
       name: enh.name,

@@ -64,7 +64,6 @@ export default function BrandAssetUpload({
   };
 
   const handleFile = (file: File) => {
-    console.log('File uploaded:', file.name);
     onUpload?.(file);
   };
 

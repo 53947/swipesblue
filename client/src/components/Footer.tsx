@@ -19,8 +19,8 @@ const footerSections = {
     links: [
       { label: "Documentation", href: "/developers" },
       { label: "API Reference", href: "/developers" },
-      { label: "API Keys", href: "/dashboard/api-keys" },
-      { label: "Webhooks", href: "/dashboard/webhooks" },
+      { label: "API Keys", href: "/developers" },
+      { label: "Webhooks", href: "/developers" },
       { label: "SDKs & Libraries", href: "/developers" },
     ],
   },
@@ -35,11 +35,11 @@ const footerSections = {
   resources: {
     title: "Resources",
     links: [
-      { label: "Help Center", href: "/" },
+      { label: "Help Center", href: "/help" },
       { label: "Processing Fees", href: "/processing-fees" },
-      { label: "Security", href: "/dashboard/security" },
-      { label: "Compliance", href: "/dashboard/security" },
-      { label: "System Status", href: "/" },
+      { label: "Security", href: "/security" },
+      { label: "Compliance", href: "/security" },
+      { label: "System Status", href: "/status" },
     ],
   },
 };
@@ -253,7 +253,7 @@ export default function Footer() {
       <div className="border-t border-gray-200">
         <div className="max-w-7xl mx-auto py-6 px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-xs text-gray-400">
-            © 2026 swipesblue, inc. all rights reserved.
+            © {new Date().getFullYear()} swipesblue, inc. all rights reserved.
           </span>
           <div className="flex items-center gap-1 text-xs text-gray-400">
             <Link href="/terms" className="hover:text-gray-500 transition-colors" data-testid="link-footer-terms">

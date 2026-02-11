@@ -37,6 +37,11 @@ import CookiePolicy from "@/pages/legal/CookiePolicy";
 import AcceptableUsePolicy from "@/pages/legal/AcceptableUsePolicy";
 import About from "@/pages/About";
 import ProcessingFees from "@/pages/ProcessingFees";
+import HelpCenter from "@/pages/HelpCenter";
+import SystemStatus from "@/pages/SystemStatus";
+import Blog from "@/pages/Blog";
+import Careers from "@/pages/Careers";
+import Security from "@/pages/Security";
 
 // Public product marketing pages
 import EcommerceSuite from "@/pages/products/EcommerceSuite";
@@ -107,6 +112,11 @@ function Router() {
       <Route path="/developers" component={Developers} />
       <Route path="/about" component={About} />
       <Route path="/processing-fees" component={ProcessingFees} />
+      <Route path="/help" component={HelpCenter} />
+      <Route path="/status" component={SystemStatus} />
+      <Route path="/blog" component={Blog} />
+      <Route path="/careers" component={Careers} />
+      <Route path="/security" component={Security} />
       <Route path="/login" component={Login} />
       <Route path="/register" component={Register} />
 

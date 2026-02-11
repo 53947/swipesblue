@@ -26,8 +26,7 @@ import {
   Settings,
   Globe,
   Terminal,
-  Shield,
-  Zap
+  Shield
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState, useEffect, useRef } from "react";
@@ -108,10 +107,9 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
         items: [
           { icon: FileText, label: "Changelog", description: "Latest updates & releases", href: "/developers" },
           { icon: Users, label: "Community", description: "Connect with other developers", href: "/developers" },
-          { icon: Zap, label: "System Status", description: "Uptime & incident history", href: "/" },
         ],
         ctaLabel: "View status page",
-        ctaHref: "/"
+        ctaHref: "/status"
       }
     ]
   },
@@ -121,23 +119,23 @@ const megaMenus: Record<string, { columns: MenuColumn[] }> = {
         title: "Support",
         subtitle: "Get help when you need it",
         items: [
-          { icon: Users, label: "Help Center", description: "FAQs and tutorials", href: "/" },
-          { icon: Phone, label: "Contact Sales", description: "Talk to our team", href: "/" },
-          { icon: Activity, label: "System Status", description: "Uptime and incidents", href: "/" },
+          { icon: Users, label: "Help Center", description: "FAQs and tutorials", href: "/help" },
+          { icon: Phone, label: "Contact Sales", description: "Talk to our team", href: "mailto:sales@swipesblue.com" },
+          { icon: Activity, label: "System Status", description: "Uptime and incidents", href: "/status" },
         ],
         ctaLabel: "Get support",
-        ctaHref: "/"
+        ctaHref: "/help"
       },
       {
         title: "Company",
         subtitle: "Learn about swipesblue",
         items: [
-          { icon: Globe, label: "About Us", description: "Our mission and story", href: "/" },
-          { icon: FileText, label: "Blog", description: "News and updates", href: "/" },
-          { icon: Users, label: "Careers", description: "Join our team", href: "/" },
+          { icon: Globe, label: "About Us", description: "Our mission and story", href: "/about" },
+          { icon: FileText, label: "Blog", description: "News and updates", href: "/blog" },
+          { icon: Users, label: "Careers", description: "Join our team", href: "/careers" },
         ],
         ctaLabel: "Learn more",
-        ctaHref: "/"
+        ctaHref: "/about"
       }
     ]
   }
@@ -295,7 +293,7 @@ export default function Header() {
 
         {/* Right: Actions */}
         <div className="hidden lg:flex items-center gap-4">
-          <Link href="/admin" className="flex items-center" data-testid="link-sign-in">
+          <Link href="/login" className="flex items-center" data-testid="link-sign-in">
             <span 
               className="text-[15px] font-medium text-gray-600"
             >
@@ -327,6 +325,7 @@ export default function Header() {
           variant="ghost"
           className="lg:hidden"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle menu"
           data-testid="button-mobile-menu"
         >
           {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -356,30 +355,40 @@ export default function Header() {
                   <ul className="space-y-1">
                     {column.items.map((item, itemIndex) => {
                       const Icon = item.icon;
+                      const isExternal = item.href.startsWith("mailto:") || item.href.startsWith("http");
+                      const linkContent = (
+                        <div className="flex items-start gap-3 p-3 rounded-[7px] cursor-pointer">
+                          <div className="flex-shrink-0 w-10 h-10 rounded-[7px] bg-[#1844A6]/5 flex items-center justify-center">
+                            <Icon className="h-5 w-5 text-[#1844A6]" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-medium text-gray-900">
+                                {item.label}
+                              </span>
+                              {item.badge && (
+                                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getBadgeStyles(item.badge)}`}>
+                                  {item.badge}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-500 truncate">
+                              {item.description}
+                            </p>
+                          </div>
+                        </div>
+                      );
                       return (
                         <li key={itemIndex}>
-                          <Link href={item.href} onClick={() => setActiveMenu(null)} data-testid={`link-mega-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
-                            <div className="flex items-start gap-3 p-3 rounded-[7px] cursor-pointer">
-                              <div className="flex-shrink-0 w-10 h-10 rounded-[7px] bg-[#1844A6]/5 flex items-center justify-center">
-                                <Icon className="h-5 w-5 text-[#1844A6]" />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span className="text-sm font-medium text-gray-900">
-                                    {item.label}
-                                  </span>
-                                  {item.badge && (
-                                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${getBadgeStyles(item.badge)}`}>
-                                      {item.badge}
-                                    </span>
-                                  )}
-                                </div>
-                                <p className="text-sm text-gray-500 truncate">
-                                  {item.description}
-                                </p>
-                              </div>
-                            </div>
-                          </Link>
+                          {isExternal ? (
+                            <a href={item.href} onClick={() => setActiveMenu(null)} data-testid={`link-mega-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                              {linkContent}
+                            </a>
+                          ) : (
+                            <Link href={item.href} onClick={() => setActiveMenu(null)} data-testid={`link-mega-menu-${item.label.toLowerCase().replace(/\s+/g, '-')}`}>
+                              {linkContent}
+                            </Link>
+                          )}
                         </li>
                       );
                     })}
@@ -417,7 +426,7 @@ export default function Header() {
             </Link>
             
             <div className="pt-4 mt-4 border-t border-gray-100 flex flex-col gap-3">
-              <Link href="/admin" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-sign-in">
+              <Link href="/login" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-sign-in">
                 <span className="block py-3 px-4 text-[15px] font-medium text-gray-600">Sign in</span>
               </Link>
               <Link href="/shoppingcart" onClick={() => setMobileMenuOpen(false)} data-testid="link-mobile-get-started">

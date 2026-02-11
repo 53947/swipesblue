@@ -2,6 +2,7 @@ import { Link } from "wouter";
 import { Lock, Check, ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { meetsMinTier } from "@shared/tier-constants";
 
 interface FeatureMarketingPageProps {
   featureName: string;
@@ -73,12 +74,7 @@ export default function FeatureMarketingPage({
   }
 
   // Determine if merchant can purchase (correct tier) or needs to upgrade first
-  const tierHierarchy: Record<string, number> = {
-    Free: 0, Growth: 1, Scale: 2, Enterprise: 3,
-  };
-  const currentLevel = tierHierarchy[currentTier] ?? 0;
-  const requiredLevel = tierHierarchy[requiredTier] ?? 0;
-  const isEligible = currentLevel >= requiredLevel;
+  const isEligible = meetsMinTier(currentTier, requiredTier);
 
   // State: NOT ELIGIBLE — wrong tier, needs upgrade first
   if (!isEligible) {
