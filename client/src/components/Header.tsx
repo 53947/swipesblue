@@ -236,8 +236,8 @@ export default function Header() {
           <Logo showIcon variant="default" />
         </Link>
 
-        {/* Center: Navigation */}
-        <nav className="hidden lg:flex items-center gap-1">
+        {/* Right-aligned: Nav + Auth actions as one continuous row */}
+        <nav className="hidden lg:flex items-center gap-1 ml-auto">
           {/* Products dropdown */}
           <div
             className="relative"
@@ -260,7 +260,7 @@ export default function Header() {
           </div>
 
           {/* Developers dropdown */}
-          <div 
+          <div
             className="relative"
             onMouseEnter={() => handleMouseEnter('developers')}
             onMouseLeave={handleMouseLeave}
@@ -311,7 +311,7 @@ export default function Header() {
             </Button>
           </div>
 
-          {/* Dashboard link — always visible in nav */}
+          {/* Dashboard link */}
           <Link href="/dashboard" data-testid="link-nav-dashboard">
             <Button
               variant="ghost"
@@ -324,10 +324,11 @@ export default function Header() {
               Dashboard
             </Button>
           </Link>
-        </nav>
 
-        {/* Right: Actions — auth-aware, pushed to far right */}
-        <div className="hidden lg:flex items-center gap-4 ml-auto">
+          {/* Divider */}
+          <div className="w-px h-5 bg-gray-200 mx-2" />
+
+          {/* Auth actions — inline with nav */}
           {!isLoading && isAuthenticated ? (
             <Button
               className="bg-[#1844A6] text-white rounded-[7px]"
@@ -339,9 +340,14 @@ export default function Header() {
           ) : (
             <>
               <Link href="/login" className="flex items-center" data-testid="link-sign-in">
-                <span className="text-[15px] font-medium text-gray-600">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-[15px] font-medium text-gray-600 rounded-[7px]"
+                  data-testid="button-sign-in"
+                >
                   Sign in
-                </span>
+                </Button>
               </Link>
               <Link href="/register" className="flex items-center" data-testid="link-get-started">
                 <Button
@@ -353,7 +359,7 @@ export default function Header() {
               </Link>
             </>
           )}
-        </div>
+        </nav>
 
         {/* Mobile menu button */}
         <Button
