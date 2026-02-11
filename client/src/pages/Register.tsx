@@ -31,9 +31,9 @@ const registerFormSchema = registerMerchantSchema.extend({
 type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 const pathHeadings: Record<string, { title: string; subtitle: string }> = {
-  ecommerce: { title: "Start selling online", subtitle: "Set up your storefront and start accepting payments" },
-  developer: { title: "Get your API keys", subtitle: "Build payment integrations with our developer platform" },
-  gateway: { title: "Connect your gateway", subtitle: "Start processing transactions in minutes" },
+  ecommerce: { title: "Start selling in minutes", subtitle: "Create your free swipesblue account and launch your store today." },
+  developer: { title: "Get your sandbox credentials", subtitle: "Create your free account and start testing the swipesblue API." },
+  gateway: { title: "Start processing payments", subtitle: "Create your free account and replace your current processor." },
 };
 
 export default function Register() {
@@ -43,8 +43,8 @@ export default function Register() {
 
   // Read signup path from URL query param
   const searchParams = new URLSearchParams(window.location.search);
-  const signupPath = searchParams.get("path") as "ecommerce" | "developer" | "gateway" | null;
-  const heading = signupPath && pathHeadings[signupPath] ? pathHeadings[signupPath] : { title: "Create your account", subtitle: "Start accepting payments in minutes" };
+  const signupPath = (searchParams.get("path") || "ecommerce") as "ecommerce" | "developer" | "gateway";
+  const heading = pathHeadings[signupPath] || pathHeadings.ecommerce;
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerFormSchema),
@@ -62,7 +62,7 @@ export default function Register() {
       const { confirmPassword, ...registerData } = data;
       const response = await apiRequest("POST", "/api/auth/register", {
         ...registerData,
-        ...(signupPath ? { signupPath } : {}),
+        signupPath,
       });
       return response.json();
     },

@@ -317,17 +317,12 @@ export default function Header() {
           {!isLoading && isAuthenticated ? (
             <>
               <Link href="/dashboard" className="flex items-center" data-testid="link-dashboard">
-                <Button
-                  variant="outline"
-                  className="border-2 border-teal-600 text-teal-600 rounded-[7px]"
-                  data-testid="button-dashboard"
-                >
+                <span className="text-[15px] font-medium text-gray-600">
                   Dashboard
-                </Button>
+                </span>
               </Link>
               <Button
-                variant="ghost"
-                className="text-[15px] font-medium text-gray-600 rounded-[7px]"
+                className="bg-[#1844A6] text-white rounded-[7px]"
                 onClick={handleSignOut}
                 data-testid="button-sign-out"
               >

@@ -1543,7 +1543,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         fullName,
         tier: "FREE",
         status: "active",
-        signupPath: signupPath || null,
+        signupPath,
       });
 
       // Set session (auto-login after registration)
