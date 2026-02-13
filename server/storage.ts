@@ -96,6 +96,10 @@ import {
   type InsertCustomerVault,
   type VaultPaymentMethod,
   type InsertVaultPaymentMethod,
+  type MerchantProfile,
+  type InsertMerchantProfile,
+  type MerchantTransaction,
+  type InsertMerchantTransaction,
   type Conversation,
   type InsertConversation,
   type Message,
@@ -148,6 +152,8 @@ import {
   apiLogs,
   customerVault,
   vaultPaymentMethods,
+  merchantProfiles,
+  merchantTransactions,
   conversations,
   messages,
 } from "@shared/schema";
@@ -479,6 +485,15 @@ export interface IStorage {
   createVaultPaymentMethod(method: InsertVaultPaymentMethod): Promise<VaultPaymentMethod>;
   updateVaultPaymentMethod(id: string, data: Partial<InsertVaultPaymentMethod>): Promise<VaultPaymentMethod | undefined>;
   deleteVaultPaymentMethod(id: string): Promise<boolean>;
+
+  // Merchant Profile operations (Prompt 21)
+  getMerchantProfile(merchantId: string): Promise<MerchantProfile | undefined>;
+  upsertMerchantProfile(merchantId: string, data: Partial<InsertMerchantProfile>): Promise<MerchantProfile>;
+  updateMerchantAccountBusinessName(id: string, businessName: string): Promise<MerchantAccount | undefined>;
+
+  // Merchant Transaction operations (Prompt 21)
+  getMerchantTransactions(merchantId: string, limit?: number, offset?: number): Promise<MerchantTransaction[]>;
+  createMerchantTransaction(transaction: InsertMerchantTransaction): Promise<MerchantTransaction>;
 
   // Conversation operations (AI Chat)
   getConversation(id: string): Promise<Conversation | undefined>;
@@ -2276,6 +2291,54 @@ export class DbStorage implements IStorage {
   async deleteMessage(id: string): Promise<boolean> {
     const result = await db.delete(messages).where(eq(messages.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Merchant Profile operations (Prompt 21)
+  async getMerchantProfile(merchantId: string): Promise<MerchantProfile | undefined> {
+    const result = await db.select().from(merchantProfiles).where(eq(merchantProfiles.merchantId, merchantId));
+    return result[0];
+  }
+
+  async upsertMerchantProfile(merchantId: string, data: Partial<InsertMerchantProfile>): Promise<MerchantProfile> {
+    const existing = await this.getMerchantProfile(merchantId);
+    if (existing) {
+      const result = await db
+        .update(merchantProfiles)
+        .set({ ...data, updatedAt: new Date() })
+        .where(eq(merchantProfiles.merchantId, merchantId))
+        .returning();
+      return result[0];
+    }
+    const result = await db
+      .insert(merchantProfiles)
+      .values({ ...data, merchantId })
+      .returning();
+    return result[0];
+  }
+
+  async updateMerchantAccountBusinessName(id: string, businessName: string): Promise<MerchantAccount | undefined> {
+    const result = await db
+      .update(merchantAccounts)
+      .set({ businessName })
+      .where(eq(merchantAccounts.id, id))
+      .returning();
+    return result[0];
+  }
+
+  // Merchant Transaction operations (Prompt 21)
+  async getMerchantTransactions(merchantId: string, limit = 50, offset = 0): Promise<MerchantTransaction[]> {
+    return await db
+      .select()
+      .from(merchantTransactions)
+      .where(eq(merchantTransactions.merchantId, merchantId))
+      .orderBy(desc(merchantTransactions.createdAt))
+      .limit(limit)
+      .offset(offset);
+  }
+
+  async createMerchantTransaction(transaction: InsertMerchantTransaction): Promise<MerchantTransaction> {
+    const result = await db.insert(merchantTransactions).values(transaction).returning();
+    return result[0];
   }
 }
 

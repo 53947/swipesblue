@@ -1274,3 +1274,69 @@ export const insertTierEntitlementSchema = createInsertSchema(tierEntitlements).
 });
 export type InsertTierEntitlement = z.infer<typeof insertTierEntitlementSchema>;
 export type TierEntitlement = typeof tierEntitlements.$inferSelect;
+
+// ========================================
+// Merchant Profiles Table (Prompt 21)
+// ========================================
+
+export const merchantProfiles = pgTable("merchant_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull().unique(),
+  dbaName: text("dba_name"),
+  businessType: text("business_type"),
+  industry: text("industry"),
+  phone: text("phone"),
+  address: text("address"),
+  city: text("city"),
+  state: text("state"),
+  zip: text("zip"),
+  country: text("country").default("US"),
+  website: text("website"),
+  taxId: text("tax_id"),
+  supportEmail: text("support_email"),
+  supportPhone: text("support_phone"),
+  brandColor: text("brand_color"),
+  checkoutLogoUrl: text("checkout_logo_url"),
+  businessLogoUrl: text("business_logo_url"),
+  notificationPrefs: json("notification_prefs"),
+  paymentSettings: json("payment_settings"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const insertMerchantProfileSchema = createInsertSchema(merchantProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertMerchantProfile = z.infer<typeof insertMerchantProfileSchema>;
+export type MerchantProfile = typeof merchantProfiles.$inferSelect;
+
+// ========================================
+// Merchant Transactions Table (Prompt 21)
+// ========================================
+
+export const merchantTransactions = pgTable("merchant_transactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  merchantId: varchar("merchant_id").notNull(),
+  transactionId: text("transaction_id"),
+  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
+  currency: text("currency").notNull().default("USD"),
+  status: text("status").notNull(), // 'approved' | 'declined' | 'pending'
+  type: text("type").notNull().default("sale"), // 'sale' | 'auth'
+  customerName: text("customer_name"),
+  cardBrand: text("card_brand"),
+  cardLastFour: text("card_last_four"),
+  authCode: text("auth_code"),
+  email: text("email"),
+  description: text("description"),
+  orderId: text("order_id"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const insertMerchantTransactionSchema = createInsertSchema(merchantTransactions).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertMerchantTransaction = z.infer<typeof insertMerchantTransactionSchema>;
+export type MerchantTransaction = typeof merchantTransactions.$inferSelect;

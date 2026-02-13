@@ -1,5 +1,6 @@
 import { useLocation } from "wouter";
-import { Wallet, ArrowDownRight, ArrowUpRight, DollarSign, Calendar } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { Wallet, ArrowDownRight, ArrowUpRight, DollarSign, Calendar, Loader2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
 
@@ -10,24 +11,30 @@ const tabs = [
   { label: "Fees", href: "/dashboard/balances?tab=fees" },
 ];
 
-const mockPayouts = [
-  { id: "po-001", date: "2025-10-22", amount: "$1,250.00", status: "completed", bank: "Chase ****4567" },
-  { id: "po-002", date: "2025-10-15", amount: "$890.50", status: "completed", bank: "Chase ****4567" },
-  { id: "po-003", date: "2025-10-08", amount: "$2,100.00", status: "completed", bank: "Chase ****4567" },
-];
-
-const mockFees = [
-  { id: "fee-001", date: "2025-10-24", description: "Processing fee — TXN-001", amount: "$3.68", rate: "2.70% + $0.30" },
-  { id: "fee-002", date: "2025-10-24", description: "Processing fee — TXN-002", amount: "$2.72", rate: "2.70% + $0.30" },
-  { id: "fee-003", date: "2025-10-23", description: "Processing fee — TXN-003", amount: "$7.05", rate: "2.70% + $0.30" },
-  { id: "fee-004", date: "2025-10-23", description: "Processing fee — TXN-004 (failed)", amount: "$0.00", rate: "No charge" },
-  { id: "fee-005", date: "2025-10-22", description: "Processing fee — TXN-005", amount: "$5.70", rate: "2.70% + $0.30" },
-];
+interface BalanceData {
+  incoming: number;
+  available: number;
+  totalPaidOut: number;
+  lastPayoutDate: string | null;
+  payouts: Array<{ id: string; date: string; amount: string; status: string; bank: string }>;
+  fees: Array<{ id: string; date: string; description: string; amount: string; rate: string }>;
+}
 
 export default function Balances() {
   const [location] = useLocation();
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "overview";
+
+  const { data: balances, isLoading } = useQuery<BalanceData>({
+    queryKey: ["/api/merchant/balances"],
+  });
+
+  const incoming = balances?.incoming ?? 0;
+  const available = balances?.available ?? 0;
+  const totalPaidOut = balances?.totalPaidOut ?? 0;
+  const lastPayoutDate = balances?.lastPayoutDate;
+  const payouts = balances?.payouts ?? [];
+  const fees = balances?.fees ?? [];
 
   return (
     <div className="p-8">
@@ -50,8 +57,14 @@ export default function Balances() {
               </div>
               <span className="text-sm text-gray-500">Incoming</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">$1,245.50</p>
-            <p className="text-xs text-gray-400 mt-1">Processing in 2-3 business days</p>
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-gray-900">${incoming.toFixed(2)}</p>
+                <p className="text-xs text-gray-400 mt-1">Processing in 2-3 business days</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -63,8 +76,14 @@ export default function Balances() {
               </div>
               <span className="text-sm text-gray-500">Available</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">$4,890.25</p>
-            <p className="text-xs text-gray-400 mt-1">Ready for payout</p>
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-gray-900">${available.toFixed(2)}</p>
+                <p className="text-xs text-gray-400 mt-1">Ready for payout</p>
+              </>
+            )}
           </CardContent>
         </Card>
 
@@ -76,8 +95,16 @@ export default function Balances() {
               </div>
               <span className="text-sm text-gray-500">Total Paid Out</span>
             </div>
-            <p className="text-2xl font-bold text-gray-900">$24,340.50</p>
-            <p className="text-xs text-gray-400 mt-1">Last payout: Oct 22, 2025</p>
+            {isLoading ? (
+              <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
+            ) : (
+              <>
+                <p className="text-2xl font-bold text-gray-900">${totalPaidOut.toFixed(2)}</p>
+                <p className="text-xs text-gray-400 mt-1">
+                  {lastPayoutDate ? `Last payout: ${new Date(lastPayoutDate).toLocaleDateString()}` : "No payouts yet"}
+                </p>
+              </>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -88,7 +115,7 @@ export default function Balances() {
           <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">
             {activeTab === "overview" ? "Recent Payouts" : "Payout History"}
           </h3>
-          {mockPayouts.length === 0 ? (
+          {payouts.length === 0 ? (
             <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
               <Wallet className="h-12 w-12 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No payouts yet</h3>
@@ -107,7 +134,7 @@ export default function Balances() {
                   </tr>
                 </thead>
                 <tbody>
-                  {mockPayouts.map((payout) => (
+                  {payouts.map((payout) => (
                     <tr key={payout.id} className="border-b border-gray-100 hover:bg-gray-50">
                       <td className="px-4 py-3 text-sm text-gray-600">{payout.date}</td>
                       <td className="px-4 py-3 text-sm font-mono text-gray-900">{payout.id}</td>
@@ -141,28 +168,36 @@ export default function Balances() {
       {activeTab === "fees" && (
         <div>
           <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wider mb-4">Processing Fees</h3>
-          <div className="bg-white border border-gray-200 rounded-[7px] overflow-hidden">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-[#F6F9FC] border-b border-gray-200">
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Description</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Rate</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fee</th>
-                </tr>
-              </thead>
-              <tbody>
-                {mockFees.map((fee) => (
-                  <tr key={fee.id} className="border-b border-gray-100 hover:bg-gray-50">
-                    <td className="px-4 py-3 text-sm text-gray-600">{fee.date}</td>
-                    <td className="px-4 py-3 text-sm text-gray-900">{fee.description}</td>
-                    <td className="px-4 py-3 text-sm text-gray-500">{fee.rate}</td>
-                    <td className="px-4 py-3 text-sm font-medium text-gray-900">{fee.amount}</td>
+          {fees.length === 0 ? (
+            <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
+              <DollarSign className="h-12 w-12 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No processing fees yet</h3>
+              <p className="text-gray-500 text-sm">Processing fees will appear here as you process payments.</p>
+            </div>
+          ) : (
+            <div className="bg-white border border-gray-200 rounded-[7px] overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-[#F6F9FC] border-b border-gray-200">
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Date</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Description</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Rate</th>
+                    <th className="px-4 py-3 text-left text-xs font-semibold text-gray-500 uppercase">Fee</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {fees.map((fee) => (
+                    <tr key={fee.id} className="border-b border-gray-100 hover:bg-gray-50">
+                      <td className="px-4 py-3 text-sm text-gray-600">{fee.date}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{fee.description}</td>
+                      <td className="px-4 py-3 text-sm text-gray-500">{fee.rate}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{fee.amount}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

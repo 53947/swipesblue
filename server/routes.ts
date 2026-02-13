@@ -447,10 +447,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
         : await nmiGateway.sale(params);
 
       if (!result.success) {
+        // Save declined transaction if merchant is logged in
+        const merchantId = (req.session as any)?.merchantId;
+        if (merchantId) {
+          try {
+            await storage.createMerchantTransaction({
+              merchantId,
+              transactionId: result.transactionId || null,
+              amount: String(data.amount),
+              currency: "USD",
+              status: "declined",
+              type: data.type,
+              customerName: data.cardholderName || null,
+              cardBrand: result.rawResponse?.cc_type || result.rawResponse?.card_type || null,
+              cardLastFour: result.rawResponse?.cc_number?.slice(-4) || null,
+              authCode: null,
+              email: data.email || null,
+              description: data.description || null,
+              orderId: data.orderId || null,
+            });
+          } catch (e) {
+            console.error("Failed to save declined transaction:", e);
+          }
+        }
         return res.status(400).json({
           success: false,
           error: result.errorMessage || "Transaction declined",
         });
+      }
+
+      // Save approved transaction if merchant is logged in
+      const merchantId = (req.session as any)?.merchantId;
+      const cardBrand = result.rawResponse?.cc_type || result.rawResponse?.card_type || null;
+      const cardLastFour = result.rawResponse?.cc_number?.slice(-4) || null;
+
+      if (merchantId) {
+        try {
+          await storage.createMerchantTransaction({
+            merchantId,
+            transactionId: result.transactionId || null,
+            amount: String(data.amount),
+            currency: "USD",
+            status: "approved",
+            type: data.type,
+            customerName: data.cardholderName || null,
+            cardBrand,
+            cardLastFour,
+            authCode: result.authCode || null,
+            email: data.email || null,
+            description: data.description || null,
+            orderId: data.orderId || null,
+          });
+        } catch (e) {
+          console.error("Failed to save transaction:", e);
+        }
       }
 
       res.json({
@@ -459,8 +509,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         authCode: result.authCode,
         amount: data.amount,
         type: data.type,
-        cardBrand: result.rawResponse?.cc_type || result.rawResponse?.card_type,
-        cardLastFour: result.rawResponse?.cc_number?.slice(-4),
+        cardBrand,
+        cardLastFour,
         message: result.message || "Transaction approved",
       });
     } catch (error) {
@@ -3179,7 +3229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // ========================================
-  // Merchant Product Catalog API (Prompt 13)
+  // Merchant Profile, Transactions & Balances (Prompt 21)
   // ========================================
 
   // Middleware to protect merchant routes
@@ -3190,6 +3240,87 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.status(401).json({ error: "Unauthorized", message: "Merchant authentication required" });
     }
   }
+
+  // GET /api/merchant/profile — returns merchant account + profile
+  app.get("/api/merchant/profile", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const account = await storage.getMerchantAccountByEmail((req.session as any).merchantEmail || "");
+      let profile = await storage.getMerchantProfile(merchantId);
+
+      // Auto-create a default profile if none exists
+      if (!profile) {
+        profile = await storage.upsertMerchantProfile(merchantId, {});
+      }
+
+      res.json({
+        ...profile,
+        businessName: account?.businessName || "",
+        email: account?.email || "",
+        fullName: account?.fullName || "",
+        tier: account?.tier || "Free",
+      });
+    } catch (error) {
+      console.error("Get merchant profile error:", error);
+      res.status(500).json({ error: "Failed to fetch merchant profile" });
+    }
+  });
+
+  // PATCH /api/merchant/profile — update merchant profile
+  app.patch("/api/merchant/profile", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const { businessName, ...profileFields } = req.body;
+
+      // Update businessName on merchant_accounts if provided
+      if (businessName !== undefined) {
+        await storage.updateMerchantAccountBusinessName(merchantId, businessName);
+      }
+
+      // Update the profile
+      const profile = await storage.upsertMerchantProfile(merchantId, profileFields);
+
+      res.json({ success: true, profile });
+    } catch (error) {
+      console.error("Update merchant profile error:", error);
+      res.status(500).json({ error: "Failed to update merchant profile" });
+    }
+  });
+
+  // GET /api/merchant/transactions — returns merchant VT transactions
+  app.get("/api/merchant/transactions", requireMerchant, async (req, res) => {
+    try {
+      const merchantId = (req.session as any).merchantId;
+      const limit = Math.min(parseInt(String(req.query.limit)) || 50, 100);
+      const offset = parseInt(String(req.query.offset)) || 0;
+      const transactions = await storage.getMerchantTransactions(merchantId, limit, offset);
+      res.json(transactions);
+    } catch (error) {
+      console.error("Get merchant transactions error:", error);
+      res.status(500).json({ error: "Failed to fetch transactions" });
+    }
+  });
+
+  // GET /api/merchant/balances — placeholder for real payout data
+  app.get("/api/merchant/balances", requireMerchant, async (_req, res) => {
+    try {
+      res.json({
+        incoming: 0,
+        available: 0,
+        totalPaidOut: 0,
+        lastPayoutDate: null,
+        payouts: [],
+        fees: [],
+      });
+    } catch (error) {
+      console.error("Get merchant balances error:", error);
+      res.status(500).json({ error: "Failed to fetch balances" });
+    }
+  });
+
+  // ========================================
+  // Merchant Product Catalog API (Prompt 13)
+  // ========================================
 
   // Middleware to require minimum tier (uses shared tier constants)
   function requireTier(minTier: string) {

@@ -1,5 +1,6 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   Settings,
   Building2,
@@ -40,6 +41,7 @@ import {
 } from "@/components/ui/dialog";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const basePath = "/dashboard/settings";
 
@@ -166,9 +168,30 @@ export default function SettingsPage() {
   const { tier, addons } = useMerchantAuth();
   const [location] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "general";
+
+  // Fetch merchant profile from API
+  const { data: profile } = useQuery<any>({
+    queryKey: ["/api/merchant/profile"],
+  });
+
+  // Save profile mutation
+  const saveProfileMutation = useMutation({
+    mutationFn: async (data: Record<string, any>) => {
+      const res = await apiRequest("PATCH", "/api/merchant/profile", data);
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/merchant/profile"] });
+      toast({ title: "Settings saved", description: "Your changes have been saved successfully." });
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to save settings. Please try again.", variant: "destructive" });
+    },
+  });
 
   // File input refs
   const logoInputRef = useRef<HTMLInputElement>(null);
@@ -182,6 +205,9 @@ export default function SettingsPage() {
 
   // Plan comparison
   const [showPlanComparison, setShowPlanComparison] = useState(false);
+
+  // Track whether profile has been loaded into state
+  const [profileLoaded, setProfileLoaded] = useState(false);
 
   // Billing tab computed values
   const tierBillingHistory = getTierBillingHistory(tier);
@@ -201,9 +227,74 @@ export default function SettingsPage() {
     .filter((r): r is NonNullable<typeof r> => r !== null),
   ];
 
-  const handleSave = () => {
-    toast({ title: "Settings saved", description: "Your changes have been saved successfully." });
+  const handleSaveAccount = () => {
+    saveProfileMutation.mutate({
+      businessName: companyName,
+    });
   };
+
+  const handleSaveBusiness = () => {
+    saveProfileMutation.mutate({
+      businessName,
+      dbaName,
+      businessType,
+      address: street,
+      city,
+      state,
+      zip,
+      country,
+      supportPhone,
+      supportEmail,
+      website: websiteUrl,
+      taxId,
+    });
+  };
+
+  const handleSaveNotifications = () => {
+    saveProfileMutation.mutate({
+      notificationPrefs: {
+        successfulPayment: notifSuccessfulPayment,
+        failedPayment: notifFailedPayment,
+        refund: notifRefund,
+        largeTransaction: notifLargeTransaction,
+        largeTransactionThreshold,
+        newDevice: notifNewDevice,
+        apiKey: notifApiKey,
+        fraud: notifFraud,
+        failedLogin: notifFailedLogin,
+        upcomingInvoice: notifUpcomingInvoice,
+        expiring: notifExpiring,
+        planRenewal: notifPlanRenewal,
+        dailySummary: notifDailySummary,
+        weeklySummary: notifWeeklySummary,
+        monthlyReport: notifMonthlyReport,
+      },
+    });
+  };
+
+  const handleSavePayment = () => {
+    saveProfileMutation.mutate({
+      paymentSettings: {
+        defaultCurrency,
+        autoCapture,
+        cardVisa,
+        cardMc,
+        cardAmex,
+        cardDiscover,
+        cardJcb,
+        cardDiners,
+        avsSetting,
+        cvvSetting,
+        threeDSecure,
+        threeDThreshold,
+        duplicateWindow,
+        autoReceipts,
+        receiptTemplate,
+        webhookUrl,
+      },
+    });
+  };
+
 
   const handleFileSelect = (ref: React.RefObject<HTMLInputElement | null>) => {
     ref.current?.click();
@@ -234,8 +325,8 @@ export default function SettingsPage() {
   };
 
   // General
-  const [companyName, setCompanyName] = useState("swipesblue, inc.");
-  const [primaryEmail, setPrimaryEmail] = useState("admin@swipesblue.com");
+  const [companyName, setCompanyName] = useState("");
+  const [primaryEmail, setPrimaryEmail] = useState("");
   const [timezone, setTimezone] = useState("america-new-york");
   const [language, setLanguage] = useState("en");
   const [defaultView, setDefaultView] = useState("overview");
@@ -243,18 +334,18 @@ export default function SettingsPage() {
   const [dateFormat, setDateFormat] = useState("mdy");
 
   // Business Profile
-  const [businessName, setBusinessName] = useState("swipesblue, inc.");
-  const [dbaName, setDbaName] = useState("swipesblue");
+  const [businessName, setBusinessName] = useState("");
+  const [dbaName, setDbaName] = useState("");
   const [businessType, setBusinessType] = useState("llc");
-  const [street, setStreet] = useState("123 Commerce St");
-  const [city, setCity] = useState("New York");
-  const [state, setState] = useState("NY");
-  const [zip, setZip] = useState("10001");
+  const [street, setStreet] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zip, setZip] = useState("");
   const [country, setCountry] = useState("us");
-  const [supportPhone, setSupportPhone] = useState("+1 (555) 123-4567");
-  const [supportEmail, setSupportEmail] = useState("support@swipesblue.com");
-  const [websiteUrl, setWebsiteUrl] = useState("https://swipesblue.com");
-  const [taxId, setTaxId] = useState("XX-XXXXXXX");
+  const [supportPhone, setSupportPhone] = useState("");
+  const [supportEmail, setSupportEmail] = useState("");
+  const [websiteUrl, setWebsiteUrl] = useState("");
+  const [taxId, setTaxId] = useState("");
 
   // Notifications
   const [notifSuccessfulPayment, setNotifSuccessfulPayment] = useState(true);
@@ -289,12 +380,78 @@ export default function SettingsPage() {
   const [duplicateWindow, setDuplicateWindow] = useState("5min");
   const [autoReceipts, setAutoReceipts] = useState(true);
   const [receiptTemplate, setReceiptTemplate] = useState(
-    "Thank you for your purchase! Your payment of {{amount}} has been processed successfully.\n\nOrder: {{order_id}}\nDate: {{date}}\n\nIf you have any questions, contact us at support@swipesblue.com"
+    "Thank you for your purchase! Your payment of {{amount}} has been processed successfully.\n\nOrder: {{order_id}}\nDate: {{date}}\n\nIf you have any questions, contact us at your support email."
   );
 
   // API
   const [testMode, setTestMode] = useState(false);
-  const [webhookUrl, setWebhookUrl] = useState("https://swipesblue.com/api/webhooks");
+  const [webhookUrl, setWebhookUrl] = useState("");
+
+  // Load profile data into state when it arrives
+  useEffect(() => {
+    if (profile && !profileLoaded) {
+      setProfileLoaded(true);
+
+      // General / Account
+      setCompanyName(profile.businessName || "");
+      setPrimaryEmail(profile.email || "");
+
+      // Business Profile
+      setBusinessName(profile.businessName || "");
+      setDbaName(profile.dbaName || "");
+      if (profile.businessType) setBusinessType(profile.businessType);
+      setStreet(profile.address || "");
+      setCity(profile.city || "");
+      setState(profile.state || "");
+      setZip(profile.zip || "");
+      if (profile.country) setCountry(profile.country.toLowerCase());
+      setSupportPhone(profile.supportPhone || "");
+      setSupportEmail(profile.supportEmail || "");
+      setWebsiteUrl(profile.website || "");
+      setTaxId(profile.taxId || "");
+
+      // Notifications — load from JSON blob
+      const np = profile.notificationPrefs as any;
+      if (np) {
+        if (np.successfulPayment !== undefined) setNotifSuccessfulPayment(np.successfulPayment);
+        if (np.failedPayment !== undefined) setNotifFailedPayment(np.failedPayment);
+        if (np.refund !== undefined) setNotifRefund(np.refund);
+        if (np.largeTransaction !== undefined) setNotifLargeTransaction(np.largeTransaction);
+        if (np.largeTransactionThreshold) setLargeTransactionThreshold(np.largeTransactionThreshold);
+        if (np.newDevice !== undefined) setNotifNewDevice(np.newDevice);
+        if (np.apiKey !== undefined) setNotifApiKey(np.apiKey);
+        if (np.fraud !== undefined) setNotifFraud(np.fraud);
+        if (np.failedLogin !== undefined) setNotifFailedLogin(np.failedLogin);
+        if (np.upcomingInvoice !== undefined) setNotifUpcomingInvoice(np.upcomingInvoice);
+        if (np.expiring !== undefined) setNotifExpiring(np.expiring);
+        if (np.planRenewal !== undefined) setNotifPlanRenewal(np.planRenewal);
+        if (np.dailySummary !== undefined) setNotifDailySummary(np.dailySummary);
+        if (np.weeklySummary !== undefined) setNotifWeeklySummary(np.weeklySummary);
+        if (np.monthlyReport !== undefined) setNotifMonthlyReport(np.monthlyReport);
+      }
+
+      // Payment Settings — load from JSON blob
+      const ps = profile.paymentSettings as any;
+      if (ps) {
+        if (ps.defaultCurrency) setDefaultCurrency(ps.defaultCurrency);
+        if (ps.autoCapture !== undefined) setAutoCapture(ps.autoCapture);
+        if (ps.cardVisa !== undefined) setCardVisa(ps.cardVisa);
+        if (ps.cardMc !== undefined) setCardMc(ps.cardMc);
+        if (ps.cardAmex !== undefined) setCardAmex(ps.cardAmex);
+        if (ps.cardDiscover !== undefined) setCardDiscover(ps.cardDiscover);
+        if (ps.cardJcb !== undefined) setCardJcb(ps.cardJcb);
+        if (ps.cardDiners !== undefined) setCardDiners(ps.cardDiners);
+        if (ps.avsSetting) setAvsSetting(ps.avsSetting);
+        if (ps.cvvSetting) setCvvSetting(ps.cvvSetting);
+        if (ps.threeDSecure !== undefined) setThreeDSecure(ps.threeDSecure);
+        if (ps.threeDThreshold) setThreeDThreshold(ps.threeDThreshold);
+        if (ps.duplicateWindow) setDuplicateWindow(ps.duplicateWindow);
+        if (ps.autoReceipts !== undefined) setAutoReceipts(ps.autoReceipts);
+        if (ps.receiptTemplate) setReceiptTemplate(ps.receiptTemplate);
+        if (ps.webhookUrl !== undefined) setWebhookUrl(ps.webhookUrl);
+      }
+    }
+  }, [profile, profileLoaded]);
 
   return (
     <div className="p-8 space-y-8">
@@ -410,8 +567,8 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleSave}>
-              Save Changes
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" disabled={saveProfileMutation.isPending} onClick={handleSaveAccount}>
+              {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
@@ -609,8 +766,8 @@ export default function SettingsPage() {
           </div>
 
           <div className="flex justify-end">
-            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleSave}>
-              Save Changes
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" disabled={saveProfileMutation.isPending} onClick={handleSaveBusiness}>
+              {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
@@ -785,6 +942,16 @@ export default function SettingsPage() {
                 <Switch checked={notifMonthlyReport} onCheckedChange={setNotifMonthlyReport} />
               </div>
             </div>
+          </div>
+
+          <div className="flex justify-end">
+            <Button
+              className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]"
+              disabled={saveProfileMutation.isPending}
+              onClick={handleSaveNotifications}
+            >
+              {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
+            </Button>
           </div>
         </div>
       )}
@@ -970,8 +1137,8 @@ export default function SettingsPage() {
           )}
 
           <div className="flex justify-end">
-            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={handleSave}>
-              Save Changes
+            <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" disabled={saveProfileMutation.isPending} onClick={handleSavePayment}>
+              {saveProfileMutation.isPending ? "Saving..." : "Save Changes"}
             </Button>
           </div>
         </div>
@@ -1074,29 +1241,16 @@ export default function SettingsPage() {
           {/* Payment Method */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Method on File</h3>
-            {tier === "Free" ? (
-              <div className="text-center py-6">
-                <CreditCard className="h-10 w-10 text-gray-300 mx-auto mb-3" />
-                <p className="text-sm text-gray-500 mb-1">No payment method on file</p>
-                <p className="text-xs text-gray-400 mb-4">Add a payment method to upgrade your plan.</p>
-                <Button variant="outline" className="rounded-[7px]" onClick={() => setShowPaymentModal(true)}>
-                  Add Payment Method
-                </Button>
-              </div>
-            ) : (
-              <div className="flex items-center justify-between p-4 bg-gray-50 rounded-[7px]">
-                <div className="flex items-center gap-3">
-                  <CreditCard className="h-6 w-6 text-[#1844A6]" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Visa ending in 4242</p>
-                    <p className="text-xs text-gray-500">Expires 12/2026</p>
-                  </div>
-                </div>
-                <Button variant="outline" className="rounded-[7px]" onClick={() => setShowPaymentModal(true)}>
-                  Update
-                </Button>
-              </div>
-            )}
+            <div className="text-center py-6">
+              <CreditCard className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+              <p className="text-sm text-gray-500 mb-1">No payment method on file</p>
+              <p className="text-xs text-gray-400 mb-4">
+                {tier === "Free" ? "Add a payment method to upgrade your plan." : "Payment method integration coming soon."}
+              </p>
+              <Button variant="outline" className="rounded-[7px]" onClick={() => setShowPaymentModal(true)}>
+                Add Payment Method
+              </Button>
+            </div>
           </div>
 
           {/* Billing History */}

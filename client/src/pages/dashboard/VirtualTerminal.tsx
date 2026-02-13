@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   CreditCard,
   DollarSign,
@@ -8,6 +9,7 @@ import {
   CheckCircle,
   XCircle,
   Clock,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,28 +43,34 @@ interface TransactionResult {
   type: "charge" | "auth_only";
 }
 
-interface RecentTransaction {
+interface MerchantTransaction {
   id: string;
-  date: string;
-  customer: string;
+  transactionId: string | null;
   amount: string;
-  status: "success" | "pending" | "failed";
-  method: string;
+  currency: string;
+  status: string;
+  type: string;
+  customerName: string | null;
+  cardBrand: string | null;
+  cardLastFour: string | null;
+  authCode: string | null;
+  email: string | null;
+  description: string | null;
+  orderId: string | null;
+  createdAt: string;
 }
-
-const MOCK_RECENT_TRANSACTIONS: RecentTransaction[] = [
-  { id: "TXN-2081", date: "2025-10-24 14:32", customer: "Sarah Connor", amount: "$142.50", status: "success", method: "Visa ****4242" },
-  { id: "TXN-2080", date: "2025-10-24 13:18", customer: "James Kirk", amount: "$89.00", status: "success", method: "MC ****5100" },
-  { id: "TXN-2079", date: "2025-10-24 11:45", customer: "Ellen Ripley", amount: "$310.25", status: "failed", method: "Amex ****3782" },
-  { id: "TXN-2078", date: "2025-10-24 10:02", customer: "Rick Deckard", amount: "$55.99", status: "success", method: "Discover ****6011" },
-  { id: "TXN-2077", date: "2025-10-23 16:55", customer: "Dana Scully", amount: "$200.00", status: "pending", method: "Visa ****1881" },
-];
 
 export default function VirtualTerminal() {
   const { tier, canAccess } = useMerchantAuth();
   const [location] = useLocation();
+  const queryClient = useQueryClient();
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "terminal";
+
+  // Fetch real transactions from API
+  const { data: transactions = [], isLoading: txnsLoading } = useQuery<MerchantTransaction[]>({
+    queryKey: ["/api/merchant/transactions?limit=5"],
+  });
 
   // Collect.js for secure card tokenization
   const { isReady, error: collectError, requestToken } = useCollectJs();
@@ -198,6 +206,8 @@ export default function VirtualTerminal() {
       };
 
       setTransactionResult(result);
+      // Refresh transaction list
+      queryClient.invalidateQueries({ queryKey: ["/api/merchant/transactions?limit=5"] });
     } catch (err) {
       setTransactionResult({
         transactionId: "N/A",
@@ -240,7 +250,7 @@ export default function VirtualTerminal() {
     }
   }
 
-  const filteredTransactions = MOCK_RECENT_TRANSACTIONS;
+  const filteredTransactions = transactions;
 
   return (
     <div className="p-8">
@@ -651,32 +661,44 @@ export default function VirtualTerminal() {
           {/* Recent Transactions */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Recent Transactions</h2>
-            <div className="space-y-3">
-              {MOCK_RECENT_TRANSACTIONS.map((txn) => (
-                <div
-                  key={txn.id}
-                  className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
-                >
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-900 truncate">
-                        {txn.customer}
-                      </span>
-                      {getStatusBadge(txn.status)}
+            {txnsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
+              </div>
+            ) : transactions.length === 0 ? (
+              <div className="text-center py-8">
+                <CreditCard className="h-10 w-10 text-gray-300 mx-auto mb-3" />
+                <p className="text-sm text-gray-500">No transactions yet.</p>
+                <p className="text-xs text-gray-400 mt-1">Process your first payment above.</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {transactions.map((txn) => (
+                  <div
+                    key={txn.id}
+                    className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0"
+                  >
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-900 truncate">
+                          {txn.customerName || "—"}
+                        </span>
+                        {getStatusBadge(txn.status === "approved" ? "success" : txn.status === "declined" ? "failed" : "pending")}
+                      </div>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <span className="text-xs text-gray-500">{txn.transactionId || txn.id.slice(0, 8)}</span>
+                        <span className="text-xs text-gray-300">|</span>
+                        <span className="text-xs text-gray-500">{txn.cardBrand || ""} {txn.cardLastFour ? `****${txn.cardLastFour}` : ""}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 mt-0.5">
-                      <span className="text-xs text-gray-500">{txn.id}</span>
-                      <span className="text-xs text-gray-300">|</span>
-                      <span className="text-xs text-gray-500">{txn.method}</span>
+                    <div className="text-right ml-3">
+                      <p className="text-sm font-semibold text-gray-900">${parseFloat(txn.amount).toFixed(2)}</p>
+                      <p className="text-xs text-gray-500">{new Date(txn.createdAt).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <div className="text-right ml-3">
-                    <p className="text-sm font-semibold text-gray-900">{txn.amount}</p>
-                    <p className="text-xs text-gray-500">{txn.date}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -707,18 +729,18 @@ export default function VirtualTerminal() {
                 <tbody>
                   {filteredTransactions.map((txn) => (
                     <tr key={txn.id} className="border-b border-gray-100 hover:bg-gray-50">
-                      <td className="px-4 py-3 text-sm font-mono text-gray-900">{txn.id}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{txn.date}</td>
-                      <td className="px-4 py-3 text-sm text-gray-900">{txn.customer}</td>
-                      <td className="px-4 py-3 text-sm font-medium text-gray-900">{txn.amount}</td>
-                      <td className="px-4 py-3 text-sm text-gray-600">{txn.method}</td>
+                      <td className="px-4 py-3 text-sm font-mono text-gray-900">{txn.transactionId || txn.id.slice(0, 8)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{new Date(txn.createdAt).toLocaleString()}</td>
+                      <td className="px-4 py-3 text-sm text-gray-900">{txn.customerName || "—"}</td>
+                      <td className="px-4 py-3 text-sm font-medium text-gray-900">${parseFloat(txn.amount).toFixed(2)}</td>
+                      <td className="px-4 py-3 text-sm text-gray-600">{txn.cardBrand || ""} {txn.cardLastFour ? `****${txn.cardLastFour}` : ""}</td>
                       <td className="px-4 py-3">
                         <Badge className={`text-xs rounded-full ${
-                          txn.status === "success" ? "bg-green-100 text-green-700" :
+                          txn.status === "approved" ? "bg-green-100 text-green-700" :
                           txn.status === "pending" ? "bg-yellow-100 text-yellow-700" :
                           "bg-red-100 text-red-600"
                         }`}>
-                          {txn.status === "success" ? "Approved" : txn.status === "pending" ? "Pending" : "Declined"}
+                          {txn.status === "approved" ? "Approved" : txn.status === "pending" ? "Pending" : "Declined"}
                         </Badge>
                       </td>
                     </tr>

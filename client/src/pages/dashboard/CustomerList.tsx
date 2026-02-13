@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
-import { Users, Search, Plus, Mail, ArrowUpDown } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Users, Search, Plus, Mail, ArrowUpDown, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 const tabs = [
   { label: "All Customers", href: "/dashboard/customers" },
@@ -21,37 +23,81 @@ const tabs = [
   { label: "High Refunds", href: "/dashboard/customers?tab=refunds" },
 ];
 
-const mockCustomers = [
-  { id: "cust-001", name: "Sarah Johnson", email: "sarah@example.com", orders: 12, spent: 1450.00, lastOrder: "2025-10-24", status: "active" },
-  { id: "cust-002", name: "Mike Chen", email: "mike@example.com", orders: 8, spent: 890.50, lastOrder: "2025-10-23", status: "active" },
-  { id: "cust-003", name: "Emily Davis", email: "emily@example.com", orders: 23, spent: 3200.00, lastOrder: "2025-10-22", status: "active" },
-  { id: "cust-004", name: "James Wilson", email: "james@example.com", orders: 3, spent: 245.99, lastOrder: "2025-10-20", status: "active" },
-  { id: "cust-005", name: "Lisa Anderson", email: "lisa@example.com", orders: 15, spent: 1890.75, lastOrder: "2025-10-19", status: "active" },
-  { id: "cust-006", name: "Robert Taylor", email: "robert@example.com", orders: 1, spent: 59.99, lastOrder: "2025-10-15", status: "inactive" },
-  { id: "cust-007", name: "Amanda Martinez", email: "amanda@example.com", orders: 6, spent: 720.00, lastOrder: "2025-10-18", status: "active" },
-  { id: "cust-008", name: "David Brown", email: "david@example.com", orders: 0, spent: 0, lastOrder: "-", status: "inactive" },
-];
+interface VaultCustomer {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string | null;
+  company: string | null;
+  status: string;
+  lifetimeValue: number;
+  transactionCount: number;
+  lastTransactionAt: string | null;
+  createdAt: string;
+}
 
 export default function CustomerList() {
   const [search, setSearch] = useState("");
   const [location] = useLocation();
   const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [showAddCustomer, setShowAddCustomer] = useState(false);
   const [newName, setNewName] = useState("");
   const [newEmail, setNewEmail] = useState("");
+
+  // Fetch real customers from API
+  const { data: customers = [], isLoading } = useQuery<VaultCustomer[]>({
+    queryKey: ["/api/merchant/customers"],
+  });
+
+  // Add customer mutation
+  const addCustomerMutation = useMutation({
+    mutationFn: async ({ name, email }: { name: string; email: string }) => {
+      const nameParts = name.trim().split(/\s+/);
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(" ") || "";
+      const res = await apiRequest("POST", "/api/merchant/customers", {
+        firstName,
+        lastName,
+        email,
+        sourcePlatform: "swipesblue",
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/merchant/customers"] });
+      toast({ title: "Customer added", description: `${newName} has been added to your customer list.` });
+      setShowAddCustomer(false);
+    },
+    onError: () => {
+      toast({ title: "Error", description: "Failed to add customer. Please try again.", variant: "destructive" });
+    },
+  });
 
   // Parse tab from URL
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "all";
 
+  // Map vault records to display format
+  const mappedCustomers = customers.map((c) => ({
+    id: c.id,
+    name: `${c.firstName} ${c.lastName}`.trim(),
+    email: c.email,
+    orders: c.transactionCount || 0,
+    spent: (c.lifetimeValue || 0) / 100,
+    lastOrder: c.lastTransactionAt ? new Date(c.lastTransactionAt).toLocaleDateString() : "—",
+    status: c.status || "active",
+  }));
+
   // Filter customers based on active tab
-  let filteredCustomers = mockCustomers;
+  let filteredCustomers = mappedCustomers;
   if (activeTab === "recent") {
-    filteredCustomers = [...mockCustomers].sort((a, b) => (b.lastOrder > a.lastOrder ? 1 : -1)).slice(0, 5);
+    filteredCustomers = [...mappedCustomers].sort((a, b) => (b.lastOrder > a.lastOrder ? 1 : -1)).slice(0, 5);
   } else if (activeTab === "top") {
-    filteredCustomers = [...mockCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5);
+    filteredCustomers = [...mappedCustomers].sort((a, b) => b.spent - a.spent).slice(0, 5);
   } else if (activeTab === "refunds") {
-    filteredCustomers = []; // No refund data in mock
+    filteredCustomers = [];
   }
 
   // Apply search filter
@@ -91,16 +137,22 @@ export default function CustomerList() {
       </div>
 
       {/* Customer Table */}
-      {filteredCustomers.length === 0 ? (
+      {isLoading ? (
+        <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-400 mx-auto" />
+        </div>
+      ) : filteredCustomers.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-[7px] p-12 text-center">
           <Users className="h-12 w-12 text-gray-300 mx-auto mb-4" />
           <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            {activeTab === "refunds" ? "No high-refund customers" : "No customers found"}
+            {activeTab === "refunds" ? "No high-refund customers" : search ? "No customers found" : "No customers yet"}
           </h3>
           <p className="text-gray-500 text-sm">
             {activeTab === "refunds"
               ? "Customers with high refund rates will appear here."
-              : "Customers will appear here once they make purchases."}
+              : search
+                ? "Try a different search term."
+                : "Customers will appear here after their first transaction."}
           </p>
         </div>
       ) : (
@@ -181,7 +233,13 @@ export default function CustomerList() {
             </div>
             <div className="flex justify-end gap-2 pt-2">
               <Button variant="outline" className="rounded-[7px]" onClick={() => setShowAddCustomer(false)}>Cancel</Button>
-              <Button className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]" onClick={() => { toast({ title: "Customer added", description: `${newName} has been added to your customer list.` }); setShowAddCustomer(false); }}>Add Customer</Button>
+              <Button
+                className="bg-[#1844A6] hover:bg-[#1844A6]/90 text-white rounded-[7px]"
+                disabled={addCustomerMutation.isPending || !newName.trim() || !newEmail.trim()}
+                onClick={() => addCustomerMutation.mutate({ name: newName, email: newEmail })}
+              >
+                {addCustomerMutation.isPending ? "Adding..." : "Add Customer"}
+              </Button>
             </div>
           </div>
         </DialogContent>

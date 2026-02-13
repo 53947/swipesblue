@@ -26,9 +26,18 @@ import {
   Settings,
   Globe,
   Terminal,
-  Shield
+  Shield,
+  User,
+  LogOut,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useState, useEffect, useRef } from "react";
 import { useMerchantAuth } from "@/hooks/use-merchant-auth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -330,13 +339,53 @@ export default function Header() {
 
           {/* Auth actions — inline with nav */}
           {!isLoading && isAuthenticated ? (
-            <Button
-              className="bg-[#1844A6] text-white rounded-[7px]"
-              onClick={handleSignOut}
-              data-testid="button-sign-out"
-            >
-              Sign out
-            </Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="bg-[#1844A6] text-white rounded-[7px] gap-2"
+                  data-testid="button-account-menu"
+                >
+                  <User className="h-4 w-4" />
+                  Account
+                  <ChevronDown className="h-3 w-3" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-52 rounded-[7px]">
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard" className="flex items-center gap-2 w-full">
+                    <LayoutDashboard className="h-4 w-4" />
+                    Dashboard
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard/settings" className="flex items-center gap-2 w-full">
+                    <User className="h-4 w-4" />
+                    My Account
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard/settings?tab=business" className="flex items-center gap-2 w-full">
+                    <Settings className="h-4 w-4" />
+                    My Profile
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <Link href="/dashboard/settings?tab=billing" className="flex items-center gap-2 w-full">
+                    <CreditCard className="h-4 w-4" />
+                    Billing & Subscriptions
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer text-red-600 focus:text-red-600"
+                  onClick={handleSignOut}
+                  data-testid="button-sign-out"
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Sign Out
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <>
               <Link href="/login" className="flex items-center" data-testid="link-sign-in">
@@ -471,13 +520,22 @@ export default function Header() {
                       Dashboard
                     </Button>
                   </Link>
+                  <Link href="/dashboard/settings" onClick={() => setMobileMenuOpen(false)}>
+                    <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">My Account</span>
+                  </Link>
+                  <Link href="/dashboard/settings?tab=business" onClick={() => setMobileMenuOpen(false)}>
+                    <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">My Profile</span>
+                  </Link>
+                  <Link href="/dashboard/settings?tab=billing" onClick={() => setMobileMenuOpen(false)}>
+                    <span className="block py-3 px-4 text-[15px] font-medium text-gray-600 rounded-[7px]">Billing & Subscriptions</span>
+                  </Link>
                   <Button
                     variant="ghost"
-                    className="w-full text-[15px] font-medium text-gray-600 rounded-[7px]"
+                    className="w-full text-[15px] font-medium text-red-600 rounded-[7px]"
                     onClick={() => { setMobileMenuOpen(false); handleSignOut(); }}
                     data-testid="button-mobile-sign-out"
                   >
-                    Sign out
+                    Sign Out
                   </Button>
                 </>
               ) : (
