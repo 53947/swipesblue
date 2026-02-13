@@ -252,7 +252,7 @@ export default function Home() {
                 process payments
               </h3>
               <p className="text-white/75 text-[13px] mt-2 leading-relaxed">
-                Replace your current processor, keep more revenue
+                Switch processors and keep more revenue
               </p>
             </div>
 
