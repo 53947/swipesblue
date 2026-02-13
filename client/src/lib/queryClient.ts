@@ -7,17 +7,58 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
+
+let csrfToken: string | null = null;
+
+async function fetchCsrfToken(): Promise<string> {
+  const res = await fetch("/api/csrf-token", { credentials: "include" });
+  if (!res.ok) throw new Error("Failed to fetch CSRF token");
+  const data = await res.json();
+  csrfToken = data.token;
+  return csrfToken!;
+}
+
+async function getCsrfToken(): Promise<string> {
+  if (csrfToken) return csrfToken;
+  return fetchCsrfToken();
+}
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const headers: Record<string, string> = {};
+  if (data) headers["Content-Type"] = "application/json";
+
+  if (MUTATING_METHODS.has(method.toUpperCase())) {
+    headers["x-csrf-token"] = await getCsrfToken();
+  }
+
+  let res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
+
+  // If CSRF token was stale, refetch and retry once
+  if (
+    !res.ok &&
+    MUTATING_METHODS.has(method.toUpperCase())
+  ) {
+    const errorText = await res.clone().text();
+    if (errorText.toLowerCase().includes("invalid csrf token")) {
+      headers["x-csrf-token"] = await fetchCsrfToken();
+      res = await fetch(url, {
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+        credentials: "include",
+      });
+    }
+  }
 
   await throwIfResNotOk(res);
   return res;
