@@ -106,10 +106,8 @@ export default function Checkout() {
           subtotal: (parseFloat(item.product.price) * (item.quantity || 0)).toFixed(2),
         })),
         payment: {
-          cardNumber: data.cardNumber,
-          cardName: data.cardName,
-          expiry: data.expiry,
-          cvv: data.cvv,
+          paymentToken: data.paymentToken,
+          cardholderName: data.cardholderName,
         },
       };
 

@@ -22,6 +22,7 @@ import {
 } from "@/components/ui/select";
 import SubNavTabs from "@/components/dashboard/SubNavTabs";
 import { useMerchantAuth } from "@/hooks/use-merchant-auth";
+import { useCollectJs } from "@/hooks/use-collectjs";
 import FeatureMarketingPage from "@/components/dashboard/FeatureMarketingPage";
 
 const tabs = [
@@ -57,58 +58,18 @@ const MOCK_RECENT_TRANSACTIONS: RecentTransaction[] = [
   { id: "TXN-2077", date: "2025-10-23 16:55", customer: "Dana Scully", amount: "$200.00", status: "pending", method: "Visa ****1881" },
 ];
 
-const MOCK_SAVED_CARDS = [
-  { id: "card_1", label: "Visa ****4242 - Sarah Connor", brand: "Visa", last4: "4242" },
-  { id: "card_2", label: "MC ****5100 - James Kirk", brand: "Mastercard", last4: "5100" },
-  { id: "card_3", label: "Amex ****3782 - Ellen Ripley", brand: "Amex", last4: "3782" },
-  { id: "card_4", label: "Discover ****6011 - Rick Deckard", brand: "Discover", last4: "6011" },
-];
-
-function detectCardBrand(cardNumber: string): string {
-  const stripped = cardNumber.replace(/\s/g, "");
-  if (!stripped) return "";
-  if (/^4/.test(stripped)) return "Visa";
-  if (/^5[1-5]/.test(stripped)) return "Mastercard";
-  if (/^3[47]/.test(stripped)) return "Amex";
-  if (/^6(?:011|5)/.test(stripped)) return "Discover";
-  return "";
-}
-
-function formatCardNumber(value: string): string {
-  const digits = value.replace(/\D/g, "");
-  const trimmed = digits.slice(0, 16);
-  const groups = trimmed.match(/.{1,4}/g);
-  return groups ? groups.join(" ") : "";
-}
-
-function formatExpiry(value: string): string {
-  const digits = value.replace(/\D/g, "").slice(0, 4);
-  if (digits.length >= 3) {
-    return digits.slice(0, 2) + " / " + digits.slice(2);
-  }
-  return digits;
-}
-
-function generateTransactionId(): string {
-  return "txn_" + Math.random().toString(36).substring(2, 14);
-}
-
-function generateAuthCode(): string {
-  return Math.random().toString(36).substring(2, 8).toUpperCase();
-}
-
 export default function VirtualTerminal() {
   const { tier, canAccess } = useMerchantAuth();
   const [location] = useLocation();
   const urlParams = new URLSearchParams(location.split("?")[1] || "");
   const activeTab = urlParams.get("tab") || "terminal";
 
-  // Form fields
+  // Collect.js for secure card tokenization
+  const { isReady, error: collectError, requestToken } = useCollectJs();
+
+  // Form fields (non-card — card fields handled by Collect.js iframes)
   const [amount, setAmount] = useState("");
   const [currency, setCurrency] = useState("USD");
-  const [cardNumber, setCardNumber] = useState("");
-  const [expiry, setExpiry] = useState("");
-  const [cvv, setCvv] = useState("");
   const [cardholderName, setCardholderName] = useState("");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
@@ -125,7 +86,6 @@ export default function VirtualTerminal() {
   const [description, setDescription] = useState("");
 
   // Sidebar state
-  const [selectedSavedCard, setSelectedSavedCard] = useState("");
   const [transactionResult, setTransactionResult] = useState<TransactionResult | null>(null);
 
   // Validation
@@ -157,43 +117,12 @@ export default function VirtualTerminal() {
     );
   }
 
-  const cardBrand = detectCardBrand(cardNumber);
-
-  function handleCardNumberChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setCardNumber(formatCardNumber(e.target.value));
-  }
-
-  function handleExpiryChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setExpiry(formatExpiry(e.target.value));
-  }
-
-  function handleCvvChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const digits = e.target.value.replace(/\D/g, "").slice(0, 4);
-    setCvv(digits);
-  }
-
   function handleAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
     const value = e.target.value.replace(/[^0-9.]/g, "");
-    // Allow only one decimal point and up to 2 decimal places
     const parts = value.split(".");
     if (parts.length > 2) return;
     if (parts[1] && parts[1].length > 2) return;
     setAmount(value);
-  }
-
-  function handleSavedCardSelect(cardId: string) {
-    setSelectedSavedCard(cardId);
-    const card = MOCK_SAVED_CARDS.find((c) => c.id === cardId);
-    if (card) {
-      // Populate card fields with mock data from saved card
-      if (card.brand === "Visa") setCardNumber("4242 4242 4242 4242");
-      else if (card.brand === "Mastercard") setCardNumber("5100 0000 0000 5100");
-      else if (card.brand === "Amex") setCardNumber("3782 822463 10005");
-      else if (card.brand === "Discover") setCardNumber("6011 0000 0000 6011");
-      setExpiry("12 / 27");
-      setCvv("123");
-      setCardholderName(card.label.split(" - ")[1] || "");
-    }
   }
 
   function validateForm(): boolean {
@@ -201,16 +130,6 @@ export default function VirtualTerminal() {
 
     if (!amount || parseFloat(amount) <= 0) {
       newErrors.amount = "Enter a valid amount";
-    }
-    const strippedCard = cardNumber.replace(/\s/g, "");
-    if (strippedCard.length < 13 || strippedCard.length > 16) {
-      newErrors.cardNumber = "Enter a valid card number";
-    }
-    if (expiry.replace(/\D/g, "").length < 4) {
-      newErrors.expiry = "Enter a valid expiration (MM/YY)";
-    }
-    if (cvv.length < 3) {
-      newErrors.cvv = "Enter a valid CVV";
     }
     if (!cardholderName.trim()) {
       newErrors.cardholderName = "Cardholder name is required";
@@ -232,31 +151,67 @@ export default function VirtualTerminal() {
     return Object.keys(newErrors).length === 0;
   }
 
-  function handleSubmit(type: "charge" | "auth_only") {
-    if (!validateForm()) return;
+  async function handleSubmit(type: "charge" | "auth_only") {
+    if (!validateForm() || !isReady) return;
 
     setIsProcessing(true);
     setTransactionResult(null);
 
-    // Simulate API call delay
-    setTimeout(() => {
-      const brand = detectCardBrand(cardNumber) || "Card";
-      const last4 = cardNumber.replace(/\s/g, "").slice(-4);
+    try {
+      // Tokenize card via Collect.js
+      const tokenResponse = await requestToken();
+
+      // Send to backend
+      const res = await fetch("/api/dashboard/terminal/charge", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount: parseFloat(amount),
+          paymentToken: tokenResponse.token,
+          cardholderName,
+          email: email || undefined,
+          billingAddress: {
+            address: street,
+            city,
+            state,
+            zip,
+            country,
+          },
+          description: description || undefined,
+          orderId: orderId || undefined,
+          invoiceNumber: poNumber || undefined,
+          type: type === "auth_only" ? "auth" : "sale",
+        }),
+      });
+
+      const data = await res.json();
 
       const result: TransactionResult = {
-        transactionId: generateTransactionId(),
+        transactionId: data.transactionId || "N/A",
         amount: `$${parseFloat(amount).toFixed(2)}`,
-        status: "approved",
-        authCode: generateAuthCode(),
-        cardBrand: brand,
-        last4,
+        status: data.success ? "approved" : "declined",
+        authCode: data.authCode || "",
+        cardBrand: data.cardBrand || tokenResponse.card?.type || "Card",
+        last4: data.cardLastFour || tokenResponse.card?.number?.slice(-4) || "****",
         timestamp: new Date().toISOString(),
         type,
       };
 
       setTransactionResult(result);
+    } catch (err) {
+      setTransactionResult({
+        transactionId: "N/A",
+        amount: `$${parseFloat(amount || "0").toFixed(2)}`,
+        status: "declined",
+        authCode: "",
+        cardBrand: "Card",
+        last4: "****",
+        timestamp: new Date().toISOString(),
+        type,
+      });
+    } finally {
       setIsProcessing(false);
-    }, 1500);
+    }
   }
 
   function getStatusBadge(status: "success" | "pending" | "failed") {
@@ -287,12 +242,6 @@ export default function VirtualTerminal() {
 
   const filteredTransactions = MOCK_RECENT_TRANSACTIONS;
 
-  const recentStatusColors: Record<string, string> = {
-    success: "bg-green-100 text-green-700",
-    pending: "bg-yellow-100 text-yellow-700",
-    failed: "bg-red-100 text-red-600",
-  };
-
   return (
     <div className="p-8">
       {/* Page header */}
@@ -312,6 +261,12 @@ export default function VirtualTerminal() {
         <div className="lg:col-span-3 space-y-6">
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-6">Payment Details</h2>
+
+            {collectError && (
+              <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-[7px] text-sm text-red-600">
+                {collectError}
+              </div>
+            )}
 
             {/* Amount + Currency */}
             <div className="flex gap-4 mb-6">
@@ -351,71 +306,27 @@ export default function VirtualTerminal() {
               </div>
             </div>
 
-            {/* Card Number */}
+            {/* Card Number — Collect.js secure iframe */}
             <div className="mb-4">
-              <Label htmlFor="cardNumber" className="text-gray-900 font-medium mb-1.5 block">
+              <Label className="text-gray-900 font-medium mb-1.5 block">
                 Card Number
               </Label>
-              <div className="relative">
-                <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-500" />
-                <Input
-                  id="cardNumber"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="4242 4242 4242 4242"
-                  value={cardNumber}
-                  onChange={handleCardNumberChange}
-                  maxLength={19}
-                  className={`pl-10 pr-20 rounded-[7px] ${errors.cardNumber ? "border-red-600" : ""}`}
-                />
-                {cardBrand && (
-                  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#1844A6]">
-                    {cardBrand}
-                  </span>
-                )}
-              </div>
-              {errors.cardNumber && (
-                <p className="text-red-600 text-sm mt-1">{errors.cardNumber}</p>
-              )}
+              <div id="collect-ccnumber" className="h-10" />
             </div>
 
-            {/* Expiry + CVV */}
+            {/* Expiry + CVV — Collect.js secure iframes */}
             <div className="grid grid-cols-2 gap-4 mb-4">
               <div>
-                <Label htmlFor="expiry" className="text-gray-900 font-medium mb-1.5 block">
+                <Label className="text-gray-900 font-medium mb-1.5 block">
                   Expiration
                 </Label>
-                <Input
-                  id="expiry"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="MM / YY"
-                  value={expiry}
-                  onChange={handleExpiryChange}
-                  maxLength={7}
-                  className={`rounded-[7px] ${errors.expiry ? "border-red-600" : ""}`}
-                />
-                {errors.expiry && (
-                  <p className="text-red-600 text-sm mt-1">{errors.expiry}</p>
-                )}
+                <div id="collect-ccexp" className="h-10" />
               </div>
               <div>
-                <Label htmlFor="cvv" className="text-gray-900 font-medium mb-1.5 block">
+                <Label className="text-gray-900 font-medium mb-1.5 block">
                   CVV
                 </Label>
-                <Input
-                  id="cvv"
-                  type="text"
-                  inputMode="numeric"
-                  placeholder="123"
-                  value={cvv}
-                  onChange={handleCvvChange}
-                  maxLength={4}
-                  className={`rounded-[7px] ${errors.cvv ? "border-red-600" : ""}`}
-                />
-                {errors.cvv && (
-                  <p className="text-red-600 text-sm mt-1">{errors.cvv}</p>
-                )}
+                <div id="collect-cvv" className="h-10" />
               </div>
             </div>
 
@@ -624,7 +535,7 @@ export default function VirtualTerminal() {
             <div className="flex gap-4 pt-2">
               <Button
                 onClick={() => handleSubmit("charge")}
-                disabled={isProcessing}
+                disabled={isProcessing || !isReady}
                 className="flex-1 h-12 bg-[#1844A6] hover:bg-[#1844A6]/90 text-white font-semibold rounded-[7px] text-base"
               >
                 {isProcessing ? (
@@ -642,7 +553,7 @@ export default function VirtualTerminal() {
               <Button
                 variant="outline"
                 onClick={() => handleSubmit("auth_only")}
-                disabled={isProcessing}
+                disabled={isProcessing || !isReady}
                 className="flex-1 h-12 font-semibold rounded-[7px] text-base border-[#1844A6] text-[#1844A6] hover:bg-[#1844A6]/5"
               >
                 <CreditCard className="h-5 w-5 mr-2" />
@@ -654,26 +565,6 @@ export default function VirtualTerminal() {
 
         {/* RIGHT: Quick Actions Sidebar (40%) */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Saved Cards */}
-          <div className="bg-white rounded-[7px] border border-gray-200 p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Saved Cards</h2>
-            <Select value={selectedSavedCard} onValueChange={handleSavedCardSelect}>
-              <SelectTrigger className="rounded-[7px]">
-                <SelectValue placeholder="Select a saved card..." />
-              </SelectTrigger>
-              <SelectContent>
-                {MOCK_SAVED_CARDS.map((card) => (
-                  <SelectItem key={card.id} value={card.id}>
-                    {card.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500 mt-2">
-              Selecting a card will auto-fill payment fields above.
-            </p>
-          </div>
-
           {/* Transaction Result */}
           <div className="bg-white rounded-[7px] border border-gray-200 p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Transaction Result</h2>
@@ -822,7 +713,11 @@ export default function VirtualTerminal() {
                       <td className="px-4 py-3 text-sm font-medium text-gray-900">{txn.amount}</td>
                       <td className="px-4 py-3 text-sm text-gray-600">{txn.method}</td>
                       <td className="px-4 py-3">
-                        <Badge className={`text-xs rounded-full ${recentStatusColors[txn.status]}`}>
+                        <Badge className={`text-xs rounded-full ${
+                          txn.status === "success" ? "bg-green-100 text-green-700" :
+                          txn.status === "pending" ? "bg-yellow-100 text-yellow-700" :
+                          "bg-red-100 text-red-600"
+                        }`}>
                           {txn.status === "success" ? "Approved" : txn.status === "pending" ? "Pending" : "Declined"}
                         </Badge>
                       </td>

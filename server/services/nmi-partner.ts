@@ -1,290 +1,333 @@
 /**
- * NMI Partner API Service
+ * NMI Merchant Boarding API Service
  *
- * Handles merchant boarding and sub-merchant account creation via NMI Partner API
- * For partners with NMI affiliate/ISO relationships
+ * 3-step boarding flow via the real Merchant Boarding API:
+ *   1. Create a Gateway Account
+ *   2. Configure a Processor
+ *   3. Configure Services
+ *
+ * Uses SWIPESBLUE_BOARDING_API env var for authentication (Authorization header).
+ * All requests are JSON — NOT form-encoded.
  */
 
-export interface MerchantBoardingRequest {
-  // Business Information
-  businessName: string;
-  businessEmail: string;
-  businessPhone?: string;
-  businessAddress?: string;
-  businessCity?: string;
-  businessState?: string;
-  businessZip?: string;
-  businessCountry?: string;
+// ── Request Types ───────────────────────────────────────────────────────────
 
-  // Platform Information
-  platform: 'businessblueprint' | 'hostsblue' | 'swipesblue';
-  platformClientId: string;
-
-  // Additional merchant data
-  dba?: string; // Doing Business As
-  website?: string;
-  taxId?: string; // EIN or SSN
-  businessType?: string; // corporation, llc, sole_proprietor, etc.
-  merchantCategoryCode?: string; // MCC code
-  annualVolume?: number;
-  averageTicket?: number;
-  highTicket?: number;
+export interface CreateGatewayParams {
+  company: string;
+  address_1: string;
+  address_2?: string;
+  city: string;
+  state: string;
+  postal: string;
+  country: string;
+  url?: string;
+  timezone_id: number;
+  contact_first_name: string;
+  contact_last_name: string;
+  contact_phone: string;
+  contact_email: string;
+  account_number?: string;
+  routing_number?: string;
+  username: string;
+  fee_plan?: number;
+  external_identifier?: string;
+  locale?: string;
+  account_type?: "checking" | "savings";
+  account_holder_type?: "business" | "personal";
+  merchant_type?: "gateway" | "split";
+  features?: {
+    capture_higher_than_authed?: boolean;
+    tsys?: { allow_payment_facilitator_fields?: boolean };
+  };
 }
 
-export interface MerchantBoardingResponse {
-  success: boolean;
-  merchantId?: string; // NMI sub-merchant ID
-  applicationId?: string; // Application tracking ID
-  status?: string; // pending, approved, rejected
-  message?: string;
-  errorMessage?: string;
-  rawResponse?: any;
+export interface ProcessorConfigParams {
+  platform: string;
+  default_industry_classification?: "ecommerce" | "moto" | "retail";
+  max_transaction_amount?: string;
+  max_monthly_volume: string;
+  enable_duplicate_checking: boolean;
+  allow_duplicate_checking_override: boolean;
+  duplicate_checking_seconds: number;
+  processor_description: string;
+  mcc: number;
+  currencies?: string;
+  payment_types?: string;
+  required_fields?: string;
+  precheck_method?: "void" | "preauth";
+  settlement_time?: string;
+  descriptor?: string;
+  descriptor_phone?: string;
+  // Processor-specific config fields
+  processor_config_1?: string;
+  processor_config_2?: string;
+  processor_config_3?: string | boolean;
+  processor_config_4?: string | boolean;
+  processor_config_5?: string | boolean;
+  processor_config_6?: string | boolean;
+  processor_config_7?: string | boolean;
+  processor_config_8?: string;
+  processor_config_9?: string;
+  processor_config_10?: string;
+  // FACe legal entity (for Vantiv/Worldpay platforms)
+  legal_entity?: Record<string, any>;
+  legal_entity_id?: string;
+  sub_merchant?: Record<string, any>;
+  // ProPay-specific
+  propay_merchant_account?: Record<string, any>;
+  propay_business_account?: Record<string, any>;
+  // Payment facilitation
+  payment_facilitation_data?: Record<string, any>;
+  split_funding?: {
+    split_type: "surcharge" | "fees";
+    split_rate: "percent" | "fixed";
+    split_amount: string;
+    split_merchant: number;
+  };
 }
+
+export interface ServiceConfigParams {
+  automatic_card_updater?: { status: ServiceStatus; run_immediately_after_activation?: boolean };
+  customer_vault?: { status: ServiceStatus };
+  ispyfraud?: { status: ServiceStatus };
+  payer_authentication_2?: { status: ServiceStatus; payment_types_allowed?: string[] };
+  centinel_2?: {
+    status: ServiceStatus;
+    payment_types_allowed?: string[];
+    org_unit_id?: string;
+    api_identifier?: string;
+    api_key?: string;
+    centinel_url?: string;
+  };
+  airline_industry?: { status: ServiceStatus };
+  certifypci?: { status: ServiceStatus; insurance?: boolean };
+  encrypted_devices?: { status: ServiceStatus };
+  enhanced_data?: { status: ServiceStatus };
+  invoicing?: { status: ServiceStatus };
+  mobile_payments?: { status: ServiceStatus };
+  quickbooks_syncpay?: { status: ServiceStatus };
+}
+
+type ServiceStatus = "active" | "not_offered" | "offered";
+
+export interface FullBoardingParams {
+  gateway: CreateGatewayParams;
+  processor: ProcessorConfigParams;
+  services?: ServiceConfigParams;
+}
+
+// ── Response Types ──────────────────────────────────────────────────────────
+
+export interface GatewayAccountResponse {
+  id: number;
+  company: string;
+  address_1?: string;
+  address_2?: string;
+  city?: string;
+  state?: string;
+  postal?: string;
+  country?: string;
+  url?: string;
+  timezone_id?: string;
+  contact_first_name?: string;
+  contact_last_name?: string;
+  contact_phone?: string;
+  contact_email?: string;
+  account_number?: string;
+  routing_number?: string;
+  username?: string;
+  fee_plan?: string;
+  external_identifier?: string;
+  locale?: string;
+  status?: string;
+  [key: string]: any;
+}
+
+export interface ProcessorResponse {
+  id: number;
+  processor_id: string;
+  platform: string;
+  status: string;
+  [key: string]: any;
+}
+
+export interface ServiceResponse {
+  [serviceName: string]: {
+    status: string;
+    service_id?: string;
+    reason?: string;
+    [key: string]: any;
+  };
+}
+
+export interface BoardingResult {
+  gateway: GatewayAccountResponse;
+  processor: ProcessorResponse;
+  services?: ServiceResponse;
+}
+
+// ── Service Class ───────────────────────────────────────────────────────────
 
 export class NMIPartnerService {
-  private partnerId: string;
-  private merchantBoardingKey: string;
-  private apiUrl: string;
+  private boardingKey: string;
+  private baseUrl: string;
 
-  constructor(config: {
-    partnerId: string;
-    merchantBoardingKey: string;
-    apiUrl?: string;
-  }) {
-    this.partnerId = config.partnerId;
-    this.merchantBoardingKey = config.merchantBoardingKey;
-    this.apiUrl = config.apiUrl || "https://secure.nmi.com/api/v1/boarding";
-  }
-
-  /**
-   * Create a sub-merchant account via NMI Partner API
-   * This initiates the merchant boarding process
-   */
-  async createSubMerchant(request: MerchantBoardingRequest): Promise<MerchantBoardingResponse> {
-    try {
-      // Build the boarding request payload
-      const formData = new URLSearchParams();
-
-      // Authentication
-      formData.append("partner_id", this.partnerId);
-      formData.append("merchant_boarding_key", this.merchantBoardingKey);
-
-      // Required business information
-      formData.append("legal_name", request.businessName);
-      formData.append("email", request.businessEmail);
-
-      // Optional business details
-      if (request.dba) formData.append("dba", request.dba);
-      if (request.businessPhone) formData.append("phone", request.businessPhone);
-      if (request.website) formData.append("website", request.website);
-      if (request.taxId) formData.append("tax_id", request.taxId);
-      if (request.businessType) formData.append("business_type", request.businessType);
-      if (request.merchantCategoryCode) formData.append("mcc", request.merchantCategoryCode);
-
-      // Business address
-      if (request.businessAddress) {
-        formData.append("address", request.businessAddress);
-        formData.append("city", request.businessCity || "");
-        formData.append("state", request.businessState || "");
-        formData.append("zip", request.businessZip || "");
-        formData.append("country", request.businessCountry || "US");
-      }
-
-      // Processing volume expectations
-      if (request.annualVolume) formData.append("annual_volume", request.annualVolume.toString());
-      if (request.averageTicket) formData.append("average_ticket", request.averageTicket.toString());
-      if (request.highTicket) formData.append("high_ticket", request.highTicket.toString());
-
-      // Platform metadata for tracking
-      formData.append("custom_field_1", request.platform); // Track which platform
-      formData.append("custom_field_2", request.platformClientId); // Platform's client ID
-
-      // Make the API request
-      const response = await fetch(this.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
-
-      const responseText = await response.text();
-      const parsedResponse = this.parseNMIResponse(responseText);
-
-      // Check if boarding was successful
-      if (parsedResponse.response === "1" || parsedResponse.result === "success") {
-        return {
-          success: true,
-          merchantId: parsedResponse.merchant_id || parsedResponse.merchantid,
-          applicationId: parsedResponse.application_id || parsedResponse.applicationid,
-          status: parsedResponse.status || "pending",
-          message: parsedResponse.responsetext || parsedResponse.message || "Merchant application submitted successfully",
-          rawResponse: parsedResponse,
-        };
-      } else {
-        return {
-          success: false,
-          errorMessage: parsedResponse.responsetext || parsedResponse.message || "Merchant boarding failed",
-          status: parsedResponse.status || "rejected",
-          rawResponse: parsedResponse,
-        };
-      }
-    } catch (error) {
-      console.error("NMI merchant boarding error:", error);
-      return {
-        success: false,
-        errorMessage: error instanceof Error ? error.message : "Merchant boarding request failed",
-      };
+  constructor() {
+    const key = process.env.SWIPESBLUE_BOARDING_API;
+    if (!key) {
+      throw new Error("SWIPESBLUE_BOARDING_API environment variable not set");
     }
+    this.boardingKey = key;
+    this.baseUrl = "https://swipesblue.transactiongateway.com/api/v3/affiliate";
   }
 
   /**
-   * Check the status of a merchant boarding application
+   * Step 1: Create a new Gateway Account for a merchant.
+   * Returns the gateway ID used in subsequent steps.
    */
-  async getMerchantStatus(merchantId: string): Promise<MerchantBoardingResponse> {
-    try {
-      const formData = new URLSearchParams();
-      formData.append("partner_id", this.partnerId);
-      formData.append("merchant_boarding_key", this.merchantBoardingKey);
-      formData.append("merchant_id", merchantId);
-      formData.append("action", "status");
+  async createGatewayAccount(
+    params: CreateGatewayParams,
+  ): Promise<GatewayAccountResponse> {
+    return this.request("POST", "/gateways", params);
+  }
 
-      const response = await fetch(this.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
+  /**
+   * Step 2: Configure a processor on the gateway account.
+   */
+  async configureProcessor(
+    gatewayId: number,
+    params: ProcessorConfigParams,
+  ): Promise<ProcessorResponse> {
+    return this.request("POST", `/gateways/${gatewayId}/processors`, params);
+  }
 
-      const responseText = await response.text();
-      const parsedResponse = this.parseNMIResponse(responseText);
+  /**
+   * Step 3: Enable services (Customer Vault, invoicing, fraud, etc.).
+   */
+  async configureServices(
+    gatewayId: number,
+    services: ServiceConfigParams,
+  ): Promise<ServiceResponse> {
+    return this.request("POST", `/gateways/${gatewayId}/services`, services);
+  }
 
-      return {
-        success: parsedResponse.response === "1",
-        merchantId: merchantId,
-        status: parsedResponse.status,
-        message: parsedResponse.responsetext || parsedResponse.message,
-        rawResponse: parsedResponse,
-      };
-    } catch (error) {
-      console.error("NMI merchant status check error:", error);
-      return {
-        success: false,
-        errorMessage: error instanceof Error ? error.message : "Status check failed",
-      };
+  /**
+   * Full boarding: runs all 3 steps in sequence.
+   * If any step fails, the error propagates immediately.
+   */
+  async boardMerchant(params: FullBoardingParams): Promise<BoardingResult> {
+    // Step 1 — Create gateway account
+    const gateway = await this.createGatewayAccount(params.gateway);
+
+    // Step 2 — Configure processor
+    const processor = await this.configureProcessor(gateway.id, params.processor);
+
+    // Step 3 — Configure services (optional)
+    let services: ServiceResponse | undefined;
+    if (params.services) {
+      services = await this.configureServices(gateway.id, params.services);
     }
+
+    return { gateway, processor, services };
+  }
+
+  // ── Account Management ──────────────────────────────────────────────────
+
+  /**
+   * Retrieve details for a gateway account.
+   */
+  async getGatewayAccount(gatewayId: number): Promise<GatewayAccountResponse> {
+    return this.request("GET", `/gateways/${gatewayId}`);
   }
 
   /**
-   * Update merchant account information
+   * Update fields on an existing gateway account.
    */
-  async updateMerchant(merchantId: string, updates: Partial<MerchantBoardingRequest>): Promise<MerchantBoardingResponse> {
-    try {
-      const formData = new URLSearchParams();
-      formData.append("partner_id", this.partnerId);
-      formData.append("merchant_boarding_key", this.merchantBoardingKey);
-      formData.append("merchant_id", merchantId);
-      formData.append("action", "update");
-
-      // Add any fields that are being updated
-      if (updates.businessEmail) formData.append("email", updates.businessEmail);
-      if (updates.businessPhone) formData.append("phone", updates.businessPhone);
-      if (updates.website) formData.append("website", updates.website);
-      // ... add other updatable fields as needed
-
-      const response = await fetch(this.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
-
-      const responseText = await response.text();
-      const parsedResponse = this.parseNMIResponse(responseText);
-
-      return {
-        success: parsedResponse.response === "1",
-        merchantId: merchantId,
-        message: parsedResponse.responsetext || parsedResponse.message,
-        rawResponse: parsedResponse,
-      };
-    } catch (error) {
-      console.error("NMI merchant update error:", error);
-      return {
-        success: false,
-        errorMessage: error instanceof Error ? error.message : "Merchant update failed",
-      };
-    }
+  async updateGatewayAccount(
+    gatewayId: number,
+    updates: Partial<CreateGatewayParams>,
+  ): Promise<GatewayAccountResponse> {
+    return this.request("PATCH", `/gateways/${gatewayId}`, updates);
   }
 
   /**
-   * Suspend or reactivate a merchant account
+   * Change the status of a merchant gateway account.
+   * Valid values: active, closed, restricted, deleted.
+   * Warning: deleted cannot be undone.
    */
-  async updateMerchantStatus(merchantId: string, status: 'active' | 'suspended'): Promise<MerchantBoardingResponse> {
-    try {
-      const formData = new URLSearchParams();
-      formData.append("partner_id", this.partnerId);
-      formData.append("merchant_boarding_key", this.merchantBoardingKey);
-      formData.append("merchant_id", merchantId);
-      formData.append("action", status === 'active' ? 'activate' : 'suspend');
-
-      const response = await fetch(this.apiUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: formData.toString(),
-      });
-
-      const responseText = await response.text();
-      const parsedResponse = this.parseNMIResponse(responseText);
-
-      return {
-        success: parsedResponse.response === "1",
-        merchantId: merchantId,
-        status: status,
-        message: parsedResponse.responsetext || parsedResponse.message,
-        rawResponse: parsedResponse,
-      };
-    } catch (error) {
-      console.error("NMI merchant status update error:", error);
-      return {
-        success: false,
-        errorMessage: error instanceof Error ? error.message : "Status update failed",
-      };
-    }
-  }
-
-  /**
-   * Parse NMI's URL-encoded response format
-   */
-  private parseNMIResponse(responseText: string): any {
-    const params = new URLSearchParams(responseText);
-    const result: any = {};
-    params.forEach((value, key) => {
-      result[key] = value;
+  async setMerchantStatus(
+    gatewayId: number,
+    status: "active" | "closed" | "restricted" | "deleted",
+  ): Promise<{ status: string }> {
+    return this.request("POST", `/gateways/${gatewayId}/status`, {
+      set_merchant_status: status,
     });
-    return result;
-  }
-}
-
-/**
- * Create NMI Partner Service instance from environment variables
- */
-export function createNMIPartnerService(): NMIPartnerService {
-  const partnerId = process.env.NMI_PARTNER_ID;
-  const merchantBoardingKey = process.env.NMI_MERCHANT_BOARDING_KEY;
-  const apiUrl = process.env.NMI_PARTNER_API_URL;
-
-  if (!partnerId || !merchantBoardingKey) {
-    throw new Error("NMI Partner credentials not configured. Set NMI_PARTNER_ID and NMI_MERCHANT_BOARDING_KEY environment variables.");
   }
 
-  return new NMIPartnerService({
-    partnerId,
-    merchantBoardingKey,
-    apiUrl,
-  });
+  /**
+   * List all gateway accounts associated with the affiliate API key.
+   */
+  async listGatewayAccounts(): Promise<GatewayAccountResponse[]> {
+    return this.request("GET", "/gateways");
+  }
+
+  /**
+   * Update processor status (active/disabled) or delete a processor.
+   */
+  async setProcessorStatus(
+    gatewayId: number,
+    processorId: number,
+    status: "active" | "disabled",
+    rerouteProcessorId?: string,
+  ): Promise<{ status: string }> {
+    const body: Record<string, string> = { set_processor_status: status };
+    if (rerouteProcessorId) {
+      body.set_processor_reroute = rerouteProcessorId;
+    }
+    return this.request(
+      "PATCH",
+      `/gateways/${gatewayId}/processors/${processorId}`,
+      body,
+    );
+  }
+
+  // ── Private Request Helper ──────────────────────────────────────────────
+
+  private async request<T = any>(
+    method: string,
+    path: string,
+    body?: any,
+  ): Promise<T> {
+    const url = `${this.baseUrl}${path}`;
+
+    const headers: Record<string, string> = {
+      Authorization: this.boardingKey,
+      "Content-Type": "application/json",
+    };
+
+    const options: RequestInit = { method, headers };
+
+    if (body && method !== "GET") {
+      options.body = JSON.stringify(body);
+    }
+
+    const response = await fetch(url, options);
+
+    if (!response.ok) {
+      let errorData: any;
+      try {
+        errorData = await response.json();
+      } catch {
+        errorData = { message: response.statusText };
+      }
+
+      const errorMessage =
+        errorData.message || errorData.type || "Unknown error";
+      throw new Error(
+        `NMI Boarding API error ${response.status}: ${errorMessage}`,
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
 }

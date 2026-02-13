@@ -41,9 +41,10 @@ import {
   type InsertOrderItem,
 } from "@shared/schema";
 import { z } from "zod";
-import { createPaymentGateway } from "./payment-gateways/nmi";
-import { createNMIPartnerService, type MerchantBoardingRequest } from "./services/nmi-partner";
-import { createMerchantPaymentService, type MerchantPaymentRequest } from "./services/merchant-payment";
+import { NMIPaymentGateway } from "./payment-gateways/nmi";
+import { NMIPartnerService } from "./services/nmi-partner";
+import { MerchantPaymentService, type MerchantPaymentRequest } from "./services/merchant-payment";
+import { CustomerVaultService } from "./services/customer-vault";
 import { requireApiKey, requirePermission, generateApiKey, generateApiSecret, type AuthenticatedRequest } from "./middleware/api-auth";
 import { webhookService, WebhookEventType } from "./services/webhook";
 import { normalizeTier, meetsMinTier as sharedMeetsMinTier, TIER_PRODUCT_LIMITS as SHARED_TIER_PRODUCT_LIMITS } from "@shared/tier-constants";
@@ -328,10 +329,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const orderSchema = insertOrderSchema.extend({
         items: z.array(orderItemInputSchema),
         payment: z.object({
-          cardNumber: z.string(),
-          cardName: z.string(),
-          expiry: z.string(),
-          cvv: z.string(),
+          paymentToken: z.string().min(1, "Payment token required"),
+          cardholderName: z.string().optional(),
         }),
       });
 
@@ -347,30 +346,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No payment gateway configured" });
       }
 
-      const paymentGateway = createPaymentGateway(gateway);
-      if (!paymentGateway) {
-        return res.status(500).json({ message: "Payment gateway not supported" });
-      }
+      const nmiGateway = new NMIPaymentGateway();
+      const nameParts = (payment.cardholderName || orderData.customerName || "").trim().split(/\s+/);
 
-      const paymentResult = await paymentGateway.processPayment({
+      const paymentResult = await nmiGateway.sale({
+        paymentToken: payment.paymentToken,
         amount: parseFloat(orderData.total as string),
-        cardNumber: payment.cardNumber,
-        cardName: payment.cardName,
-        expiry: payment.expiry,
-        cvv: payment.cvv,
         email: orderData.customerEmail,
-        billingAddress: {
-          address: orderData.shippingAddress,
-          city: orderData.shippingCity,
-          state: orderData.shippingState,
-          zip: orderData.shippingZip,
-        },
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        address1: orderData.shippingAddress,
+        city: orderData.shippingCity,
+        state: orderData.shippingState,
+        zip: orderData.shippingZip,
       });
 
       if (!paymentResult.success) {
-        return res.status(400).json({ 
-          message: "Payment failed", 
-          error: paymentResult.errorMessage 
+        return res.status(400).json({
+          message: "Payment failed",
+          error: paymentResult.errorMessage
         });
       }
 
@@ -378,13 +372,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       await storage.updateOrderPaymentStatus(order.id, "paid");
 
+      const cardLastFour = paymentResult.rawResponse?.cc_number?.slice(-4);
+
       await storage.createPaymentTransaction({
         orderId: order.id,
         gatewayId: gateway.id,
         gatewayTransactionId: paymentResult.transactionId,
         amount: orderData.total,
         status: "success",
-        paymentMethod: `****${payment.cardNumber.slice(-4)}`,
+        paymentMethod: cardLastFour ? `****${cardLastFour}` : "card",
         gatewayResponse: paymentResult.rawResponse,
       });
 
@@ -397,6 +393,78 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid order data", errors: error.errors });
       }
       res.status(500).json({ message: "Failed to create order" });
+    }
+  });
+
+  // Dashboard Virtual Terminal — process a card-not-present payment
+  app.post("/api/dashboard/terminal/charge", paymentLimiter, async (req, res) => {
+    try {
+      const terminalSchema = z.object({
+        amount: z.number().positive("Amount must be positive"),
+        paymentToken: z.string().min(1, "Payment token required"),
+        cardholderName: z.string().optional(),
+        email: z.string().email().optional(),
+        billingAddress: z.object({
+          address: z.string(),
+          city: z.string(),
+          state: z.string(),
+          zip: z.string(),
+          country: z.string().optional(),
+        }).optional(),
+        description: z.string().optional(),
+        orderId: z.string().optional(),
+        invoiceNumber: z.string().optional(),
+        type: z.enum(["sale", "auth"]).default("sale"),
+      });
+
+      const data = terminalSchema.parse(req.body);
+      const nmiGateway = new NMIPaymentGateway();
+
+      const nameParts = (data.cardholderName || "").trim().split(/\s+/);
+
+      const params = {
+        paymentToken: data.paymentToken,
+        amount: data.amount,
+        email: data.email,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        address1: data.billingAddress?.address,
+        city: data.billingAddress?.city,
+        state: data.billingAddress?.state,
+        zip: data.billingAddress?.zip,
+        country: data.billingAddress?.country,
+        description: data.description,
+        orderId: data.orderId,
+        invoiceNumber: data.invoiceNumber,
+      };
+
+      const result = data.type === "auth"
+        ? await nmiGateway.authorize(params)
+        : await nmiGateway.sale(params);
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: result.errorMessage || "Transaction declined",
+        });
+      }
+
+      res.json({
+        success: true,
+        transactionId: result.transactionId,
+        authCode: result.authCode,
+        amount: data.amount,
+        type: data.type,
+        cardBrand: result.rawResponse?.cc_type || result.rawResponse?.card_type,
+        cardLastFour: result.rawResponse?.cc_number?.slice(-4),
+        message: result.message || "Transaction approved",
+      });
+    } catch (error) {
+      console.error("Terminal charge error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Failed to process terminal transaction" });
     }
   });
 
@@ -528,47 +596,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Initialize NMI Partner Service
-      const nmiPartnerService = createNMIPartnerService();
+      // Create gateway account via NMI Boarding API
+      const nmiPartnerService = new NMIPartnerService();
 
-      // Create sub-merchant via NMI Partner API
-      const boardingRequest: MerchantBoardingRequest = {
-        businessName: validatedData.businessName,
-        businessEmail: validatedData.businessEmail,
-        businessPhone: validatedData.businessPhone,
-        businessAddress: validatedData.businessAddress,
-        businessCity: validatedData.businessCity,
-        businessState: validatedData.businessState,
-        businessZip: validatedData.businessZip,
-        businessCountry: validatedData.businessCountry,
-        platform: validatedData.platform,
-        platformClientId: validatedData.platformClientId,
-        dba: validatedData.dba,
-        website: validatedData.website,
-        taxId: validatedData.taxId,
-        businessType: validatedData.businessType,
-        merchantCategoryCode: validatedData.merchantCategoryCode,
-        annualVolume: validatedData.annualVolume,
-        averageTicket: validatedData.averageTicket,
-        highTicket: validatedData.highTicket,
-      };
+      // Split contact name for NMI (requires first/last separately)
+      const contactName = validatedData.businessName.split(/\s+/);
+      const contactFirstName = contactName[0] || validatedData.businessName;
+      const contactLastName = contactName.slice(1).join(" ") || validatedData.businessName;
 
-      const boardingResponse = await nmiPartnerService.createSubMerchant(boardingRequest);
-
-      if (!boardingResponse.success) {
+      let gatewayAccount;
+      try {
+        gatewayAccount = await nmiPartnerService.createGatewayAccount({
+          company: validatedData.businessName,
+          address_1: validatedData.businessAddress || "",
+          city: validatedData.businessCity || "",
+          state: validatedData.businessState || "",
+          postal: validatedData.businessZip || "",
+          country: validatedData.businessCountry,
+          url: validatedData.website,
+          timezone_id: 1, // US Eastern default
+          contact_first_name: contactFirstName,
+          contact_last_name: contactLastName,
+          contact_phone: validatedData.businessPhone || "",
+          contact_email: validatedData.businessEmail,
+          username: `${validatedData.platform}_${validatedData.platformClientId}`,
+          external_identifier: validatedData.platformClientId,
+        });
+      } catch (nmiError) {
         return res.status(400).json({
-          message: "Failed to create NMI sub-merchant",
-          error: boardingResponse.errorMessage,
+          message: "Failed to create NMI gateway account",
+          error: nmiError instanceof Error ? nmiError.message : "Unknown boarding error",
         });
       }
 
-      // Store merchant in database
-      const partnerId = process.env.NMI_PARTNER_ID || "LaskowskiD3124";
+      // Store merchant in database with NMI gateway ID
+      const partnerId = process.env.NMI_PARTNER_ID || "";
       const merchant = await storage.createMerchant({
         platform: validatedData.platform,
         platformClientId: validatedData.platformClientId,
-        nmiMerchantId: boardingResponse.merchantId || null,
-        partnerId: partnerId,
+        nmiMerchantId: String(gatewayAccount.id),
+        partnerId,
         businessName: validatedData.businessName,
         businessEmail: validatedData.businessEmail,
         businessPhone: validatedData.businessPhone || null,
@@ -577,9 +644,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         businessState: validatedData.businessState || null,
         businessZip: validatedData.businessZip || null,
         businessCountry: validatedData.businessCountry,
-        status: boardingResponse.status || "pending",
-        nmiApplicationStatus: boardingResponse.status || null,
-        nmiApplicationData: boardingResponse.rawResponse || null,
+        status: gatewayAccount.status || "pending",
+        nmiApplicationStatus: gatewayAccount.status || null,
+        nmiApplicationData: gatewayAccount as any,
         metadata: {
           dba: validatedData.dba,
           website: validatedData.website,
@@ -602,16 +669,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           businessName: validatedData.businessName,
           businessEmail: validatedData.businessEmail,
           status: merchant.status,
-          applicationId: boardingResponse.applicationId,
+          nmiGatewayId: gatewayAccount.id,
         }
       );
 
       res.status(201).json({
         merchantId: merchant.id,
         nmiMerchantId: merchant.nmiMerchantId,
-        applicationId: boardingResponse.applicationId,
+        nmiGatewayId: gatewayAccount.id,
         status: merchant.status,
-        message: boardingResponse.message || "Merchant application submitted successfully",
+        message: "Merchant gateway account created successfully",
       });
     } catch (error) {
       console.error("Error creating merchant:", error);
@@ -680,15 +747,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // If activating or suspending, also update in NMI
-      if (status === "active" || status === "suspended") {
+      if ((status === "active" || status === "suspended") && merchant.nmiMerchantId) {
         try {
-          const nmiPartnerService = createNMIPartnerService();
-          if (merchant.nmiMerchantId) {
-            await nmiPartnerService.updateMerchantStatus(
-              merchant.nmiMerchantId,
-              status
-            );
-          }
+          const nmiPartnerService = new NMIPartnerService();
+          const nmiStatus = status === "suspended" ? "restricted" : "active";
+          await nmiPartnerService.setMerchantStatus(
+            parseInt(merchant.nmiMerchantId, 10),
+            nmiStatus
+          );
         } catch (nmiError) {
           console.error("Failed to update NMI merchant status:", nmiError);
           // Continue anyway - we updated our database
@@ -751,23 +817,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const nmiPartnerService = createNMIPartnerService();
-      const statusResponse = await nmiPartnerService.getMerchantStatus(
-        merchant.nmiMerchantId
+      const nmiPartnerService = new NMIPartnerService();
+      const gatewayAccount = await nmiPartnerService.getGatewayAccount(
+        parseInt(merchant.nmiMerchantId, 10)
       );
 
       // Update our database with the latest status
-      if (statusResponse.success && statusResponse.status) {
+      if (gatewayAccount.status) {
         await storage.updateMerchant(merchant.id, {
-          nmiApplicationStatus: statusResponse.status,
+          nmiApplicationStatus: gatewayAccount.status,
         });
       }
 
       res.json({
         merchantId: merchant.id,
         nmiMerchantId: merchant.nmiMerchantId,
-        status: statusResponse.status,
-        message: statusResponse.message,
+        nmiGatewayId: gatewayAccount.id,
+        status: gatewayAccount.status,
+        company: gatewayAccount.company,
       });
     } catch (error) {
       console.error("Error checking NMI merchant status:", error);
@@ -783,15 +850,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const authReq = req as AuthenticatedRequest;
       const platform = authReq.apiKey!.platform;
 
-      // Validate payment request
+      // Validate payment request — paymentToken from Collect.js, never raw card data
       const paymentSchema = z.object({
         merchantId: z.string().uuid("Invalid merchant ID"),
         amount: z.number().positive("Amount must be positive"),
         currency: z.string().default("USD"),
-        cardNumber: z.string().min(13, "Invalid card number"),
-        cardName: z.string().min(1, "Cardholder name required"),
-        expiry: z.string().regex(/^\d{4}$/, "Expiry must be MMYY format"),
-        cvv: z.string().regex(/^\d{3,4}$/, "CVV must be 3-4 digits"),
+        paymentToken: z.string().min(1, "Payment token required"),
         customerEmail: z.string().email("Valid email required"),
         customerName: z.string().optional(),
         billingAddress: z.object({
@@ -826,18 +890,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      // Validate card details
-      const paymentService = createMerchantPaymentService();
-      const validation = paymentService.validateCardDetails(validatedData as MerchantPaymentRequest);
-
-      if (!validation.valid) {
-        return res.status(400).json({
-          error: "Invalid payment details",
-          message: validation.errors.join(", "),
-        });
-      }
-
-      // Process the payment
+      // Process the payment via NMI using the Collect.js token
+      const paymentService = new MerchantPaymentService();
       const paymentResult = await paymentService.processPayment(merchant, validatedData as MerchantPaymentRequest);
 
       if (!paymentResult.success) {
@@ -958,6 +1012,225 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Authorize a payment (hold without capturing)
+  app.post("/api/v1/payments/authorize", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const authSchema = z.object({
+        merchantId: z.string().uuid("Invalid merchant ID"),
+        amount: z.number().positive("Amount must be positive"),
+        currency: z.string().default("USD"),
+        paymentToken: z.string().min(1, "Payment token required"),
+        customerEmail: z.string().email("Valid email required"),
+        customerName: z.string().optional(),
+        billingAddress: z.object({
+          address: z.string(),
+          city: z.string(),
+          state: z.string(),
+          zip: z.string(),
+          country: z.string().optional(),
+        }).optional(),
+        platformOrderId: z.string().optional(),
+        description: z.string().optional(),
+      });
+
+      const validatedData = authSchema.parse(req.body);
+
+      const merchant = await storage.getMerchant(validatedData.merchantId);
+      if (!merchant) {
+        return res.status(404).json({ error: "Merchant not found" });
+      }
+
+      if (platform !== "internal" && merchant.platform !== platform) {
+        return res.status(403).json({ error: "Forbidden", message: "Cannot process payments for merchants from other platforms" });
+      }
+
+      const paymentService = new MerchantPaymentService();
+      const result = await paymentService.authorizePayment(merchant, validatedData as MerchantPaymentRequest);
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Authorization failed",
+          message: result.errorMessage || "Authorization declined",
+        });
+      }
+
+      const cardBrand = result.rawResponse?.cc_type || result.rawResponse?.card_type;
+      const cardLastFour = result.rawResponse?.cc_number?.slice(-4);
+
+      const transaction = await storage.createPartnerPaymentTransaction({
+        merchantId: merchant.id,
+        platform,
+        platformOrderId: validatedData.platformOrderId || null,
+        gatewayTransactionId: result.transactionId || null,
+        amount: validatedData.amount.toString(),
+        currency: validatedData.currency,
+        status: "authorized",
+        paymentMethod: "credit_card",
+        cardBrand: cardBrand || null,
+        cardLastFour: cardLastFour || null,
+        customerEmail: validatedData.customerEmail,
+        customerName: validatedData.customerName || null,
+        billingAddress: validatedData.billingAddress || null,
+        errorMessage: null,
+        gatewayResponse: result.rawResponse || null,
+        metadata: null,
+        refundedAmount: "0",
+        refundedAt: null,
+      });
+
+      res.status(201).json({
+        success: true,
+        transactionId: transaction.id,
+        gatewayTransactionId: result.transactionId,
+        authCode: result.authCode,
+        amount: validatedData.amount,
+        currency: validatedData.currency,
+        status: "authorized",
+        cardBrand,
+        cardLastFour,
+        message: result.message || "Authorization approved",
+      });
+    } catch (error) {
+      console.error("Authorization error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error", message: "Failed to authorize payment" });
+    }
+  });
+
+  // Capture a previously authorized payment
+  app.post("/api/v1/payments/capture", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const captureSchema = z.object({
+        transactionId: z.string().uuid("Invalid transaction ID"),
+        amount: z.number().positive().optional(),
+      });
+
+      const validatedData = captureSchema.parse(req.body);
+
+      const transaction = await storage.getPartnerPaymentTransaction(validatedData.transactionId);
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+
+      if (platform !== "internal" && transaction.platform !== platform) {
+        return res.status(403).json({ error: "Forbidden", message: "Cannot capture transactions from other platforms" });
+      }
+
+      if (transaction.status !== "authorized") {
+        return res.status(400).json({ error: "Invalid status", message: "Only authorized transactions can be captured" });
+      }
+
+      if (!transaction.gatewayTransactionId) {
+        return res.status(400).json({ error: "Missing gateway transaction ID" });
+      }
+
+      const merchant = await storage.getMerchant(transaction.merchantId);
+      if (!merchant) {
+        return res.status(404).json({ error: "Merchant not found" });
+      }
+
+      const paymentService = new MerchantPaymentService();
+      const result = await paymentService.capturePayment(merchant, transaction.gatewayTransactionId, validatedData.amount);
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Capture failed",
+          message: result.errorMessage || "Capture processing failed",
+        });
+      }
+
+      await storage.updatePartnerPaymentTransaction(transaction.id, {
+        status: "success",
+      });
+
+      res.json({
+        success: true,
+        transactionId: transaction.id,
+        gatewayTransactionId: result.transactionId,
+        amount: validatedData.amount || parseFloat(transaction.amount),
+        status: "captured",
+        message: result.message || "Payment captured successfully",
+      });
+    } catch (error) {
+      console.error("Capture error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error", message: "Failed to capture payment" });
+    }
+  });
+
+  // Void a transaction before settlement
+  app.post("/api/v1/payments/void", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const voidSchema = z.object({
+        transactionId: z.string().uuid("Invalid transaction ID"),
+      });
+
+      const validatedData = voidSchema.parse(req.body);
+
+      const transaction = await storage.getPartnerPaymentTransaction(validatedData.transactionId);
+      if (!transaction) {
+        return res.status(404).json({ error: "Transaction not found" });
+      }
+
+      if (platform !== "internal" && transaction.platform !== platform) {
+        return res.status(403).json({ error: "Forbidden", message: "Cannot void transactions from other platforms" });
+      }
+
+      if (!transaction.gatewayTransactionId) {
+        return res.status(400).json({ error: "Missing gateway transaction ID" });
+      }
+
+      const merchant = await storage.getMerchant(transaction.merchantId);
+      if (!merchant) {
+        return res.status(404).json({ error: "Merchant not found" });
+      }
+
+      const paymentService = new MerchantPaymentService();
+      const result = await paymentService.voidPayment(merchant, transaction.gatewayTransactionId);
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Void failed",
+          message: result.errorMessage || "Void processing failed",
+        });
+      }
+
+      await storage.updatePartnerPaymentTransaction(transaction.id, {
+        status: "voided",
+      });
+
+      res.json({
+        success: true,
+        transactionId: transaction.id,
+        gatewayTransactionId: result.transactionId,
+        status: "voided",
+        message: result.message || "Transaction voided successfully",
+      });
+    } catch (error) {
+      console.error("Void error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error", message: "Failed to void transaction" });
+    }
+  });
+
   // Process a refund
   app.post("/api/v1/payments/refund", requireApiKey, requirePermission("process_refunds"), async (req, res) => {
     try {
@@ -1020,7 +1293,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Process refund
-      const paymentService = createMerchantPaymentService();
+      const paymentService = new MerchantPaymentService();
       const refundResult = await paymentService.processRefund(
         merchant,
         transaction.gatewayTransactionId!,
@@ -1162,6 +1435,363 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error fetching transaction:", error);
       res.status(500).json({ message: "Failed to fetch transaction" });
     }
+  });
+
+  // Customer Vault — Add a card to the vault (tokenize without charging)
+  app.post("/api/v1/payments/vault/add", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const vaultAddSchema = z.object({
+        merchantId: z.string().uuid("Invalid merchant ID"),
+        paymentToken: z.string().min(1, "Payment token required"),
+        customerEmail: z.string().email().optional(),
+        customerName: z.string().optional(),
+        billingAddress: z.object({
+          address: z.string(),
+          city: z.string(),
+          state: z.string(),
+          zip: z.string(),
+          country: z.string().optional(),
+        }).optional(),
+      });
+
+      const validatedData = vaultAddSchema.parse(req.body);
+
+      const merchant = await storage.getMerchant(validatedData.merchantId);
+      if (!merchant) {
+        return res.status(404).json({ error: "Merchant not found" });
+      }
+
+      if (platform !== "internal" && merchant.platform !== platform) {
+        return res.status(403).json({ error: "Forbidden", message: "Cannot access merchants from other platforms" });
+      }
+
+      if (merchant.status !== "active") {
+        return res.status(400).json({ error: "Merchant not active" });
+      }
+
+      const nmiGateway = new NMIPaymentGateway();
+      const nameParts = (validatedData.customerName || "").trim().split(/\s+/);
+
+      const result = await nmiGateway.addCustomerToVault({
+        paymentToken: validatedData.paymentToken,
+        email: validatedData.customerEmail,
+        firstName: nameParts[0] || "",
+        lastName: nameParts.slice(1).join(" ") || "",
+        address1: validatedData.billingAddress?.address,
+        city: validatedData.billingAddress?.city,
+        state: validatedData.billingAddress?.state,
+        zip: validatedData.billingAddress?.zip,
+        country: validatedData.billingAddress?.country,
+      });
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: "Vault add failed",
+          message: result.errorMessage || "Failed to add card to vault",
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        customerVaultId: result.customerVaultId,
+        message: result.message || "Card added to vault successfully",
+      });
+    } catch (error) {
+      console.error("Vault add error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error", message: "Failed to add card to vault" });
+    }
+  });
+
+  // Customer Vault — Charge a stored card
+  app.post("/api/v1/payments/vault/charge", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const vaultChargeSchema = z.object({
+        merchantId: z.string().uuid("Invalid merchant ID"),
+        customerVaultId: z.string().min(1, "Customer vault ID required"),
+        amount: z.number().positive("Amount must be positive"),
+        currency: z.string().default("USD"),
+        description: z.string().optional(),
+        platformOrderId: z.string().optional(),
+        customerEmail: z.string().email().optional(),
+        customerName: z.string().optional(),
+        metadata: z.record(z.any()).optional(),
+      });
+
+      const validatedData = vaultChargeSchema.parse(req.body);
+
+      const merchant = await storage.getMerchant(validatedData.merchantId);
+      if (!merchant) {
+        return res.status(404).json({ error: "Merchant not found" });
+      }
+
+      if (platform !== "internal" && merchant.platform !== platform) {
+        return res.status(403).json({ error: "Forbidden", message: "Cannot access merchants from other platforms" });
+      }
+
+      if (merchant.status !== "active" || !merchant.nmiMerchantId) {
+        return res.status(400).json({ error: "Merchant not active or not fully configured" });
+      }
+
+      const nmiGateway = new NMIPaymentGateway();
+      const result = await nmiGateway.chargeVaultCustomer({
+        customerVaultId: validatedData.customerVaultId,
+        amount: validatedData.amount,
+        description: validatedData.description,
+        orderId: validatedData.platformOrderId,
+      });
+
+      if (!result.success) {
+        const failedTransaction = await storage.createPartnerPaymentTransaction({
+          merchantId: merchant.id,
+          platform,
+          platformOrderId: validatedData.platformOrderId || null,
+          gatewayTransactionId: null,
+          amount: validatedData.amount.toString(),
+          currency: validatedData.currency,
+          status: "failed",
+          customerEmail: validatedData.customerEmail || null,
+          customerName: validatedData.customerName || null,
+          billingAddress: null,
+          errorMessage: result.errorMessage || null,
+          gatewayResponse: result.rawResponse || null,
+          metadata: validatedData.metadata || null,
+          refundedAmount: "0",
+          refundedAt: null,
+        });
+
+        return res.status(400).json({
+          success: false,
+          transactionId: failedTransaction.id,
+          error: "Vault charge failed",
+          message: result.errorMessage || "Payment from vault failed",
+        });
+      }
+
+      const cardBrand = result.rawResponse?.cc_type || result.rawResponse?.card_type;
+      const cardLastFour = result.rawResponse?.cc_number?.slice(-4);
+
+      const transaction = await storage.createPartnerPaymentTransaction({
+        merchantId: merchant.id,
+        platform,
+        platformOrderId: validatedData.platformOrderId || null,
+        gatewayTransactionId: result.transactionId || null,
+        amount: validatedData.amount.toString(),
+        currency: validatedData.currency,
+        status: "success",
+        paymentMethod: "vault",
+        cardBrand: cardBrand || null,
+        cardLastFour: cardLastFour || null,
+        customerEmail: validatedData.customerEmail || null,
+        customerName: validatedData.customerName || null,
+        billingAddress: null,
+        errorMessage: null,
+        gatewayResponse: result.rawResponse || null,
+        metadata: validatedData.metadata || null,
+        refundedAmount: "0",
+        refundedAt: null,
+      });
+
+      res.status(201).json({
+        success: true,
+        transactionId: transaction.id,
+        gatewayTransactionId: result.transactionId,
+        authCode: result.authCode,
+        amount: validatedData.amount,
+        currency: validatedData.currency,
+        status: "success",
+        cardBrand,
+        cardLastFour,
+        message: result.message || "Vault payment processed successfully",
+      });
+    } catch (error) {
+      console.error("Vault charge error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Internal server error", message: "Failed to charge vault customer" });
+    }
+  });
+
+  // Customer Vault Management — add customer + card via the orchestration service
+  app.post("/api/v1/vault/customers", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+
+      const addSchema = z.object({
+        merchantId: z.string().uuid().optional(),
+        paymentToken: z.string().min(1, "Payment token required"),
+        firstName: z.string().min(1),
+        lastName: z.string().min(1),
+        email: z.string().email(),
+        phone: z.string().optional(),
+        company: z.string().optional(),
+        billingAddress: z.string().optional(),
+        billingCity: z.string().optional(),
+        billingState: z.string().optional(),
+        billingZip: z.string().optional(),
+        billingCountry: z.string().optional(),
+        nickname: z.string().optional(),
+      });
+
+      const data = addSchema.parse(req.body);
+
+      // Verify merchant belongs to platform if provided
+      if (data.merchantId) {
+        const merchant = await storage.getMerchant(data.merchantId);
+        if (!merchant) {
+          return res.status(404).json({ error: "Merchant not found" });
+        }
+        if (platform !== "internal" && merchant.platform !== platform) {
+          return res.status(403).json({ error: "Forbidden" });
+        }
+      }
+
+      const vaultService = new CustomerVaultService();
+      const result = await vaultService.addToVault({
+        ...data,
+        sourcePlatform: platform,
+      });
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: result.errorMessage || "Failed to add to vault",
+        });
+      }
+
+      res.status(201).json({
+        success: true,
+        customerId: result.customer!.id,
+        paymentMethodId: result.paymentMethod!.id,
+        nmiVaultId: result.nmiVaultId,
+        message: "Customer and card added to vault",
+      });
+    } catch (error) {
+      console.error("Vault add customer error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Failed to add customer to vault" });
+    }
+  });
+
+  // Charge a vault customer's stored card
+  app.post("/api/v1/vault/customers/:customerId/charge", paymentLimiter, requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const { customerId } = req.params;
+
+      const chargeSchema = z.object({
+        amount: z.number().positive(),
+        paymentMethodId: z.string().optional(),
+        description: z.string().optional(),
+        orderId: z.string().optional(),
+      });
+
+      const data = chargeSchema.parse(req.body);
+
+      const vaultService = new CustomerVaultService();
+      const result = await vaultService.chargeVaultCustomer({
+        customerId,
+        paymentMethodId: data.paymentMethodId,
+        amount: data.amount,
+        description: data.description,
+        orderId: data.orderId,
+      });
+
+      if (!result.success) {
+        return res.status(400).json({
+          success: false,
+          error: result.errorMessage || "Vault charge failed",
+        });
+      }
+
+      res.json({
+        success: true,
+        transactionId: result.transactionId,
+        authCode: result.authCode,
+        amount: result.amount,
+        message: result.message,
+      });
+    } catch (error) {
+      console.error("Vault charge error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: "Invalid request", errors: error.errors });
+      }
+      res.status(500).json({ error: "Failed to charge vault customer" });
+    }
+  });
+
+  // List vault customers for a merchant
+  app.get("/api/v1/vault/merchants/:merchantId/customers", requireApiKey, async (req, res) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      const platform = authReq.apiKey!.platform;
+      const { merchantId } = req.params;
+
+      const merchant = await storage.getMerchant(merchantId);
+      if (!merchant) {
+        return res.status(404).json({ error: "Merchant not found" });
+      }
+
+      if (platform !== "internal" && merchant.platform !== platform) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+
+      const vaultService = new CustomerVaultService();
+      const customers = await vaultService.getCustomersByMerchant(merchantId);
+      res.json(customers);
+    } catch (error) {
+      console.error("Vault list customers error:", error);
+      res.status(500).json({ error: "Failed to list vault customers" });
+    }
+  });
+
+  // Get payment methods for a vault customer
+  app.get("/api/v1/vault/customers/:customerId/payment-methods", requireApiKey, async (req, res) => {
+    try {
+      const { customerId } = req.params;
+
+      const vaultService = new CustomerVaultService();
+      const methods = await vaultService.getPaymentMethods(customerId);
+      res.json(methods);
+    } catch (error) {
+      console.error("Vault payment methods error:", error);
+      res.status(500).json({ error: "Failed to list payment methods" });
+    }
+  });
+
+  // Delete a payment method from the vault
+  app.delete("/api/v1/vault/payment-methods/:id", requireApiKey, requirePermission("process_payments"), async (req, res) => {
+    try {
+      const deleted = await storage.deleteVaultPaymentMethod(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Payment method not found" });
+      }
+      res.json({ success: true, message: "Payment method removed" });
+    } catch (error) {
+      console.error("Vault delete payment method error:", error);
+      res.status(500).json({ error: "Failed to delete payment method" });
+    }
+  });
+
+  // Public config — returns the Collect.js tokenization key for the frontend
+  app.get("/api/config/public-key", (_req, res) => {
+    const collectJsKey = process.env.SWIPESBLUE_COLLECTJS;
+    if (!collectJsKey) {
+      return res.status(500).json({ error: "Collect.js tokenization key not configured" });
+    }
+    res.json({ tokenizationKey: collectJsKey });
   });
 
   // API Key Management Endpoints (internal use only)

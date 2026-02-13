@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Check, Lock, CreditCard, ArrowRight } from "lucide-react";
+import { Check, Lock, ArrowRight } from "lucide-react";
 import type { AddOnProduct } from "@shared/schema";
 import Logo from "@/components/Logo";
 import { useToast } from "@/hooks/use-toast";
+import { useCollectJs } from "@/hooks/use-collectjs";
 
 const productFeatures: Record<string, { free: string[]; paid: string[] }> = {
   "customer-portal": {
@@ -52,11 +53,10 @@ export default function SubscriptionCheckout() {
   const plan = searchParams.get("plan") || "paid";
   const isFree = plan === "free";
 
+  const { isReady, error: collectError, requestToken } = useCollectJs();
+
   const [formData, setFormData] = useState({
     email: "",
-    cardNumber: "",
-    expiration: "",
-    cvv: "",
     nameOnCard: "",
     address: "",
     city: "",
@@ -79,7 +79,7 @@ export default function SubscriptionCheckout() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isFree && !formData.agreeToTerms) {
       toast({
         title: "Please agree to terms",
@@ -92,13 +92,21 @@ export default function SubscriptionCheckout() {
     setIsSubmitting(true);
 
     try {
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      if (!isFree) {
+        // Tokenize card via Collect.js before processing
+        const tokenResponse = await requestToken();
+        // Token available at tokenResponse.token for future subscription API call
+        console.log("Subscription payment tokenized:", tokenResponse.token);
+      }
+
+      // Process subscription (will be wired to real subscription API)
+      await new Promise(resolve => setTimeout(resolve, 500));
 
       setLocation(`/subscription/success?product=${slug}&plan=${plan}`);
-    } catch {
+    } catch (err) {
       toast({
         title: "Subscription failed",
-        description: "There was an error processing your subscription. Please try again.",
+        description: err instanceof Error ? err.message : "There was an error processing your subscription. Please try again.",
         variant: "destructive"
       });
     } finally {
@@ -230,58 +238,42 @@ export default function SubscriptionCheckout() {
 
                 {!isFree && (
                   <>
-                    <div>
-                      <Label htmlFor="cardNumber">Card Number</Label>
-                      <div className="relative">
-                        <Input
-                          id="cardNumber"
-                          placeholder="4242 4242 4242 4242"
-                          required
-                          value={formData.cardNumber}
-                          onChange={(e) => setFormData({ ...formData, cardNumber: e.target.value })}
-                          className="pl-10"
-                          data-testid="input-card-number"
-                        />
-                        <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    {collectError ? (
+                      <div className="py-4 text-center text-sm text-muted-foreground">
+                        <Lock className="h-6 w-6 mx-auto text-gray-300 mb-2" />
+                        {collectError}
                       </div>
-                    </div>
+                    ) : (
+                      <>
+                        <div>
+                          <Label>Card Number</Label>
+                          <div id="collect-ccnumber" className="h-10 mt-1" />
+                        </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="expiration">Expiration</Label>
-                        <Input
-                          id="expiration"
-                          placeholder="MM / YY"
-                          required
-                          value={formData.expiration}
-                          onChange={(e) => setFormData({ ...formData, expiration: e.target.value })}
-                          data-testid="input-expiration"
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="cvv">CVV</Label>
-                        <Input
-                          id="cvv"
-                          placeholder="123"
-                          required
-                          value={formData.cvv}
-                          onChange={(e) => setFormData({ ...formData, cvv: e.target.value })}
-                          data-testid="input-cvv"
-                        />
-                      </div>
-                    </div>
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <Label>Expiration</Label>
+                            <div id="collect-ccexp" className="h-10 mt-1" />
+                          </div>
+                          <div>
+                            <Label>CVV</Label>
+                            <div id="collect-cvv" className="h-10 mt-1" />
+                          </div>
+                        </div>
 
-                    <div>
-                      <Label htmlFor="nameOnCard">Name on Card</Label>
-                      <Input
-                        id="nameOnCard"
-                        placeholder="John Smith"
-                        required
-                        value={formData.nameOnCard}
-                        onChange={(e) => setFormData({ ...formData, nameOnCard: e.target.value })}
-                        data-testid="input-name-on-card"
-                      />
-                    </div>
+                        <div>
+                          <Label htmlFor="nameOnCard">Name on Card</Label>
+                          <Input
+                            id="nameOnCard"
+                            placeholder="John Smith"
+                            required
+                            value={formData.nameOnCard}
+                            onChange={(e) => setFormData({ ...formData, nameOnCard: e.target.value })}
+                            data-testid="input-name-on-card"
+                          />
+                        </div>
+                      </>
+                    )}
 
                     <div>
                       <Label htmlFor="address">Billing Address</Label>
@@ -347,12 +339,12 @@ export default function SubscriptionCheckout() {
 
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || (!isFree && !isReady)}
                   className="w-full bg-[#1844A6] text-white rounded-[7px] py-6 text-lg font-semibold group"
                   data-testid="button-subscribe"
                 >
                   <span className="flex items-center justify-center">
-                    {isSubmitting ? "Processing..." : isFree ? "Start Free" : `Subscribe — $${price.toFixed(2)}/year`}
+                    {isSubmitting ? "Processing..." : !isFree && !isReady ? "Loading payment form..." : isFree ? "Start Free" : `Subscribe — $${price.toFixed(2)}/year`}
                     <span className="inline-flex w-0 opacity-0 group-hover:w-6 group-hover:opacity-100 transition-all duration-200 overflow-hidden">
                       <ArrowRight className="h-5 w-5 ml-2" />
                     </span>

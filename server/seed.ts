@@ -6,13 +6,13 @@ async function seed() {
   const existingGateway = await storage.getDefaultPaymentGateway();
   if (!existingGateway) {
     const nmiGateway = await storage.createPaymentGateway({
-      name: "NMI Payment Gateway",
+      name: "swipesblue NMI Gateway",
       type: "nmi",
       isActive: true,
       isDefault: true,
       config: {
-        apiKey: process.env.NMI_API_KEY || "your-nmi-api-key-here",
-        apiUrl: "https://secure.networkmerchants.com/api/transact.php",
+        gatewayUrl: "https://swipesblue.transactiongateway.com/api/transact.php",
+        collectJsUrl: "https://swipesblue.transactiongateway.com/token/Collect.js",
       },
     });
     console.log("Created NMI payment gateway:", nmiGateway.id);
