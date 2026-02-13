@@ -105,7 +105,7 @@ export default function Home() {
             }}
           >
             {/* Gradient header */}
-            <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1844A6 0%, #2563eb 100%)", padding: "36px 28px 28px" }}>
+            <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1844A6 0%, #2563eb 100%)", padding: "36px 28px 28px", minHeight: 200 }}>
               {/* SVG decoration */}
               <div className="absolute top-3 right-4 opacity-15">
                 <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
@@ -171,7 +171,7 @@ export default function Home() {
               boxShadow: hoveredPath === "dev" ? "0 12px 40px rgba(13,148,136,0.12)" : "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
-            <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)", padding: "36px 28px 28px" }}>
+            <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0f766e 0%, #0d9488 100%)", padding: "36px 28px 28px", minHeight: 200 }}>
               <div className="absolute top-3.5 right-4 opacity-15">
                 <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
                   <path d="M20 25L8 40L20 55" stroke="white" strokeWidth="3" strokeLinecap="round" />
@@ -232,7 +232,7 @@ export default function Home() {
               boxShadow: hoveredPath === "gateway" ? "0 12px 40px rgba(55,65,81,0.12)" : "0 1px 3px rgba(0,0,0,0.04)",
             }}
           >
-            <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1f2937 0%, #374151 100%)", padding: "36px 28px 28px" }}>
+            <div className="relative overflow-hidden" style={{ background: "linear-gradient(135deg, #1f2937 0%, #374151 100%)", padding: "36px 28px 28px", minHeight: 200 }}>
               <div className="absolute top-3.5 right-4 opacity-15">
                 <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
                   <rect x="10" y="22" width="60" height="38" rx="4" stroke="white" strokeWidth="2" />
