@@ -92,6 +92,10 @@ const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
 export async function registerRoutes(app: Express): Promise<Server> {
   // CSRF token endpoint
   app.get("/api/csrf-token", (req, res) => {
+    // Ensure session exists so the CSRF token can bind to it
+    if (!(req.session as any).initialized) {
+      (req.session as any).initialized = true;
+    }
     const token = generateCsrfToken(req, res);
     res.json({ token });
   });

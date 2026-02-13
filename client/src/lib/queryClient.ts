@@ -7,56 +7,50 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
-const MUTATING_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
-
 let csrfToken: string | null = null;
 
-async function fetchCsrfToken(): Promise<string> {
-  const res = await fetch("/api/csrf-token", { credentials: "include" });
-  if (!res.ok) throw new Error("Failed to fetch CSRF token");
-  const data = await res.json();
-  csrfToken = data.token;
-  return csrfToken!;
-}
-
 async function getCsrfToken(): Promise<string> {
-  if (csrfToken) return csrfToken;
-  return fetchCsrfToken();
+  if (!csrfToken) {
+    const res = await fetch("/api/csrf-token", { credentials: "include" });
+    const data = await res.json();
+    csrfToken = data.token;
+  }
+  return csrfToken!;
 }
 
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: unknown,
 ): Promise<Response> {
   const headers: Record<string, string> = {};
   if (data) headers["Content-Type"] = "application/json";
 
-  if (MUTATING_METHODS.has(method.toUpperCase())) {
+  if (["POST", "PUT", "PATCH", "DELETE"].includes(method.toUpperCase())) {
     headers["x-csrf-token"] = await getCsrfToken();
   }
 
-  let res = await fetch(url, {
+  const res = await fetch(url, {
     method,
     headers,
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
 
-  // If CSRF token was stale, refetch and retry once
-  if (
-    !res.ok &&
-    MUTATING_METHODS.has(method.toUpperCase())
-  ) {
-    const errorText = await res.clone().text();
-    if (errorText.toLowerCase().includes("invalid csrf token")) {
-      headers["x-csrf-token"] = await fetchCsrfToken();
-      res = await fetch(url, {
+  // If CSRF token expired, refresh and retry once
+  if (res.status === 403) {
+    const text = await res.clone().text();
+    if (text.includes("csrf")) {
+      csrfToken = null;
+      headers["x-csrf-token"] = await getCsrfToken();
+      const retry = await fetch(url, {
         method,
         headers,
         body: data ? JSON.stringify(data) : undefined,
         credentials: "include",
       });
+      await throwIfResNotOk(retry);
+      return retry;
     }
   }
 
